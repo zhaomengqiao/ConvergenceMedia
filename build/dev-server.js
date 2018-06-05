@@ -73,9 +73,30 @@ var readyPromise = new Promise(resolve => {
   _resolve = resolve
 })
 
-console.log('> Starting dev server...')
+console.log('> 帅哥来玩嘛!~')
+console.log("\u001b[31m                       .::::.\u001b[39m")
+console.log("\u001b[31m                      .::::::::.\u001b[39m")
+console.log("\u001b[31m                     :::::::::::\u001b[39m")
+console.log("\u001b[31m                  ..:::::::::::'\u001b[39m")
+console.log("\u001b[31m               '::::::::::::'\u001b[39m")
+console.log("\u001b[31m                 .::::::::::\u001b[39m")
+console.log("\u001b[31m            '::::::::::::::..\u001b[39m")
+console.log("\u001b[31m                 ..::::::::::::.\u001b[39m")
+console.log("\u001b[31m               ``::::::::::::::::\u001b[39m")
+console.log("\u001b[31m                ::::``:::::::::'        .:::.\u001b[39m")
+console.log("\u001b[31m               ::::'   ':::::'       .::::::::.\u001b[39m")
+console.log("\u001b[31m             .::::'      ::::     .:::::::'::::.\u001b[39m")
+console.log("\u001b[31m            .:::'       :::::  .:::::::::' ':::::.\u001b[39m")
+console.log("\u001b[31m           .::'        :::::.:::::::::'      ':::::.\u001b[39m")
+console.log("\u001b[31m          .::'         ::::::::::::::'         ``::::.\u001b[39m")
+console.log("\u001b[31m      ...:::           ::::::::::::'              ``::.\u001b[39m")
+console.log("\u001b[31m     ```` ':.          ':::::::::'                  ::::..\u001b[39m")
+console.log("\u001b[31m                        '.:::::'                    ':'````..\u001b[39m")
 devMiddleware.waitUntilValid(() => {
   console.log('> Listening at ' + uri + '\n')
+
+
+
   // when env is testing, don't need open it
   if (autoOpenBrowser && process.env.NODE_ENV !== 'testing') {
     opn(uri)

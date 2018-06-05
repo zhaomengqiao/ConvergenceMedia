@@ -10,6 +10,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
   font-family: Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Arial, sans-serif;
 }
 
@@ -193,4 +195,12 @@ code {
 
 .multiselect--active {
   z-index: 1000 !important;
+}
+
+.audit_nullData{
+    text-align: center;
+    font-size: 60px;
+    color: #ccc;
+    letter-spacing: 4px;
+    line-height: 400px;
 }

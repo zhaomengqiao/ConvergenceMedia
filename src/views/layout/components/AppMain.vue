@@ -1,24 +1,24 @@
 <template>
-  <section class="app-main" style="min-height: 100%">
+<section class="app-main" style="min-height: 100%">
     <transition name="fade" mode="out-in">
-      <keep-alive :include="cachedViews">
-        <router-view></router-view>
-      </keep-alive>
+        <keep-alive :include="cachedViews">
+            <router-view></router-view>
+        </keep-alive>
     </transition>
-  </section>
+</section>
 </template>
 
 <script>
 export default {
-  name: 'AppMain',
-  computed: {
-    cachedViews() {
-      // console.log(this.$store.state.tagsView.cachedViews)
-      return this.$store.state.tagsView.cachedViews
+    name: 'AppMain',
+    computed: {
+        cachedViews() {
+            // console.log(this.$store.state.tagsView.cachedViews)
+            return this.$store.state.tagsView.cachedViews
+        }
+        // key() {
+        //   return this.$route.name !== undefined ? this.$route.name + +new Date() : this.$route + +new Date()
+        // }
     }
-    // key() {
-    //   return this.$route.name !== undefined ? this.$route.name + +new Date() : this.$route + +new Date()
-    // }
-  }
 }
 </script>

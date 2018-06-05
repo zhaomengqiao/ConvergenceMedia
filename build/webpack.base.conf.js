@@ -37,15 +37,15 @@ module.exports = {
   },
   module: {
     rules: [
-      {
-        test: /\.(js|vue)$/,
-        loader: 'eslint-loader',
-        enforce: "pre",
-        include: [resolve('src'), resolve('test')],
-        options: {
-            formatter: require('eslint-friendly-formatter')
-        }
-      },
+      // {
+      //   test: /\.(js|vue)$/,
+      //   loader: 'eslint-loader',
+      //   enforce: "pre",
+      //   include: [resolve('src'), resolve('test')],
+      //   options: {
+      //       formatter: require('eslint-friendly-formatter')
+      //   }
+      // },
       {
         test: /\.vue$/,
         loader: 'vue-loader',
@@ -89,4 +89,3 @@ module.exports = {
   //     data:  path.join(__dirname, '../src/styles/index.scss')
   // },
 }
-
