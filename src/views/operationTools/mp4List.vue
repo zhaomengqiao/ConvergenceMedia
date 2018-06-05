@@ -10,7 +10,7 @@
             </el-table-column>
             <el-table-column label="标题" width="170" :show-overflow-tooltip="true" prop="rowkey">
                 <template slot-scope="scope">
-                    <span v-if="contenttitle">{{ scope.row.contenttitle }}</span>
+                    <span v-if="scope.row.bt">{{ scope.row.bt }}</span>
                     <span v-else>暂无标题</span>
                 </template>
             </el-table-column>

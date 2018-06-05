@@ -10,11 +10,11 @@ import {
 } from 'element-ui'
 
 // permissiom judge
-function hasPermission(roles, permissionRoles) {
-    if (roles.indexOf('admin') >= 0) return true // admin权限 直接通过
-    if (!permissionRoles) return true
-    return roles.some(role => permissionRoles.indexOf(role) >= 0)
-}
+// function hasPermission(roles, permissionRoles) {
+//     if (roles.indexOf('admin') >= 0) return true // admin权限 直接通过
+//     if (!permissionRoles) return true
+//     return roles.some(role => permissionRoles.indexOf(role) >= 0)
+// }
 
 const whiteList = ['/login', '/authredirect'] // 不重定向白名单
 router.beforeEach((to, from, next) => {
@@ -27,7 +27,6 @@ router.beforeEach((to, from, next) => {
             NProgress.done() // router在hash模式下 手动改变hash 重定向回来 不会触发afterEach 暂时hack方案 ps：history模式下无问题，可删除该行！
         } else {
             if (store.getters.permission_list !== null && store.getters.permission_list.length === 0) { // 判断当前用户是否已拉取完user_info信息
-                next()
                 store.dispatch('GenerateRoutes').then(() => { // 生成可访问的路由表
                     router.addRoutes(store.getters.addRouters) // 动态添加可访问路由表
                     next({ ...to,

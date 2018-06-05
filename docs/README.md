@@ -223,7 +223,7 @@ copy(event){
 ```html
 <el-form-item>
     <!--按钮 Begin-->
-    <el-button type="primary" @click="function">按钮名称</el-button>
+    <el-button type="primary" @click="方法">按钮名称</el-button>
     <!--按钮 End-->
 </el-form-item>
 ```

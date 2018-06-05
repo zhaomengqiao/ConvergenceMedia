@@ -64,7 +64,9 @@ const user = {
             return new Promise((resolve, reject) => {
                 requestLogin(userInfo).then(response => {
                     let data = response.data
-                    let url = data.url
+                    localStorage.setItem('user', JSON.stringify(data))
+                    commit('SET_NAME', data.username)
+                    // let url = data.url
                     // function proxyLogin(askurl, askData, okurl) {
                     //     var killAjax = true;
                     //     setTimeout(function() {
@@ -75,12 +77,13 @@ const user = {
                     //     }, function(d) {
                     //         killAjax = false;
                     //         if (d.msg == "-1") {
-                    //             window.location.href = "http://sso.test.com:8080/authority/replylogin?ReturnURL=http%3A%2F%2Flocalhost%3A9527%2Flogin%2Fproxylogin";
+                    //             window.location.href = "/login";
                     //         } else {
-                    //             $.post(okurl, {
+                    //             jQuery.post('/rongmeitiapi/login/oklogin', {
                     //                 replyTxt: d.msg
                     //             }, function(e) {
-                    //                 window.location.href = e.returl;
+                    //                 localStorage.setItem('user', JSON.stringify(data))
+                    //                 commit('SET_NAME', data.username)
                     //             }, "json");
                     //         }
                     //     });
@@ -88,7 +91,7 @@ const user = {
                     //     function checkajaxkill() {
                     //         if (killAjax) {
                     //             ajaxCall.abort();
-                    //             window.location.href = "localhost:9527";
+                    //             window.location.href = "/login";
                     //         }
                     //     }
                     // }
@@ -113,10 +116,6 @@ const user = {
                     //         }
                     //     })
                     // }
-
-
-                    localStorage.setItem('user', JSON.stringify(data))
-                    commit('SET_NAME', data.username)
                     // commit('SET_TOKEN', data.token)
                     // setToken(response.data.token)
                     resolve()
