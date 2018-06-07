@@ -1,5 +1,12 @@
 import request from '@/utils/request'
 
+export function verifySSOLogin(data) {
+    return request({
+        url: '/login/checklogin',
+        method: 'post',
+    })
+}
+
 export function requestLogin(data) {
     return request({
         url: '/login/user',

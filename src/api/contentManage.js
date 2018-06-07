@@ -281,22 +281,22 @@ export function savedraft(data) {
 }
 
 // 视频权限
-export function newsvideoGetauth(data) {
-    let param = {
-        json: JSON.stringify(data)
-    }
-    let url = '';
-    if (data.type == 'share') {
-        url = `/${data.type}/getauth`
-    } else {
-        url = `/api/${data.type}/getauth`
-    }
-    return request({
-        url: url,
-        method: 'post',
-        data: qs.stringify(param)
-    })
-}
+// export function newsvideoGetauth(data) {
+//     let param = {
+//         json: JSON.stringify(data)
+//     }
+//     let url = '';
+//     if (data.type == 'share') {
+//         url = `/${data.type}/getauth`
+//     } else {
+//         url = `/api/${data.type}/getauth`
+//     }
+//     return request({
+//         url: url,
+//         method: 'post',
+//         data: qs.stringify(param)
+//     })
+// }
 
 // 内容同步---------------------------
 // 同步类别
@@ -707,5 +707,32 @@ export function videohQualityList(data) {
         url: '/api/highqualityvideo/querylist',
         method: 'post',
         data: qs.stringify(param)
+    })
+}
+
+// 视频编辑
+//文件名加密
+export function videoAliyun(data) {
+    return request({
+        url: '/md5filename/encryption',
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+// 发视频
+export function newsvideoGetauth(data) {
+    let params = {json: JSON.stringify(data)}
+    let url = ''
+    if(params.type=='share'){
+        url=`/${params.type}/getauth`
+    }else if(params.type=='sportsvideopublish'){
+        url=`/afterlogin/${params.type}/getauth`
+    }else{
+        url=`/api/${params.type}/getauth`
+    }
+    return request({
+        url: url,
+        method: 'post',
+        data: qs.stringify(params)
     })
 }

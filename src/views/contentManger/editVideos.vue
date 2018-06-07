@@ -1,448 +1,616 @@
 <template lang="html">
-    <section class="short_video_audit">
-        <el-card :body-style="{padding:'10px 20px'}">
-            <el-row :gutter="4">
-                <el-col :span="4">
-                    <el-button type="primary" size="small" icon="circle-check" @click="pass">通过</el-button>
-                    <el-button type="danger" size="small" icon="circle-cross" @click="refuse">拒绝</el-button>
-                </el-col>
-                <el-col :span="20" class="flex_center">
-                    <!-- <el-tag type="danger">境外</el-tag> -->
-                    <span class="audit-title">{{ newExam.contenttitle }}</span>
-                    <el-button type="primary" size="mini" @click="copyContent(newExam.contenttitle,$event)">复制</el-button>
-                </el-col>
-            </el-row>
-        </el-card>
-        <el-card style="margin-top:10px" :body-style="{padding:'10px 10px 10px 10px'}">
-            <el-row :gutter="20" type="flex">
-                <el-col :span="4" justify="space-between">
-                    <el-card :body-style="{padding:'10px'}">
-                        <div class="left-label hasBorderBottom">
-                            <span class="title" style="font-weight:700">当前待审：</span>
-                            <span class="audit-num" style="color:#ff4949;font-weight:700">12311</span>
+    <section class="sendVideo">
+        <el-form label-position="right" ref="ruleForm" label-width="120px" :model="form">
+            <el-form-item label="选择操作平台：">
+                <el-select v-model="form.platform" style="width: 180px;" filterable placeholder="支持中文/拼音搜索" @change='gettypes'>
+                    <el-option v-for="item in platform" :key="item.value" :label="item.label" :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="视频上传：">
+                <el-upload class="avatar-videoUploader" :action="videoUploadUrl" accept='.mp4,.mov,.Mp4' :show-file-list="false" :on-success='handleChange' :http-request='beforeAvatarVedioUpload' :on-change='handleChange'>
+                    <i class="avatar-video-uploader-icon" v-if='!videoload&&videoloadSize==0&&!aliyunload&&aliyunSize==0'></i>
+                    <div class="clearfix" :style="{marginTop:(!videoload&&videoloadSize!=0||!aliyunload&&aliyunSize!=0)?'30px':'0px'}">
+                        <div class="pull-left">
+                            <el-progress type="circle" :percentage="Number(videoloadSize)" v-if='!videoload&&videoloadSize>0'></el-progress>
+                            <el-progress type="circle" :percentage="Number(videoloadSize)" v-if='videoload&&form.videoUrl==""' status="exception"></el-progress>
+                            <p style="color:#666;font-size:18px;margin:0" v-if='!videoload&&videoloadSize>0'>ucloud上传进度</p>
+                            <video width="160" height="120" v-if='form.videoUrl!=""' id='sendVideoUc' @canplaythrough='videoDuration()' controls>
+                                <source :src="form.videoUrl" type="video/mp4">
+                                您的浏览器不支持 video 属性。
+                            </video>
                         </div>
-                        <div class="left-radio hasBorderBottom mt-10">
-                            <div class="left-title">评级：
-                                <el-tooltip class="item tooltip-key" effect="dark" placement="bottom">
-    						      	<div slot="content">快捷键：<br/>数字键1~5对应1~5级；</div>
-    						      	<img src='../../assets/audit_images/wen.png' style="width: 14px" class="tip-question"/>
-        						</el-tooltip>
-                            </div>
-                            <el-radio-group v-model="videoLevel">
-                                <div v-for="item in levelOptions" :key="index" style="margin-bottom:6px;">
-                                    <el-radio :label="item.value">{{ item.label }}</el-radio>
-                                </div>
-    					   </el-radio-group>
+                        <div class="pull-left" style="margin-left:20px;">
+                            <el-progress type="circle" :percentage="Number(aliyunSize)" v-if='!aliyunload&&Number(aliyunSize)>0'></el-progress>
+                            <el-progress type="circle" :percentage="Number(aliyunSize)" v-if='aliyunload&form.aliyunUrl==""' status="exception"></el-progress>
+                            <p style="color:#666;font-size:18px;margin:0" v-if='!aliyunload&&aliyunSize>0'>aliyun上传进度</p>
+                            <video width="160" height="120" v-if='form.aliyunUrl!=""' id='sendVideoAli' controls>
+                                <source :src="form.aliyunUrl" type="video/mp4">
+                                您的浏览器不支持 video 属性。
+                            </video>
                         </div>
                     </div>
-                    </el-card>
-                </el-col>
-                <el-col style="width:380px;padding:0 20px;">
-                    <el-card :body-style="{padding:'0px'}">
-                        <video-player :options="playerOptions" ref="videoPlayer" v-if="playerOptions.sources[0].src!==''"></video-player>
-                        <div class="null-short-video" v-if="playerOptions.sources[0].src===''">
-                            暂无视频
-                        </div>
-                    </el-card>
-                </el-col>
-                <el-col style="flex:1">
-                    <el-card :body-style="{padding:'10px'}">
-                        <div class="flex_box">
-                            <div class="flex_title">标签：</div>
-                            <div class="flex_content">
-                                <el-tag v-for="(item,index) in newExam.keywords" :key="index" v-if="newExam.keywords.length!==0"
-                                        style="margin:0 10px 10px 0">{{ item }}</el-tag>
-                                <span v-if="newExam.keywords.length===0">暂无关键词</span>
-                            </div>
-                        </div>
-                        <div class="flex_box">
-                            <div class="flex_title">视频封面：</div>
-                            <div class="flex_content">
-                                <div class="img_cover" v-if="newExam.videoCover!==''">
-                                    <img :src="newExam.videoCover" alt="" style="width:168.5px;height:300px">
-                                </div>
-                                <div class="img_null" v-if="newExam.videoCover===''">
-                                    暂无封面
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex_box">
-                            <div class="flex_title">视频简介：</div>
-                            <div class="flex_content">
-                                <el-input
-                                    type="textarea"
-                                    :rows="4"
-                                    :disabled="true"
-                                    placeholder="请输入视频简介"
-                                    v-model="newExam.infor">
-                                </el-input>
-                            </div>
-                        </div>
-                    </el-card>
-                </el-col>
-            </el-row>
-        </el-card>
+                </el-upload>
+            </el-form-item>
+            <el-form-item label="视频标题：">
+                <el-input v-model.trim="form.title" style="width: 40%;" placeholder="请输入视频标题，5-50个汉字；"></el-input>
+            </el-form-item>
+            <el-form-item label="是否优质：">
+                <el-checkbox v-model="isquality" v-if="form.platform == 'toutiao'">是否优质</el-checkbox>
+            </el-form-item>
+            <el-form-item label="视频分类：">
+                <el-cascader style="width: 280px;" change-on-select :options="classification" v-model="form.maintype">
+                </el-cascader>
+            </el-form-item>
+            <el-form-item label="视频简介：">
+                <el-input style="width: 40%;" type="textarea" :autosize="{ minRows: 2}" placeholder="请输入视频简介，限140个汉字；" v-model="form.describe"></el-input>
+            </el-form-item>
+            <el-form-item label="视频时长：">
+                <el-input v-model="form.timeSize" style="width: 40%;" placeholder="请输入视频时长(毫秒)"></el-input>
+            </el-form-item>
+            <el-form-item label="视频来源：">
+                <el-input v-model="form.source" style="width: 40%;" placeholder="请输入视频来源，2-10个汉字；"></el-input>
+            </el-form-item>
+            <el-form-item label="关键词：">
+                <div v-if='form.platform=="toutiao"||form.platform=="yangzi"||form.platform=="all"'>
+                    <el-tag :key="tag" v-for="tag in form.keywords" :closable="true" :close-transition="false" @close="handleClose(tag)">
+                        {{tag}}
+                    </el-tag>
+                    <el-input style="width: 100px;" class="input-new-tag" v-if="inputVisible" v-model.trim="inputValue" ref="saveTagInput" size="mini" @keyup.enter.native="handleInputConfirm" @blur="handleInputConfirm">
+                    </el-input>
+                    <el-button v-else class="button-new-tag" size="small" @click="showInput">+ 新标签</el-button>
+                    <p class="keywords-tips">每个关键词五个汉字以内或三个以内单词</p>
+                </div>
+                <div v-if='form.platform=="wxsport"'>
+                    <el-select v-model="form.keywords" multiple filterable remote placeholder="请输入关键词" :remote-method="remoteMethod" :loading="loading">
+                        <el-option v-for="item in sportTags" :key="item.value" :label="item.label" :value="item.value">
+                        </el-option>
+                    </el-select>
+                </div>
+            </el-form-item>
+            <el-form-item label="封面图片：">
+                <template>
+                    <el-radio-group v-model="form.cover">
+                        <el-radio :label="1">单图</el-radio>
+                        <el-radio :label="2">自动</el-radio>
+                        <span class="question"></span>
+                    </el-radio-group>
+                </template>
+                <el-upload v-if='isAuth.videoUpload' class="avatar-imgUploader" :action="fileUpload" :show-file-list="false" list-type="picture-card" :on-success="handleAvatarImgSuccess">
+                    <img v-if="imageUrl" :src="imageUrl" class="avatar">
+                    <i v-else class="el-icon-plus"></i>
+                </el-upload>
+            </el-form-item>
+            <el-form-item label="是否原创：">
+                <template>
+                    <el-radio-group style="padding-top: 8px;" v-model="form.isoriginal">
+                        <el-radio :label="1">原创</el-radio>
+                        <el-radio :label="0">非原创</el-radio>
+                    </el-radio-group>
+                </template>
+            </el-form-item>
+            <el-form-item>
+                <el-button v-if='isAuth.videoImgPreview' type="primary" @click="clientPreview">客户端预览</el-button>
+                <el-button type="primary" v-if='isAuth.videoAdd' :disabled="!showSave" @click="releaseData">发布</el-button>
+            </el-form-item>
+        </el-form>
     </section>
 </template>
 
 <script>
-import 'video.js/dist/video-js.css'
-import clip from '@/utils/clipboard'
-import {
-    videoPlayer
-} from 'vue-video-player'
-import {
-    getShortVideoAuditList,
-    passShortVideo,
-    refuseShortVideo
-} from '@/api/audit'
+import $ from 'jquery'
+// import {
+//     videoAliyun,
+//     newsvideoGetauth,
+//     // newsvideoMinipreview,
+//     // newsvideoSavevideos,
+//     // getOperPlatform,
+//     // getLatelyList,
+//     // getVideoUpload,
+//     // getfileUpload,
+//     // newsvideoapiGettypes,
+//     // newsvideoapiGettags,
+//     // BUCKETALIY,
+//     // BUCKETS,
+//     // BUCKETY
+// } from '../../api/api';
 
 export default {
-    components: {
-        videoPlayer
-    },
-    computed: {
-        player() {
-            return this.$refs.videoPlayer.player
-        }
-    },
-    mounted() {
-        // 如果本地缓存没有，调取接口
-        var localVideo = localStorage.getItem('short_video')
-        if (localVideo && JSON.parse(localVideo).length!=0) {
-            this.dataList = JSON.parse(localVideo)
-            this.getVideoDetail()
-        } else {
-            this.getAuditList()
-        }
-        this.loadKey()
-    },
-    destroyed() {
-        clearInterval(this.videoInterva)
-    },
     data() {
         return {
-            dataList: [],
-            playerOptions: {
-                height: '600',
-                autoplay: false,
-                language: 'zh-CN',
-                controls: true, //播放控制条是否显示
-                preload: true, //是否预加载
-                playbackRates: [0.7, 1.0, 1.5, 2.0],
-                sources: [{
-                    type: "video/mp4",
-                    // mp4
-                    src: ""
-                }]
+            isquality: false,
+            isAuth: {
+                videoUpload: false,
+                getVideoList: false,
+                videoImgPreview: false,
+                videoAdd: false,
             },
-            fold: {
-                tag: true,
-                level: true
-            },
-            newExam: {
-                contenttitle: '我是视频审核',
+            inputVisible: false,
+            dialogShowVisible: false,
+            showSave: false,
+            platform: [],
+            form: {
+                platform: '',
+                title: '',
+                source: '',
+                describe: '',
+                maintype: [],
                 keywords: [],
-                videoCover: '',
-                videoInfor: '',
-                rowkey: ''
+                isoriginal: '1',
+                cover: 1,
+                timeSize: 0,
+                videoUrl: '',
+                aliyunUrl: ''
             },
-            platform: [{
-                typePy: 'lieqi',
-                typeName: '猎奇'
-            }],
-            levelOptions: [{
-                    label: '1级(纯新闻)',
-                    value: 1
-                },
-                {
-                    label: '2级(非新闻)',
-                    value: 2
-                },
-                {
-                    label: '3级(血腥暴力)',
-                    value: 3
-                },
-                {
-                    label: '4级(诱惑图片)',
-                    value: 4
-                },
-                {
-                    label: '5级(猎奇野史)',
-                    value: 5
-                }
-            ],
-            videoLevel: 1,
-            videoInterva: ''
+            videoload: false,
+            aliyunload: false,
+            aliyunStatus: true,
+            aliyunSize: 0,
+            videoloadSize: 0,
+            listLoading: false,
+            videoInterva: '',
+            classification: [],
+            inputValue: '',
+            checkedCover: ['单图'],
+            checkedCoverOptions: ['单图', '自动'],
+            checkedOriginal: ['原创'],
+            checkedOriginalOptions: ['原创', '非原创'],
+            worksData: [],
+            videoUpload: '',
+            fileUpload: '',
+            imageUrl: '',
+            newImg: '',
+            sportTags: [],
+            tagList: [],
+            loading: false,
+            url: '',
+            videoUploadUrl: '',
+            currentRow: null
+        };
+    },
+    mounted() {
+        this.getAuth();
+        this.fileUpload = getfileUpload;
+        this.getLatelyList();
+        this.getOperPlatform();
+    },
+    watch: {
+        videoloadSize: function(n, o) {
+
         }
     },
     methods: {
-        getAuditList() {
-            let params = {
-                size: 5
+        getAuth() { //权限控制
+            this.authorList = localStorage.getItem('authorList');
+            if (this.authorList.indexOf('api/newsvideo/getauth') > -1) {
+                this.isAuth.videoUpload = true;
             }
-            getShortVideoAuditList(params).then(res => {
-                if (res.code === '00001') {
-                    this.dataList = res.data.Beans
-                    this.getVideoDetail()
-                    localStorage.setItem('short_video', JSON.stringify(this.dataList))
-                }else{
-                    this.dataList = []
-                    this.getVideoDetail()
+            if (this.authorList.indexOf('api/newsvideo/minipreview') > -1) {
+                this.isAuth.videoImgPreview = true;
+            }
+            if (this.authorList.indexOf('api/newsvideo/savevideos') > -1) {
+                this.isAuth.videoAdd = true;
+            }
+            if (this.authorList.indexOf('api/newsvideo/savevideos') > -1) {
+                this.isAuth.videoAdd = true;
+            }
+        },
+        getLatelyList() { //标签列表
+            newsvideoapiGettags('').then(res => {
+                this.tagList = res.data.map(item => {
+                    return {
+                        value: item,
+                        label: item
+                    };
+                });
+            });
+        },
+        remoteMethod(query) {
+            if (query !== '') {
+                this.sportTags = this.tagList.filter(item => {
+                    return item.label.toLowerCase()
+                        .indexOf(query.toLowerCase()) > -1;
+                });
+            } else {
+                this.sportTags = [];
+            }
+        },
+        videoDuration() {
+            var a = document.getElementById('sendVideoUc').duration.toFixed(3);
+            this.form.timeSize = a * 1000;
+        },
+        handleCurrentChange(val) {
+            this.currentRow = val;
+        },
+        getOperPlatform() {
+            var user = localStorage.getItem('user'); //获取用户名
+            user = JSON.parse(user);
+            let params = {
+                userName: user.username,
+                url: 'send/video'
+            }
+            getOperPlatform(params).then(res => {
+                this.platform = res.data;
+                this.form.platform = this.platform[0].value;
+            });
+        },
+        gettypes() {
+            var level1 = [];
+            var level2 = [];
+            var level3 = [];
+            let para = {};
+            if (this.form.platform == 'wxsport') {
+                para = {
+                    type: 'wxsportsvideo'
+                }
+            } else if (this.form.platform == 'all') {
+                para = {
+                    type: 'sportsvideopublish'
+                }
+            } else {
+                para = {
+                    type: 'newsvideo'
+                }
+            }
+            newsvideoapiGettypes(para).then(res => {
+                if (res.data && res.data.length) {
+                    for (var i = 0; i < res.data.length; i++) {
+                        if (res.data[i].level && res.data[i].level == 1) {
+                            level1.push({
+                                value: res.data[i].typePy,
+                                label: res.data[i].typeName,
+                                typeId: res.data[i].typeId,
+                                level: res.data[i].level
+                            })
+                        } else if (res.data[i].level && res.data[i].level == 2) {
+                            level2.push({
+                                value: res.data[i].typePy,
+                                label: res.data[i].typeName,
+                                typeId: res.data[i].typeId,
+                                parentId: res.data[i].parentId,
+                                level: res.data[i].level
+                            })
+                        } else if (res.data[i].level && res.data[i].level == 3) {
+                            level3.push({
+                                value: res.data[i].typePy,
+                                label: res.data[i].typeName,
+                                typeId: res.data[i].typeId,
+                                parentId: res.data[i].parentId,
+                                level: res.data[i].level
+                            })
+                        }
+
+                    }
+                    for (var i = 0; i < level1.length; i++) {
+                        for (var j = 0; j < level2.length; j++) {
+                            if (level1[i].typeId == level2[j].parentId) {
+                                if (level1[i].children == undefined) {
+                                    level1[i].children = [];
+                                }
+                                for (var k = 0; k < level3.length; k++) {
+                                    if (level2[j].typeId == level3[k].parentId) {
+                                        if (level2[j].children == undefined) {
+                                            level2[j].children = [];
+                                        }
+                                        level2[j].children.push({
+                                            value: level3[k].value,
+                                            label: level3[k].label
+                                        });
+                                    }
+                                }
+                                level1[i].children.push({
+                                    value: level2[j].value,
+                                    label: level2[j].label,
+                                    parentId: level2[j].parentId,
+                                    typeId: level2[j].typeId,
+                                    children: level2[j].children
+                                })
+                            }
+                        }
+                    }
+                    this.classification = level1;
                 }
             })
         },
-        getVideoDetail() {
-            if (this.dataList.length != 0) {
-                this.newExam.contenttitle = this.dataList[0].title
-                this.newExam.keywords = this.dataList[0].lable01.split(',')
-                this.newExam.videoCover = this.dataList[0].coverimglink
-                this.playerOptions.sources[0].src = this.dataList[0].videolink
-                this.playerOptions.poster = this.dataList[0].coverimglink
-                this.newExam.videoCover = this.dataList[0].coverimglink
-                this.newExam.rowkey = this.dataList[0].rowkey
-                clearInterval(this.videoInterva)
+        handleClose(tag) {
+            this.form.keywords.splice(this.form.keywords.indexOf(tag), 1);
+        },
+        showInput() {
+            this.inputVisible = true;
+            this.$nextTick(_ => {
+                this.$refs.saveTagInput.$refs.input.focus();
+            });
+        },
+        handleInputConfirm() {
+            let inputValue = this.inputValue;
+            if (inputValue) {
+                this.form.keywords.push(inputValue);
+            }
+            this.inputVisible = false;
+            this.inputValue = '';
+        },
+        handleClick(tab, event) {},
+        handleChange(file) {
+            this.videoloadSize = 0;
+            this.videoload = false;
+            this.form.videoUrl = '';
+            this.aliyunSize = 0;
+            this.aliyunload = false;
+            this.form.aliyunUrl = '';
+        },
+        // 视频上传
+        beforeAvatarVedioUpload(res) {
+            console.log(res);
+            var _this = this;
+            let file = res.file;
+            let name = file.name; //文件名
+            if (_this.form.title === '') {
+                _this.form.title = name.split('.')[0];
+            }
+            let size = file.size; //总大小
+            var content_type = file.type;
+            let Header = {
+                "Content-Type": content_type,
+                "Content-Length": size
+            };
+            var Bucket = '';
+            var upUrl = '';
+            if (this.form.platform == 'wxsport') {
+                Bucket = BUCKETY;
+                upUrl = '.cn-bj.ufileos.com/';
             } else {
-                this.newExam.contenttitle = ''
-                this.newExam.keywords = []
-                this.newExam.videoCover = ''
-                this.playerOptions.sources[0].src = ''
-                this.playerOptions.poster = ''
-                this.newExam.videoCover = ''
-                this.newExam.rowkey = ''
-                this.getInterva()
+                Bucket = BUCKETS;
+                upUrl = '.ufile.ucloud.cn/'
             }
-        },
-        // 通过/拒绝获取视频
-        getData() {
-            if (this.dataList.length === 0) {
-                this.getAuditList()
+            var _data = file.slice(0, size);
+            var params = {
+                "Bucket": Bucket,
+                "METHOD": 'PUT',
+                "Header": Header,
+                "Key": name
+            }
+            var extendName = name.substring(name.lastIndexOf(".") + 1);
+            var limitType = 'mp4,mov';
+            if (limitType.indexOf(extendName) == -1) {
+                this.$message({
+                    type: 'warning',
+                    message: '格式不允许！'
+                });
+                return;
+            }
+            if (this.form.platform == 'wxsport') {
+                params.type = 'wxsportsvideo';
+            } else if (this.form.platform == 'all') {
+                params.type = 'sportsvideopublish'
             } else {
-                this.getVideoDetail()
+                params.type = 'newsvideo';
             }
-        },
-        // 没有数据开启定时器
-        getInterva() {
-            if (this.dataList.length === 0) {
-                this.videoInterva = setInterval(this.getInterva, 10000)
-            }
-        },
-        pass() {
-            let params = {
-                rowkey: this.newExam.rowkey,
-                gradelv: this.videoLevel
-            }
-            this.$confirm('是否通过这条视频?', '提示', {
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
-                type: 'warning'
-            }).then(() => {
-                passShortVideo(params).then(res => {
-                    if (res.code == '00001') {
-                        this.dataList.shift()
-                        this.getData()
-                        localStorage.setItem('short_video', JSON.stringify(this.dataList))
-                        this.$notify({
-                            title: '成功',
-                            message: '通过成功',
-                            type: 'success',
-                            duration: 1 * 1000
-                        });
+            var xhrOnProgress = function(fun) {
+                xhrOnProgress.onprogress = fun; //绑定监听
+                //使用闭包实现监听绑
+                return function() {
+                    //通过$.ajaxSettings.xhr();获得XMLHttpRequest对象
+                    var xhr = $.ajaxSettings.xhr();
+                    //判断监听函数是否为函数
+                    if (typeof xhrOnProgress.onprogress !== 'function')
+                        return xhr;
+                    //如果有监听函数并且xhr对象支持绑定时就把监听函数绑定上去
+                    if (xhrOnProgress.onprogress && xhr.upload) {
+                        xhr.upload.onprogress = xhrOnProgress.onprogress;
                     }
-                })
-            }).catch(() => {
-
-            })
-        },
-        refuse() {
-            let params = {
-                rowkey: this.newExam.rowkey,
-                reason: this.videoLevel
-            }
-            this.$confirm('是否拒绝这条视频?', '提示', {
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
-                type: 'warning'
-            }).then(() => {
-                refuseShortVideo(params).then(res => {
-                    if (res.code == '00001') {
-                        this.dataList.shift()
-                        this.getData()
-                        localStorage.setItem('short_video', JSON.stringify(this.dataList))
-                        this.$notify({
-                            title: '成功',
-                            message: '通过成功',
-                            type: 'success',
-                            duration: 1 * 1000
-                        });
-                    }
-                })
-            }).catch(() => {
-
-            })
-        },
-        // 快捷键
-        loadKey() {
-            let _that = this;
-            document.onkeydown = function(ev) {
-                if (ev.keyCode == 49) {
-                    // 级别 1
-                    _that.videoLevel = 1
-                } else if (ev.keyCode == 50) {
-                    // 级别 2
-                    _that.videoLevel = 2
-                } else if (ev.keyCode == 51) {
-                    // 级别 3
-                    _that.videoLevel = 3
-                } else if (ev.keyCode == 52) {
-                    // 级别 4
-                    _that.videoLevel = 4
-                } else if (ev.keyCode == 53) {
-                    // 级别 5
-                    _that.videoLevel = 5
-                } else if (ev.shiftKey == 1 && ev.keyCode == 13) {
-                    // shift + enter
-                    _that.pass()
-                } else if (ev.shiftKey == 1 && ev.keyCode == 220) {
-                    // shift + \
-                    _that.showPassVisible()
+                    return xhr;
                 }
+            };
+            let isAuth = newsvideoGetauth(params).then(res => {
+                if (res.code == '00001') {
+                    let vurl = res.data.url;
+                    $.ajax({
+                        url: vurl,
+                        type: "PUT",
+                        processData: false,
+                        contentType: false,
+                        async: true,
+                        data: _data,
+                        headers: {
+                            "Authorization": res.data.auth,
+                            "Content-Type": content_type
+                        },
+                        xhr: xhrOnProgress(function(e) {
+                            var percent = e.loaded / e.total; //计算百分比
+                            _this.videoloadSize = (percent * 100).toFixed(2);
+                        }),
+                        success: function(response, textStatus, jqXHR) {
+                            _this.videoloadSize = 100;
+                            _this.videoload = true;
+                            _this.form.videoUrl = vurl;
+                            clearInterval(_this.videoInterva);
+                            _this.$notify({
+                                title: '成功',
+                                message: '视频上传成功',
+                                type: 'success'
+                            });
+                        }
+                    });
+
+                    //阿里云
+                    //aliyun-sdk
+                    _this.aliyunload = false;
+                    var ossUpload = new OssUpload({
+                        bucket: BUCKETALIY,
+                        //   bucket: 'gxtest00',//正式gaoxinmv
+                        endpoint: 'http://oss-cn-beijing.aliyuncs.com',
+                        // 如果文件大于 chunkSize 则分块上传, chunkSize 不能小于 100KB 即 102400
+                        chunkSize: 1048576,
+                        // 分块上传的并发数
+                        concurrency: 2,
+                        aliyunCredential: {
+                            "accessKeyId": "LTAIjzNN6TTNNCVg",
+                            "secretAccessKey": "68bnrfGFpnyKpHpkfO1B0hMDdI1H7k"
+                        }
+                    });
+
+                    console.log('wasports/' + res.data.newFileName.split('/')[1])
+                    ossUpload.upload({
+                        // 必传参数, 需要上传的文件对象
+                        file: file,
+                        // 必传参数, 文件上传到 oss 后的名称, 包含路径
+                        key: 'wasports/' + res.data.newFileName.split('/')[1],
+                        // 上传失败后重试次数
+                        maxRetry: 3,
+                        // OSS支持4个 HTTP RFC2616(https://www.ietf.org/rfc/rfc2616.txt)协议规定的Header 字段：
+                        // Cache-Control、Expires、Content-Encoding、Content-Disposition。
+                        // 如果上传Object时设置了这些Header，则这个Object被下载时，相应的Header值会被自动设置成上传时的值
+                        // 可选参数
+                        headers: {
+                            'CacheControl': 'public',
+                            'Expires': '',
+                            'ContentEncoding': '',
+                            'ContentDisposition': '',
+                            // oss 支持的 header, 目前仅支持 x-oss-server-side-encryption
+                            'ServerSideEncryption': ''
+                        },
+                        // 文件上传中调用, 可选参数
+                        onprogress: function(evt) {
+                            _this.aliyunSize = ((evt.loaded / evt.total) * 100).toFixed(2);
+                        },
+                        // 文件上传失败后调用, 可选参数
+                        onerror: function(evt) {
+                            //   _that.aliyunStatus = true
+                        },
+                        // 文件上传成功调用, 可选参数
+                        oncomplete: function(res) {
+                            _this.form.aliyunUrl = res.Location
+                            _this.aliyunload = true
+                        }
+                    })
+                    return true;
+                } else {
+                    return false;
+                }
+            });
+        },
+        // 封面上传
+        handleAvatarImgSuccess(res, file) {
+            this.imageUrl = res.url;
+        },
+        clientPreview() {
+            if (this.imageUrl.length == 0) {
+                this.$message({
+                    type: 'warning',
+                    message: '无略缩图，无法预览'
+                });
+                return;
+            }
+            if (this.form.maintype.length == 0) {
+                this.$message({
+                    type: 'warning',
+                    message: '未选择任何分类,请选择分类'
+                });
+                return;
+            }
+            var params = {
+                imgs: [this.imageUrl],
+                maintype: this.form.maintype[0],
+                platform: this.form.platform
+            }
+
+            if (this.form.platform == 'wxsport') {
+                params.type = 'wxsportsvideo';
+            } else if (this.form.platform == 'all') {
+                params.type = 'sportsvideopublish';
+            } else {
+                params.type = 'newsvideo';
+            }
+
+            this.listLoading = true;
+            newsvideoMinipreview(params).then(res => {
+                this.newImg = res.data;
+                this.newImg.minibjs = JSON.parse(this.newImg.minibjs);
+                this.newImg.lunbjs = JSON.parse(this.newImg.lunbjs);
+                this.newImg.minijs = JSON.parse(this.newImg.minijs);
+                this.newImg.miniajs = JSON.parse(this.newImg.miniajs);
+                this.showSave = true;
+                this.dialogShowVisible = true;
+                this.listLoading = false;
+            })
+        },
+        dialogHandleClose(index) {
+            if (index == 0) {
+                this.dialogShowVisible = false;
+            } else if (index == 1) {
+                this.dialogFormVisible = false;
+            } else {
+                this.urlVisible = false;
             }
         },
-        // 权限控制
-        getAuth() {
-            let authorList = localStorage.getItem('authorList');
-            // 通过
-            if (authorList.indexOf('wemedia/picture/audit-pass') > -1) {
-                this.isAuth.imgPassed = true;
+        releaseData() {
+            if (this.form.videoUrl == '') {
+                this.$message({
+                    type: 'warning',
+                    message: '视频未上传，无法发布'
+                });
+                return;
             }
-            // 拒绝
-            if (authorList.indexOf('wemedia/picture/audit-refused') > -1) {
-                this.isAuth.imgNoPassed = true;
+            var _params = {
+                title: this.form.title,
+                describe: this.form.describe,
+                source: this.form.source,
+                maintype: this.form.maintype[0],
+                secondtype: this.form.maintype[1],
+                thirdtype: this.form.maintype[2],
+                keywords: this.form.keywords.join(","),
+                timeSize: this.form.timeSize,
+                url: this.form.videoUrl,
+                isoriginal: this.form.isoriginal,
+                platform: this.form.platform,
+                isquality: Number(this.isquality)
+            };
+
+            if (this.form.platform == 'wxsport') {
+                _params.type = 'wxsportsvideo';
+            } else if (this.form.platform == 'all') {
+                _params.type = 'sportsvideopublish';
+            } else {
+                _params.type = 'newsvideo';
             }
-        },
-        // 复制URL按钮
-        copyContent(text, event) {
-            clip(text, event)
+
+            this.listLoading = true;
+            newsvideoSavevideos(_params).then(res => {
+                if (res.code == '00001') {
+                    //初始化视频上传组件
+                    this.form = {
+                        platform: '',
+                        title: '',
+                        source: '',
+                        describe: '',
+                        maintype: [],
+                        keywords: [],
+                        isoriginal: '1',
+                        cover: 1,
+                        videoUrl: '',
+                        aliyunUrl: ''
+                    }
+                    this.videoloadSize = 0;
+                    this.videoload = false;
+                    this.form.videoUrl = '';
+                    this.form.aliyunUrl = '';
+                    this.aliyunSize = 0;
+                    this.aliyunload = false;
+                    this.imageUrl = '';
+                    this.$notify({
+                        title: '成功',
+                        message: '发布视频成功',
+                        type: 'success'
+                    });
+                    this.isquality = false
+                }
+                this.listLoading = false;
+            })
         }
     }
 }
 </script>
 
-<style lang="scss" scoped="scoped">
-.audit-title {
-    font-size: 20px;
-    text-align: center;
-    margin: 0 10px;
-}
-.flex_center {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.url-next_page {
-    position: relative;
-    text-align: center;
-    padding: 8px 5px;
-    .url-source {
-        text-align: center;
-        font-size: 18px;
-        .source {
-            margin-right: 20px;
-        }
-        .url {
-            text-decoration: none;
-            color: #20a0ff;
-            &:hover {
-                color: #4db3ff;
-            }
-        }
-    }
-    .next_btn-group {
-        position: absolute;
-        right: 10px;
-        top: 5px;
-    }
-}
-.left-label {
-    font-size: 16px;
-    padding: 10px 0;
-}
-.hasBorderBottom {
-    border-bottom: 1px solid #ccc;
-    padding: 5px;
-    &:last-child {
-        border: none;
-    }
-}
-.left-title {
-    font-size: 16px;
-    font-weight: bold;
-    margin-bottom: 6px;
-}
-.audit_img_item {
-    height: 200px;
-    display: flex;
-    align-items: center;
-    background-color: #ccc;
-    text-align: center;
-    img {
-        max-width: 100%;
-        max-height: 100%;
-        display: block;
-        margin: 0 auto;
-    }
-}
-.audit_content-box {
-    min-height: 620px;
-}
-.null-data-content {
-    color: #999;
-    font-size: 40px;
-    text-align: center;
-    line-height: 620px;
-}
-.demo-block-control {
-    height: 36px;
-    line-height: 36px;
-    box-sizing: border-box;
-    background-color: #fff;
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-    text-align: center;
-    color: #d3dce6;
-    cursor: pointer;
-    transition: 0.2s;
-    position: relative;
-    &:hover {
-        color: #20a0ff;
-        background-color: #f9fafc;
-    }
-}
+<style scoped>
 
-.flex_box {
-    margin-bottom: 10px;
-    .flex_title {
-        font-size: 14px;
-        margin-bottom: 20px;
-        font-weight: 700;
-    }
-    .flex_content {
-        margin-left: 10px;
-    }
-}
-.img_null {
-    font-size: 16px;
-    color: #999;
-    margin-bottom: 20px;
-}
-.null-short-video {
-    width: 100%;
-    height: 600px;
-    line-height: 600px;
-    font-size: 42px;
-    color: #999;
-    letter-spacing: 2px;
-    text-align: center;
-}
 </style>

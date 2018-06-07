@@ -269,6 +269,16 @@ copy(event){
 </el-row>
 ```
 ```javascript
+handleSizeChange(val) {
+    this.pageSize = val
+    this.getList()
+},
+handleCurrentChange(val) {
+    this.currentPage = val
+    this.getList()
+}
+```
+```javascript
 data() {
     return {
         form: {

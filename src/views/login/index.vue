@@ -3,7 +3,6 @@
     <!-- <div class="logo-box">
         <img src="../../assets/logotext.png" alt="">
     </div> -->
-
     <el-form class="card-box" autoComplete="on" :model="loginForm" :rules="loginRules" ref="loginForm" label-position="left">
         <div class="logo logo-box">
             <img src="../../assets/logo.png" alt="">
@@ -26,7 +25,6 @@
         </el-form-item>
 
         <el-button type="primary" style="width:100%;margin-bottom:30px;" :loading="loading" @click.native.prevent="handleLogin">登录</el-button>
-
         <!-- <div class="tips">账号:admin 密码随便填</div>
         <div class="tips">账号:editor 密码随便填</div>
 
@@ -44,6 +42,9 @@
 import {
     isvalidUsername
 } from '@/utils/validate'
+import {
+    verifySSOLogin
+} from '@/api/login'
 import socialSign from './socialsignin'
 import particles from 'particles.js'
 import md5 from 'js-md5';
@@ -54,15 +55,8 @@ export default {
     },
     name: 'login',
     mounted(){
-        let newurl = '0140038318266847151'
+        this.verifySSOLogin()
         particlesJS.load('particles','./static/data.json')
-        var num1 = newurl.split('').reverse().join('').substr(0,13)
-        var num2 = newurl.split('').reverse().join('').substr(14,6)
-        console.log(num1)
-        let time = this.format(Number(num1), 'yyyyMMddHHmmssSSS')
-        console.log(time)
-        let urlid = time.slice(2, time.length) + num2
-        console.log(urlid)
     },
     data() {
         return {
@@ -89,6 +83,19 @@ export default {
         }
     },
     methods: {
+        verifySSOLogin(){
+            verifySSOLogin().then(res => {
+                if(res.state){
+                    this.$store.dispatch('LoginByUsername','username=&password=&verifyCode=').then(() => {
+                        this.$router.push({
+                            path: '/'
+                        })
+                    }).catch(() => {
+
+                    })
+                }
+            })
+        },
         format(time, format){
             var t = new Date(time);
             var tf = function(i){return (i < 10 ? '0' : '') + i};
