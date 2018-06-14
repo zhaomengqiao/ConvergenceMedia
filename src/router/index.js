@@ -400,6 +400,36 @@ export const asyncRouterMap = [
                         }
                     }
                 ]
+            },
+            {
+                path: 'auditPatrol',
+                component: _import('contentAudit/auditPatrol/auditPatrol'),
+                name: 'auditPatrol',
+                meta: {
+                    title: 'auditPatrol',
+                    icon: '',
+                    authUrl: 'audit/patrol'
+                }
+            },
+            {
+                path: 'dfwCarNewsAudit',
+                component: _import('contentAudit/dfwCarAudit/dfwCarNewsAudit'),
+                name: 'dfwCarNewsAudit',
+                meta: {
+                    title: 'dfwCarNewsAudit',
+                    icon: '',
+                    authUrl: 'eastdayqiche/audit'
+                }
+            },
+            {
+                path: 'searchAudit',
+                component: _import('contentAudit/searchAudit/searchAudit'),
+                name: 'searchAudit',
+                meta: {
+                    title: 'searchAudit',
+                    icon: '',
+                    authUrl: 'search/audit'
+                }
             }
         ]
     },
@@ -516,17 +546,17 @@ export const asyncRouterMap = [
                             authUrl: 'send/news'
                         }
                     },
-                    {
-                        path: 'editVideos',
-                        component: _import('contentManger/editVideos'),
-                        name: 'editVideos',
-                        meta: {
-                            title: 'editVideos',
-                            icon: '',
-                            noCache: false,
-                            authUrl: 'send/video'
-                        }
-                    },
+                    // {
+                    //     path: 'editVideos',
+                    //     component: _import('contentManger/editVideos'),
+                    //     name: 'editVideos',
+                    //     meta: {
+                    //         title: 'editVideos',
+                    //         icon: '',
+                    //         noCache: false,
+                    //         authUrl: 'send/video'
+                    //     }
+                    // },
                     {
                         path: 'editPictures',
                         component: _import('contentManger/editPictures'),
@@ -746,6 +776,64 @@ export const asyncRouterMap = [
                         }
                     }
                 ]
+            },
+            {
+                path: '/liveManage/liveManageTools',
+                component: _import('liveManage/index'),
+                redirect: 'noredirect',
+                name: 'liveManageTools',
+                meta: {
+                    title: 'liveManageTools',
+                    icon: '',
+                    noCache: false,
+                    authUrl: 'live/tools'
+                },
+                children: [
+                    {
+                        path: 'liveBlackList',
+                        component: _import('liveManage/liveManageTools/liveBlackList'),
+                        name: 'liveBlackList',
+                        meta: {
+                            title: 'liveBlackList',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'liveroom/black'
+                        }
+                    },
+                    {
+                        path: 'liveReportManage',
+                        component: _import('liveManage/liveManageTools/liveReportManage'),
+                        name: 'liveReportManage',
+                        meta: {
+                            title: 'liveReportManage',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'api/liveroommanager/queryreport'
+                        }
+                    },
+                    {
+                        path: 'liveroomManger',
+                        component: _import('liveManage/liveManageTools/liveroomManger'),
+                        name: 'liveroomManger',
+                        meta: {
+                            title: 'liveroomManger',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'my/liveroom'
+                        }
+                    },
+                    {
+                        path: 'streamName',
+                        component: _import('liveManage/liveManageTools/streamName'),
+                        name: 'streamName',
+                        meta: {
+                            title: 'streamName',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'liveroom/streamName'
+                        }
+                    }
+                ]
             }
         ]
     },
@@ -785,13 +873,35 @@ export const asyncRouterMap = [
                     },
                     {
                         path: 'previewBlack',
-                        component: _import('operationTools/contentManageTools'),
+                        component: _import('operationTools/newsReviewBlack'),
                         name: 'previewBlack',
                         meta: {
                             title: 'previewBlack',
                             icon: '',
                             noCache: false,
                             authUrl: 'news/black'
+                        },
+                    },
+                    {
+                        path: 'fileUpload',
+                        component: _import('operationTools/fileUpload'),
+                        name: 'fileUpload',
+                        meta: {
+                            title: 'fileUpload',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'task/uploadText'
+                        },
+                    },
+                    {
+                        path: 'videoClip',
+                        component: _import('operationTools/videoClip'),
+                        name: 'videoClip',
+                        meta: {
+                            title: 'videoClip',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'content/filmEditing'
                         },
                     }
                 ]
@@ -828,6 +938,28 @@ export const asyncRouterMap = [
                             noCache: false,
                             authUrl: 'videoRecommendTools'
                         }
+                    },
+                    {
+                        path: 'liveRecommend',
+                        component: _import('operationTools/liveRecommend'),
+                        name: 'liveRecommend',
+                        meta: {
+                            title: 'liveRecommend',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'liveroom/recommendTools'
+                        }
+                    },
+                    {
+                        path: 'hotNewsRecommend',
+                        component: _import('operationTools/hotNewsRecommend'),
+                        name: 'hotNewsRecommend',
+                        meta: {
+                            title: 'hotNewsRecommend',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'hotNews/recommendTools'
+                        }
                     }
                 ]
             },
@@ -862,6 +994,28 @@ export const asyncRouterMap = [
                             icon: '',
                             noCache: false,
                             authUrl: 'video/recommendList'
+                        }
+                    },
+                    {
+                        path: 'liveRecommendList',
+                        component: _import('operationTools/liveRecommendList'),
+                        name: 'liveRecommendList',
+                        meta: {
+                            title: 'liveRecommendList',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'live/liveRecommentLog'
+                        }
+                    },
+                    {
+                        path: 'hotNewsRecommendList',
+                        component: _import('operationTools/hotNewsRecommendList'),
+                        name: 'hotNewsRecommendList',
+                        meta: {
+                            title: 'hotNewsRecommendList',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'hotNewsTopList/recommendList'
                         }
                     }
                 ]
@@ -934,6 +1088,52 @@ export const asyncRouterMap = [
                             icon: '',
                             noCache: false,
                             authUrl: 'activeConfig/answer'
+                        }
+                    }
+                ]
+            },
+            {
+                path: '/operationTools/keywordManage',
+                component: _import('operationTools/index'),
+                redirect: 'noredirect',
+                name: 'keywordManage',
+                meta: {
+                    title: 'keywordManage',
+                    icon: '',
+                    authUrl: 'comment/keyWordManager'
+                },
+                children: [
+                    {
+                        path: 'index',
+                        component: _import('operationTools/keywordManage/keywordManage'),
+                        name: 'keywordManage',
+                        meta: {
+                            title: 'keywordManage',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'keywords/manager'
+                        }
+                    },
+                    {
+                        path: 'yzKeyword',
+                        component: _import('operationTools/keywordManage/yzKeyword'),
+                        name: 'yzKeyword',
+                        meta: {
+                            title: 'yzKeyword',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'operationyzwbsensitivewords'
+                        }
+                    },
+                    {
+                        path: 'gdKeyword',
+                        component: _import('operationTools/keywordManage/gdKeyword'),
+                        name: 'gdKeyword',
+                        meta: {
+                            title: 'gdKeyword',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'send/keywords'
                         }
                     }
                 ]
@@ -1085,409 +1285,182 @@ export const asyncRouterMap = [
             }
         ]
     },
-    // {
-    //     path: '/permission',
-    //     component: Layout,
-    //     redirect: '/permission/index',
-    //     meta: {
-    //         role: ['admin']
-    //     },
-    //     children: [{
-    //         path: 'index',
-    //         component: _import('permission/index'),
-    //         name: 'permission',
-    //         meta: {
-    //             title: 'permission',
-    //             icon: 'lock',
-    //             role: ['admin']
-    //         }
-    //     }]
-    // },
-    // {
-    //     path: '/icon',
-    //     component: Layout,
-    //     children: [{
-    //         path: 'index',
-    //         component: _import('svg-icons/index'),
-    //         name: 'icons',
-    //         meta: {
-    //             title: 'icons',
-    //             icon: 'icon',
-    //             noCache: true
-    //         }
-    //     }]
-    // },
-    //
-    // {
-    //     path: '/components',
-    //     component: Layout,
-    //     redirect: 'noredirect',
-    //     name: 'component-demo',
-    //     meta: {
-    //         title: 'components',
-    //         icon: 'component'
-    //     },
-    //     children: [{
-    //             path: 'tinymce',
-    //             component: _import('components-demo/tinymce'),
-    //             name: 'tinymce-demo',
-    //             meta: {
-    //                 title: 'tinymce'
-    //             }
-    //         },
-    //         {
-    //             path: 'markdown',
-    //             component: _import('components-demo/markdown'),
-    //             name: 'markdown-demo',
-    //             meta: {
-    //                 title: 'markdown'
-    //             }
-    //         },
-    //         {
-    //             path: 'json-editor',
-    //             component: _import('components-demo/jsonEditor'),
-    //             name: 'jsonEditor-demo',
-    //             meta: {
-    //                 title: 'jsonEditor'
-    //             }
-    //         },
-    //         {
-    //             path: 'dnd-list',
-    //             component: _import('components-demo/dndList'),
-    //             name: 'dndList-demo',
-    //             meta: {
-    //                 title: 'dndList'
-    //             }
-    //         },
-    //         {
-    //             path: 'splitpane',
-    //             component: _import('components-demo/splitpane'),
-    //             name: 'splitpane-demo',
-    //             meta: {
-    //                 title: 'splitPane'
-    //             }
-    //         },
-    //         {
-    //             path: 'avatar-upload',
-    //             component: _import('components-demo/avatarUpload'),
-    //             name: 'avatarUpload-demo',
-    //             meta: {
-    //                 title: 'avatarUpload'
-    //             }
-    //         },
-    //         {
-    //             path: 'dropzone',
-    //             component: _import('components-demo/dropzone'),
-    //             name: 'dropzone-demo',
-    //             meta: {
-    //                 title: 'dropzone'
-    //             }
-    //         },
-    //         {
-    //             path: 'sticky',
-    //             component: _import('components-demo/sticky'),
-    //             name: 'sticky-demo',
-    //             meta: {
-    //                 title: 'sticky'
-    //             }
-    //         },
-    //         {
-    //             path: 'count-to',
-    //             component: _import('components-demo/countTo'),
-    //             name: 'countTo-demo',
-    //             meta: {
-    //                 title: 'countTo'
-    //             }
-    //         },
-    //         {
-    //             path: 'mixin',
-    //             component: _import('components-demo/mixin'),
-    //             name: 'componentMixin-demo',
-    //             meta: {
-    //                 title: 'componentMixin'
-    //             }
-    //         },
-    //         {
-    //             path: 'back-to-top',
-    //             component: _import('components-demo/backToTop'),
-    //             name: 'backToTop-demo',
-    //             meta: {
-    //                 title: 'backToTop'
-    //             }
-    //         }
-    //     ]
-    // },
-    //
-    // {
-    //     path: '/charts',
-    //     component: Layout,
-    //     redirect: 'noredirect',
-    //     name: 'charts',
-    //     meta: {
-    //         title: 'charts',
-    //         icon: 'chart'
-    //     },
-    //     children: [{
-    //             path: 'keyboard',
-    //             component: _import('charts/keyboard'),
-    //             name: 'keyboardChart',
-    //             meta: {
-    //                 title: 'keyboardChart',
-    //                 noCache: true
-    //             }
-    //         },
-    //         {
-    //             path: 'line',
-    //             component: _import('charts/line'),
-    //             name: 'lineChart',
-    //             meta: {
-    //                 title: 'lineChart',
-    //                 noCache: true
-    //             }
-    //         },
-    //         {
-    //             path: 'mixchart',
-    //             component: _import('charts/mixChart'),
-    //             name: 'mixChart',
-    //             meta: {
-    //                 title: 'mixChart',
-    //                 noCache: true
-    //             }
-    //         }
-    //     ]
-    // },
-    //
-    // {
-    //     path: '/example',
-    //     component: Layout,
-    //     redirect: '/example/table/complex-table',
-    //     name: 'example',
-    //     meta: {
-    //         title: 'example',
-    //         icon: 'example'
-    //     },
-    //     children: [{
-    //             path: '/example/table',
-    //             component: _import('example/table/index'),
-    //             redirect: '/example/table/complex-table',
-    //             name: 'Table',
-    //             meta: {
-    //                 title: 'Table',
-    //                 icon: 'table'
-    //             },
-    //             children: [{
-    //                     path: 'dynamic-table',
-    //                     component: _import('example/table/dynamicTable/index'),
-    //                     name: 'dynamicTable',
-    //                     meta: {
-    //                         title: 'dynamicTable'
-    //                     }
-    //                 },
-    //                 {
-    //                     path: 'drag-table',
-    //                     component: _import('example/table/dragTable'),
-    //                     name: 'dragTable',
-    //                     meta: {
-    //                         title: 'dragTable'
-    //                     }
-    //                 },
-    //                 {
-    //                     path: 'inline-edit-table',
-    //                     component: _import('example/table/inlineEditTable'),
-    //                     name: 'inlineEditTable',
-    //                     meta: {
-    //                         title: 'inlineEditTable'
-    //                     }
-    //                 },
-    //                 {
-    //                     path: 'complex-table',
-    //                     component: _import('example/table/complexTable'),
-    //                     name: 'complexTable',
-    //                     meta: {
-    //                         title: 'complexTable'
-    //                     }
-    //                 }
-    //             ]
-    //         },
-    //         {
-    //             path: 'tab/index',
-    //             icon: 'tab',
-    //             component: _import('example/tab/index'),
-    //             name: 'tab',
-    //             meta: {
-    //                 title: 'tab'
-    //             }
-    //         }
-    //     ]
-    // },
-    //
-    // {
-    //     path: '/form',
-    //     component: Layout,
-    //     redirect: 'noredirect',
-    //     name: 'form',
-    //     meta: {
-    //         title: 'form',
-    //         icon: 'form'
-    //     },
-    //     children: [{
-    //             path: 'create-form',
-    //             component: _import('form/create'),
-    //             name: 'createForm',
-    //             meta: {
-    //                 title: 'createForm',
-    //                 icon: 'table'
-    //             }
-    //         },
-    //         {
-    //             path: 'edit-form',
-    //             component: _import('form/edit'),
-    //             name: 'editForm',
-    //             meta: {
-    //                 title: 'editForm',
-    //                 icon: 'table'
-    //             }
-    //         }
-    //     ]
-    // },
-    //
-    // {
-    //     path: '/error',
-    //     component: Layout,
-    //     redirect: 'noredirect',
-    //     name: 'errorPages',
-    //     meta: {
-    //         title: 'errorPages',
-    //         icon: '404'
-    //     },
-    //     children: [{
-    //             path: '401',
-    //             component: _import('errorPage/401'),
-    //             name: 'page401',
-    //             meta: {
-    //                 title: 'page401',
-    //                 noCache: true
-    //             }
-    //         },
-    //         {
-    //             path: '404',
-    //             component: _import('errorPage/404'),
-    //             name: 'page404',
-    //             meta: {
-    //                 title: 'page404',
-    //                 noCache: true
-    //             }
-    //         }
-    //     ]
-    // },
-    //
-    // {
-    //     path: '/error-log',
-    //     component: Layout,
-    //     redirect: 'noredirect',
-    //     children: [{
-    //         path: 'log',
-    //         component: _import('errorLog/index'),
-    //         name: 'errorLog',
-    //         meta: {
-    //             title: 'errorLog',
-    //             icon: 'bug'
-    //         }
-    //     }]
-    // },
-    //
-    // {
-    //     path: '/excel',
-    //     component: Layout,
-    //     redirect: '/excel/export-excel',
-    //     name: 'excel',
-    //     meta: {
-    //         title: 'excel',
-    //         icon: 'excel'
-    //     },
-    //     children: [{
-    //             path: 'export-excel',
-    //             component: _import('excel/exportExcel'),
-    //             name: 'exportExcel',
-    //             meta: {
-    //                 title: 'exportExcel'
-    //             }
-    //         },
-    //         {
-    //             path: 'export-selected-excel',
-    //             component: _import('excel/selectExcel'),
-    //             name: 'selectExcel',
-    //             meta: {
-    //                 title: 'selectExcel'
-    //             }
-    //         },
-    //         {
-    //             path: 'upload-excel',
-    //             component: _import('excel/uploadExcel'),
-    //             name: 'uploadExcel',
-    //             meta: {
-    //                 title: 'uploadExcel'
-    //             }
-    //         }
-    //     ]
-    // },
-    //
-    // {
-    //     path: '/zip',
-    //     component: Layout,
-    //     redirect: '/zip/download',
-    //     children: [{
-    //         path: 'download',
-    //         component: _import('zip/index'),
-    //         name: 'exportZip',
-    //         meta: {
-    //             title: 'exportZip',
-    //             icon: 'zip'
-    //         }
-    //     }]
-    // },
-    //
-    // {
-    //     path: '/theme',
-    //     component: Layout,
-    //     redirect: 'noredirect',
-    //     children: [{
-    //         path: 'index',
-    //         component: _import('theme/index'),
-    //         name: 'theme',
-    //         meta: {
-    //             title: 'theme',
-    //             icon: 'theme'
-    //         }
-    //     }]
-    // },
-    //
-    // {
-    //     path: '/clipboard',
-    //     component: Layout,
-    //     redirect: 'noredirect',
-    //     children: [{
-    //         path: 'index',
-    //         component: _import('clipboard/index'),
-    //         name: 'clipboardDemo',
-    //         meta: {
-    //             title: 'clipboardDemo',
-    //             icon: 'clipboard'
-    //         }
-    //     }]
-    // },
-    //
-    // {
-    //     path: '/i18n',
-    //     component: Layout,
-    //     children: [{
-    //         path: 'index',
-    //         component: _import('i18n-demo/index'),
-    //         name: 'i18n',
-    //         meta: {
-    //             title: 'i18n',
-    //             icon: 'international'
-    //         }
-    //     }]
-    // },
+    {
+        path: '/dataCenter',
+        component: Layout,
+        redirect: 'noredirect',
+        name: 'dataCenter',
+        meta: {
+            title: 'dataCenter',
+            icon: 'dataCenter',
+            authUrl: 'v4blank30'
+        },
+        children: [
+            {
+                path: '/dataCenter/appInforStream',
+                component: _import('dataCenter/index'),
+                redirect: 'noredirect',
+                name: 'appInforStream',
+                meta: {
+                    title: 'appInforStream',
+                    icon: '',
+                    noCache: false,
+                    authUrl: 'appInfoWater'
+                },
+                children: [
+                    {
+                        path: 'appInforStreamCount',
+                        component: _import('dataCenter/appInforStream/appInforStreamCount'),
+                        name: 'appInforStreamCount',
+                        meta: {
+                            title: 'appInforStreamCount',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'data/yangziApp/flow'
+                        }
+                    }
+                ]
+            },
+            {
+                path: '/dataCenter/appBasic',
+                component: _import('dataCenter/index'),
+                redirect: 'noredirect',
+                name: 'appBasic',
+                meta: {
+                    title: 'appBasic',
+                    icon: '',
+                    noCache: false,
+                    authUrl: 'appBasic'
+                },
+                children: [
+                    {
+                        path: 'appBasicData',
+                        component: _import('dataCenter/appBasic/appBasicData'),
+                        name: 'appBasicData',
+                        meta: {
+                            title: 'appBasicData',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'data/yangziApp/basic'
+                        }
+                    },
+                    {
+                        path: 'versionCount',
+                        component: _import('dataCenter/appBasic/versionCount'),
+                        name: 'versionCount',
+                        meta: {
+                            title: 'versionCount',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'data/yangziApp/basic'
+                        }
+                    },
+                    {
+                        path: 'areaCount',
+                        component: _import('dataCenter/appBasic/areaCount'),
+                        name: 'areaCount',
+                        meta: {
+                            title: 'areaCount',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'data/yangziApp/basic'
+                        }
+                    }
+                ]
+            },
+            {
+                path: '/dataCenter/h5Data',
+                component: _import('dataCenter/index'),
+                redirect: 'noredirect',
+                name: 'h5Data',
+                meta: {
+                    title: 'h5Data',
+                    icon: '',
+                    noCache: false,
+                    authUrl: 'hDataTab'
+                },
+                children: [
+                    {
+                        path: 'nanchang',
+                        component: _import('dataCenter/h5Data/nanchang'),
+                        name: 'nanchang',
+                        meta: {
+                            title: 'nanchang',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'nanchangdata/datalist'
+                        }
+                    }
+                ]
+            },
+            {
+                path: 'cmsData',
+                component: _import('dataCenter/cmsData/cmsData'),
+                name: 'cmsData',
+                meta: {
+                    title: 'cmsData',
+                    icon: '',
+                    noCache: false,
+                    authUrl: 'yzOperation'
+                }
+            },
+            {
+                path: 'yzPCData',
+                component: _import('dataCenter/yzPCData/yzPCData'),
+                name: 'yzPCData',
+                meta: {
+                    title: 'yzPCData',
+                    icon: '',
+                    noCache: false,
+                    authUrl: 'pcData'
+                }
+            },
+            {
+                path: 'hainanUserData',
+                component: _import('dataCenter/hainanUserData/hainanUserData'),
+                name: 'hainanUserData',
+                meta: {
+                    title: 'hainanUserData',
+                    icon: '',
+                    noCache: false,
+                    authUrl: 'hnDataTab'
+                }
+            }
+        ]
+    },
+    {
+        path: '/pcManage',
+        component: Layout,
+        redirect: 'noredirect',
+        name: 'pcManage',
+        meta: {
+            title: 'pcManage',
+            icon: 'pcManage',
+            authUrl: 'v4blank32'
+        },
+        children: [
+            {
+                path: 'yzSliderManage',
+                component: _import('pcManage/yzSliderManage'),
+                name: 'yzSliderManage',
+                meta: {
+                    title: 'yzSliderManage',
+                    icon: '',
+                    noCache: false,
+                    authUrl: 'sliderManage'
+                }
+            },
+            {
+                path: 'ncSliderManage',
+                component: _import('pcManage/ncSliderManage'),
+                name: 'ncSliderManage',
+                meta: {
+                    title: 'ncSliderManage',
+                    icon: '',
+                    noCache: false,
+                    authUrl: 'ncsliderManage'
+                }
+            }
+        ]
+    }
 ]

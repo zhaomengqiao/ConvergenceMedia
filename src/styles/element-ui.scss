@@ -460,3 +460,8 @@ a>.adv_box{
 .flex-form__item .el-form-item__content{
     display: flex !important;
 }
+.login-container{
+    .el-form-item__content{
+        line-height: 40px !important
+    }
+}

@@ -257,7 +257,7 @@
                     <el-row :gutter="10">
 						<div v-for="(type,index) in newsTypeList" style="float: left;padding: 5px;width: 100px;" :id="type.typePy">
 							<el-checkbox v-if="type.children==null" :label="type.typeName" :key="type.typeId">{{type.typeName}}</el-checkbox>
-							<el-checkbox v-else v-model="type.checkAll" :indeterminate="type.indeterminate" :label="type.typeName" @change="handleCheckAllChange(this.event,type,index)">{{type.typeName}}</el-checkbox>
+							<el-checkbox v-else v-model="type.checkAll" :indeterminate="type.indeterminate" :label="type.typeName" @change="handleCheckAllChange($event,type,index)">{{type.typeName}}</el-checkbox>
 							<div v-if='type.checkedCities.length!=0||type.checkAll' >
 								<el-checkbox-group v-model="type.checkedCities" @change="handleCheckedCitiesChange(type.checkedCities,type,index)">
 									<el-checkbox v-for="(typec,indexc) in type.children"  :label="typec.typeName" :key="typec.typeId">{{typec.typeName}}</el-checkbox>
@@ -348,10 +348,7 @@ export default {
 
             ],
             newsTypeListHasAll: [],
-            pagenumOptions: [{
-                    value: -1,
-                    label: '所有屏幕'
-                },
+            pagenumOptions: [
                 {
                     value: 1,
                     label: '第一集合'
@@ -433,10 +430,7 @@ export default {
                     label: '第二十集合'
                 },
             ],
-            idxOptions: [{
-                    value: -1,
-                    label: '所有位置'
-                },
+            idxOptions: [
                 {
                     value: 1,
                     label: '第一项'
@@ -462,10 +456,7 @@ export default {
                     label: '第六项'
                 }
             ],
-            pagenumOptionsHasAll: [{
-                    value: -1,
-                    label: '所有屏幕'
-                },
+            pagenumOptionsHasAll: [
                 {
                     value: '1',
                     label: '第一集合'
@@ -1028,7 +1019,7 @@ export default {
         handleCheckAllChange(event, typeOptions, index) {
             if (typeOptions.children != null) {
                 var cities = typeOptions.children.map(item => item.typeName);
-                typeOptions.checkedCities = event.target.checked ? cities : [];
+                typeOptions.checkedCities = event ? cities : [];
                 typeOptions.indeterminate = false;
                 this.newsTypeList.splice(index, 1, typeOptions);
             }

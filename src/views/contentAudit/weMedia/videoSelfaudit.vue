@@ -531,6 +531,10 @@ export default {
                     if (this.dataList.length === 0) {
                         this.newExam = null
                         this.dynamicTags = []
+                        this.playerOptions.sources[0].src = ''
+                        this.playerOptions.poster = ''
+                        this.videoIntro = ''
+                        this.imageUrl = ''
                         if (type !== 'interval') {
                             if (this.dataList.length === 0) {
                                 this.selfInterva = window.setInterval(() => {
@@ -596,7 +600,7 @@ export default {
                 })
                 return
             }
-            if (this.newExam.urlmaintypeid) {
+            if (!this.newExam.urlmaintypeid) {
                 this.$message({
                     type: 'warning',
                     message: '请选择相应的分类再进行相关操作'

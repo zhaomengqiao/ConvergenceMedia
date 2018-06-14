@@ -111,7 +111,6 @@ const permission = {
                     localStorage.setItem('authorList', JSON.stringify(data))
                     commit('SET_PERMISSION_LIST', data)
                     commit('SET_ROUTERS', filterAuthList)
-                    console.log(filterAuthList)
                     resolve()
                 })
             })

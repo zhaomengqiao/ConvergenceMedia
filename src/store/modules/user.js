@@ -66,66 +66,73 @@ const user = {
         }, userInfo) {
             return new Promise((resolve, reject) => {
                 requestLogin(userInfo).then(response => {
-                    let data = response.data
-                    // localStorage.setItem('user', JSON.stringify(data))
-                    // commit('SET_NAME', data.username)
-                    if(data.ReturnURL){
-                        let url = data.url
-                        function proxyLogin(askurl, askData, okurl) {
-                            var killAjax = true;
-                            setTimeout(function() {
-                                checkajaxkill();
-                            }, 30000);
-                            let queryParam = '&data=' + data.data + '&ReturnURL=' + data.ReturnURL + '&callback';
-                            var ajaxCall = jQuery.getJSON(askurl + "?callback=?", {
-                                askData: askData
-                            }, function(d) {
-                                killAjax = false;
-                                if (d.msg == "-1") {
-                                    window.location.href = "/login";
-                                } else {
-                                    jQuery.post('/rongmeitiapi/login/oklogin', {
-                                        replyTxt: d.msg
-                                    }, function(e) {
-                                        if(e.code === '00001'){
-                                            localStorage.setItem('user', JSON.stringify(e.data))
-                                            commit('SET_NAME', e.data.username)
-                                            resolve()
-                                        }else{
-                                            Message.error({
-                                                message: e.ret
-                                            })
-                                        }
-                                    }, "json");
-                                }
-                            });
-
-                            function checkajaxkill() {
-                                if (killAjax) {
-                                    ajaxCall.abort();
-                                    window.location.href = "/login";
-                                }
-                            }
+                    if(response.code === '00001'){
+                        let data = response.data
+                        if(data){
+                            localStorage.setItem('user', JSON.stringify(data))
+                            commit('SET_NAME', data.username)
+                        }else{
+                            localStorage.removeItem('user')
                         }
-                        let queryParam = '&data=' + data.data + '&ReturnURL=' + data.ReturnURL + '&callback';
-                        jsonp(url+'?callbackparam=callback', {
-                            'param': queryParam,
-                            'name': 'callback'
-                        }, function(err, data) {
-
-                        });
-                        window.callback = function(data){
-                            Login1(data.returnUrl).then(res => {
-                                if(res.code === '00001'){
-                                    proxyLogin(res.data.askurl, res.data.askData, res.data.okurl);
-                                }
-                            })
-                        }
-                    }else{
-                        localStorage.setItem('user', JSON.stringify(data))
-                        commit('SET_NAME', data.username)
                         resolve()
                     }
+                    // if(data.ReturnURL){
+                    //     let url = data.url
+                    //     function proxyLogin(askurl, askData, okurl) {
+                    //         var killAjax = true;
+                    //         setTimeout(function() {
+                    //             checkajaxkill();
+                    //         }, 30000);
+                    //         let queryParam = '&data=' + data.data + '&ReturnURL=' + data.ReturnURL + '&callback';
+                    //         var ajaxCall = jQuery.getJSON(askurl + "?callback=?", {
+                    //             askData: askData
+                    //         }, function(d) {
+                    //             killAjax = false;
+                    //             if (d.msg == "-1") {
+                    //                 window.location.href = "/login";
+                    //             } else {
+                    //                 jQuery.post('/rongmeitiapi/login/oklogin', {
+                    //                     replyTxt: d.msg
+                    //                 }, function(e) {
+                    //                     if(e.code === '00001'){
+                    //                         localStorage.setItem('user', JSON.stringify(e.data))
+                    //                         commit('SET_NAME', e.data.username)
+                    //                         resolve()
+                    //                     }else{
+                    //                         Message.error({
+                    //                             message: e.ret
+                    //                         })
+                    //                     }
+                    //                 }, "json");
+                    //             }
+                    //         });
+                    //
+                    //         function checkajaxkill() {
+                    //             if (killAjax) {
+                    //                 ajaxCall.abort();
+                    //                 window.location.href = "/login";
+                    //             }
+                    //         }
+                    //     }
+                    //     let queryParam = '&data=' + data.data + '&ReturnURL=' + data.ReturnURL + '&callback';
+                    //     jsonp(url+'?callbackparam=callback', {
+                    //         'param': queryParam,
+                    //         'name': 'callback'
+                    //     }, function(err, data) {
+                    //
+                    //     });
+                    //     window.callback = function(data){
+                    //         Login1(data.returnUrl).then(res => {
+                    //             if(res.code === '00001'){
+                    //                 proxyLogin(res.data.askurl, res.data.askData, res.data.okurl);
+                    //             }
+                    //         })
+                    //     }
+                    // }else{
+                    //     localStorage .setItem('user', JSON.stringify(data))
+                    //     commit('SET_NAME', data.username)
+                    //     resolve()
+                    // }
                     // commit('SET_TOKEN', data.token)
                     // setToken(response.data.token)
                 }).catch(error => {

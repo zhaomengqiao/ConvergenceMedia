@@ -421,14 +421,13 @@ export function arrContainsObj(arr, obj) {
     return false;
 }
 
-export const contentRecommend = [
-    {
+export const contentRecommend = [{
         text: '7:30-10:00',
         onClick(picker) {
             const end = new Date();
             const start = new Date();
-            start.setHours(7,30,0,0)
-            end.setHours(10,0,0,0)
+            start.setHours(7, 30, 0, 0)
+            end.setHours(10, 0, 0, 0)
             picker.$emit('pick', [start, end]);
         }
     },
@@ -437,8 +436,8 @@ export const contentRecommend = [
         onClick(picker) {
             const end = new Date();
             const start = new Date();
-            start.setHours(10,0,0,0)
-            end.setHours(12,0,0,0)
+            start.setHours(10, 0, 0, 0)
+            end.setHours(12, 0, 0, 0)
             picker.$emit('pick', [start, end]);
         }
     },
@@ -447,8 +446,8 @@ export const contentRecommend = [
         onClick(picker) {
             const end = new Date();
             const start = new Date();
-            start.setHours(14,0,0,0)
-            end.setHours(16,0,0,0)
+            start.setHours(14, 0, 0, 0)
+            end.setHours(16, 0, 0, 0)
             picker.$emit('pick', [start, end]);
         }
     },
@@ -457,8 +456,8 @@ export const contentRecommend = [
         onClick(picker) {
             const end = new Date();
             const start = new Date();
-            start.setHours(16,0,0,0)
-            end.setHours(18,0,0,0)
+            start.setHours(16, 0, 0, 0)
+            end.setHours(18, 0, 0, 0)
             picker.$emit('pick', [start, end]);
         }
     },
@@ -467,8 +466,8 @@ export const contentRecommend = [
         onClick(picker) {
             const end = new Date();
             const start = new Date();
-            start.setHours(18,0,0,0)
-            end.setHours(20,0,0,0)
+            start.setHours(18, 0, 0, 0)
+            end.setHours(20, 0, 0, 0)
             picker.$emit('pick', [start, end]);
         }
     },
@@ -477,8 +476,8 @@ export const contentRecommend = [
         onClick(picker) {
             const end = new Date();
             const start = new Date();
-            start.setHours(20,0,0,0)
-            end.setHours(22,0,0,0)
+            start.setHours(20, 0, 0, 0)
+            end.setHours(22, 0, 0, 0)
             picker.$emit('pick', [start, end]);
         }
     },
@@ -517,5 +516,57 @@ export const contentRecommend = [
             end.setTime(end.getTime() + 3600 * 1000 * 4);
             picker.$emit('pick', [start, end]);
         }
+    }
+]
+
+// 数字转汉字
+export function NumberToChineseCharacter(section) {
+    const chnNumChar = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九']
+    const chnUnitSection = ['', '万', '亿', '万亿', '亿亿']
+    const chnUnitChar = ['', '十', '百', '千']
+    var strIns = '',
+        chnStr = '';
+    var unitPos = 0;
+    var zero = true;
+    debugger
+    while (section > 0) {
+        var v = section % 10;
+        if (v === 0) {
+            if (!zero) {
+                zero = true;
+                chnStr = chnNumChar[v] + chnStr;
+            }
+        } else {
+            zero = false;
+            strIns = chnNumChar[v];
+            strIns += chnUnitChar[unitPos];
+            chnStr = strIns + chnStr;
+        }
+        unitPos++;
+        section = Math.floor(section / 10);
+    }
+    if(chnStr === '一十'){
+        chnStr = '十'
+    }
+    return chnStr;
+}
+
+// 审核团队
+export const auditTeam = [
+    {
+        label: '全部团队',
+        value: ''
+    },
+    {
+        label: '胡丽团队',
+        value: '审核'
+    },
+    {
+        label: '漫山网络',
+        value: '福州审核'
+    },
+    {
+        label: '神熊互娱',
+        value: '外包-神熊互娱'
     }
 ]

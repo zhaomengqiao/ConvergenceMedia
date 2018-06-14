@@ -25,11 +25,8 @@
                     </el-select>
                 </div>
                 <div class="url-source">
-                    <!--dfhviplv 判断东方号大V-->
                     <span class="source"
-                          v-html="newExam.source"
-                           :style="newExam.dfhviplv>0?{color: 'red'}:''"></span>
-                    <img v-if='newExam.dfhviplv>0' src="../../../assets/audit_images/dfhvip.png" style="vertical-align:-3px;">
+                          v-html="newExam.source"></span>
                     ：
                     <a :href="newExam.purl" target="_blank" class="url" v-html="newExam.purl"></a>
                     <el-button type="primary" size="mini" @click="copyContent(newExam.purl,$event)">复制</el-button>

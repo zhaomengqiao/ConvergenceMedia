@@ -25,6 +25,8 @@
                     <!--政务号标记-->
                     <img src="../../../assets/audit_images/government.png"
                          v-if="newExam.dfhtype==3">
+                    <!--东方号活动标记-->
+                    <el-tag type="success" v-if="newExam.dfhactname" v-html="newExam.dfhactname"></el-tag>
                     <el-popover
                         ref="popoverTitle"
                         placement="bottom"
@@ -54,7 +56,12 @@
                 </el-select>
             </div>
             <div class="url-div" v-if="newExam.length!=0">
-                <span v-html="newExam.source"></span>：<a :href="newExam.purl" id='self-news' v-html="newExam.purl" style="color:#409EFF;vertical-align:middle" target="_blank"></a>
+                <span class="source"
+                      v-html="newExam.source"
+                       :style="newExam.dfhviplv>0?{color: 'red'}:''"></span>
+                <img v-if='newExam.dfhviplv>0' src="../../../assets/audit_images/dfhvip.png" style="vertical-align:-3px;">
+                ：
+                <a :href="newExam.purl" id='self-news' v-html="newExam.purl" style="color:#409EFF;vertical-align:middle" target="_blank"></a>
                 <el-button type="primary" size="mini" @click="copyTitle(newExam.purl,$event)">复制</el-button>
             </div>
             <div class="page-div" v-if="imgAllLoaded">
@@ -382,8 +389,8 @@ export default {
                             value: '601 请删除请点击此处输入图片描述'
                         },
                         {
-                            label: '602 封面或正文图片缺失',
-                            value: '602 封面或正文图片缺失'
+                            label: '602 封面或正文内容存在图片缺失或图文不符问题',
+                            value: '602 封面或正文内容存在图片缺失或图文不符问题'
                         },
                         {
                             label: '603 正文含有不相关字符或存在排版问题',
@@ -410,8 +417,16 @@ export default {
                             value: '608 内容可能引起读者恶心、不适'
                         },
                         {
-                            label: '609 正文含敏感词汇',
-                            value: '609 正文含敏感词汇'
+                            label: '609 正文含敏感词汇或图片敏感',
+                            value: '609 正文含敏感词汇或图片敏感'
+                        },
+                        {
+                            label: '610 内容部分涉嫌侵权',
+                            value: '610 内容部分涉嫌侵权'
+                        },
+                        {
+                            label: '611 实际发布内容与所选发文领域不一致',
+                            value: '611 实际发布内容与所选发文领域不一致'
                         }
                     ]
                 }

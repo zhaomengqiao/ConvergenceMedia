@@ -16,6 +16,8 @@
                     <!--政务号标记-->
                     <img src="../../../assets/audit_images/government.png"
                          v-if="newExam.dfhtype==3">
+                    <!--东方号活动标记-->
+                    <el-tag type="success" v-if="newExam.dfhactname" v-html="newExam.dfhactname"></el-tag>
                     <!--东方号需要展示封面-->
                     <el-popover
                         ref="popoverTitle"
@@ -308,16 +310,20 @@ export default {
             dialog: {
                 reasonSelect: ''
             },
-            noPassedOptions: [{
+            noPassedOptions: [
+                {
                     label: '一 政治类',
-                    options: [{
-                        label: '101 发布内容涉及政治或敏感信息，违背相关现行政策与法律法规',
-                        value: '101 发布内容涉及政治或敏感信息，违背相关现行政策与法律法规'
-                    }]
+                    options: [
+                        {
+                            label: '101 发布内容涉及政治或敏感信息，违背相关现行政策与法律法规',
+                            value: '101 发布内容涉及政治或敏感信息，违背相关现行政策与法律法规'
+                        }
+                    ]
                 },
                 {
                     label: '二 色情淫秽、低俗类',
-                    options: [{
+                    options: [
+                        {
                             label: '201 发布内容涉及色情、淫秽信息',
                             value: '201 发布内容涉及色情、淫秽信息'
                         },
@@ -329,7 +335,8 @@ export default {
                 },
                 {
                     label: '三 广告类',
-                    options: [{
+                    options: [
+                        {
                             label: '301 正文含不相关违规推广文字或ID',
                             value: '301 正文含不相关违规推广文字或ID'
                         },
@@ -345,7 +352,8 @@ export default {
                 },
                 {
                     label: '四 旧闻、虚假信息',
-                    options: [{
+                    options: [
+                        {
                             label: '401 文章内容描述违背科学常理',
                             value: '401 文章内容描述违背科学常理'
                         },
@@ -365,7 +373,8 @@ export default {
                 },
                 {
                     label: '五 标题类',
-                    options: [{
+                    options: [
+                        {
                             label: '501 发布内容涉嫌标题党',
                             value: '501 发布内容涉嫌标题党'
                         },
@@ -378,20 +387,21 @@ export default {
                             value: '503 标题含错别字'
                         },
                         {
-                            label: '504 发布内容标题内容不符',
-                            value: '504 发布内容标题内容不符'
+                            label: '504 发布内容题文不符',
+                            value: '504 发布内容题文不符'
                         }
                     ]
                 },
                 {
                     label: '六 内容格式类',
-                    options: [{
+                    options: [
+                        {
                             label: '601 请删除请点击此处输入图片描述',
                             value: '601 请删除请点击此处输入图片描述'
                         },
                         {
-                            label: '602 封面或正文图片缺失',
-                            value: '602 封面或正文图片缺失'
+                            label: '602 封面或正文内容存在图片缺失或图文不符问题',
+                            value: '602 封面或正文内容存在图片缺失或图文不符问题'
                         },
                         {
                             label: '603 正文含有不相关字符或存在排版问题',
@@ -418,8 +428,16 @@ export default {
                             value: '608 内容可能引起读者恶心、不适'
                         },
                         {
-                            label: '609 正文含敏感词汇',
-                            value: '609 正文含敏感词汇'
+                            label: '609 正文含敏感词汇或图片敏感',
+                            value: '609 正文含敏感词汇或图片敏感'
+                        },
+                        {
+                            label: '610 内容部分涉嫌侵权',
+                            value: '610 内容部分涉嫌侵权'
+                        },
+                        {
+                            label: '611 实际发布内容与所选发文领域不一致',
+                            value: '611 实际发布内容与所选发文领域不一致'
                         }
                     ]
                 }

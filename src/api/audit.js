@@ -460,3 +460,109 @@ export function getCommentDetailLog(data) {
 
 // 导出
 export const exportCommentDetail = `/rongmeitiapi/afterlogin/reviewmonitoring/exportcommentlist?`
+
+// 审核巡查
+export function getAuditPatrol(data) {
+    return request({
+        url: `afterlogin/auditpatrol/getauditpatrols`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 通过/拒绝
+export function changePatrolStatus(data) {
+    return request({
+        url: `afterlogin/auditpatrol/updateall`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 取消巡查
+export function cancelPatrol(data) {
+    return request({
+        url: `afterlogin/auditpatrol/cancelpatrol`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 东方网骑车新闻审核
+// 审核通过
+export function newsCarPassed(data) {
+    return request({
+        url: `api/eastdayqichenewsaudit/audit-pass`,
+        method: 'post',
+        data: qs.stringify(data.param)
+    })
+}
+// 审核拒绝
+export function newsCarNoPassed(data) {
+    return request({
+        url: `api/eastdayqichenewsaudit/audit-refuse`,
+        method: 'post',
+        data: qs.stringify(data.param)
+    })
+}
+// 东方网汽车
+export function getNewsCarExamList(data) {
+    return request({
+        url: `api/eastdayqichenewsaudit/unauditnewslist?size=${data.size}`,
+        method: 'get',
+        data: qs.stringify(data)
+    })
+}
+
+// 东方网汽车待审数量
+export function UncheckedCarNum(data) {
+    return request({
+        url: `api/eastdayqichenewsaudit/unauditnum`,
+        method: 'get'
+    })
+}
+
+// 审核通过
+export function searchExamPass(data) {
+    return request({
+        url: `searcheAudit/audit-pass`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 审核拒绝
+export function searchExamNoPass(data) {
+    return request({
+        url: `searcheAudit/audit-refuse`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 查询搜索审核详情
+export function searchExamDetail(data) {
+    return request({
+        url: `searcheAudit/queryDetail`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 搜索审核
+export function searchExam(data) {
+    return request({
+        url: `searcheAudit/search`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 搜索审核校检
+export function searchExamVerification(data) {
+    return request({
+        url: `searcheAudit/checkDataVaild`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}

@@ -1,4 +1,5 @@
 import request from '@/utils/request'
+import qs from 'qs'
 
 export function verifySSOLogin(data) {
     return request({
@@ -37,5 +38,22 @@ export function getAuthList(data) {
         url: '/login/authorities_v4_view',
         method: 'get',
         data
+    })
+}
+
+// 获取验证码
+export function getVerCode(data) {
+    return request({
+        url: '/login/verify-code-send',
+        method: 'post',
+        data
+    })
+}
+
+// 验证是否需要验证码
+export function isNeedVerifycode(data) {
+    return request({
+        url: `/login/isneedverifycode?userName=${data.userName}`,
+        method: 'get'
     })
 }

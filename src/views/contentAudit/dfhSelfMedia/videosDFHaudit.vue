@@ -14,6 +14,8 @@
                     <!--政务号标记-->
                     <img src="../../../assets/audit_images/government.png"
                          v-if="newExam.dfhtype==3">
+                    <!--东方号活动标记-->
+                    <el-tag type="success" v-if="newExam.dfhactname" v-html="newExam.dfhactname"></el-tag>
                     <!-- <el-popover
                         ref="popoverTitle"
                         placement="bottom"
@@ -43,8 +45,12 @@
                     </el-select>
                 </div>
                 <div class="url-source">
+                    <!--dfhviplv 判断东方号大V-->
                     <span class="source"
-                          v-html="newExam.source"></span>：
+                          v-html="newExam.source"
+                           :style="newExam.dfhviplv>0?{color: 'red'}:''"></span>
+                    <img v-if='newExam.dfhviplv>0' src="../../../assets/audit_images/dfhvip.png" style="vertical-align:-3px;">
+                    ：
                     <a :href="newExam.purl" target="_blank" class="url" v-html="newExam.purl"></a>
                     <el-button type="primary" size="mini" @click="copyContent(newExam.purl,$event)">复制</el-button>
                 </div>
@@ -62,7 +68,8 @@
                                   v-for="item in firpy"
                                   :key="item.typeId"
                                   :label="item.typeName"
-                                  :value="item.typeId">
+                                  :value="item.typeId"
+                                  :disabled="item.typeId==700000">
                                 </el-option>
                             </el-select>
                             <el-select v-model="newExam.tp2ndid" placeholder="请选择二级分类" @change="getType(newExam.tp2ndid,3)">
@@ -252,36 +259,26 @@
                    :visible.sync="noPassVisible"
                    :close-on-click-modal="false"
                    >
-			<span>
-                <el-form ref="refuseForm" :rules="refuseRules" :model="refuseForm">
-					<el-form-item prop="refuseReason">
-						<el-radio-group v-model="noPassReason" style="display:block">
-							<el-row style="line-height:36px;">
-								<el-radio label="广告或违规推广">广告或违规推广</el-radio>
-							</el-row>
-							<el-row style="line-height:36px;">
-								<el-radio label="违法违规信息">违法违规信息</el-radio>
-							</el-row>
-							<el-row style="line-height:36px;">
-								<el-radio label="画面画质效果差">画面画质效果差</el-radio>
-							</el-row>
-							<el-row style="line-height:36px;">
-								<el-radio label="内容缺失或无意义">内容缺失或无意义</el-radio>
-							</el-row>
-							<el-row style="line-height:36px;">
-								<el-radio label="纯外文无翻译">纯外文无翻译</el-radio>
-							</el-row>
-							<el-row style="line-height:36px;">
-								<el-radio label="无声音或黑屏">无声音或黑屏</el-radio>
-							</el-row>
-							<el-row style="line-height:36px;display:flex;align-items:center" >
-								<el-radio label="其他" class="pull-left">其他</el-radio>
-								<el-input v-model="noPassInputReason" placeholder="请输入原因" class="pull-left" style="width:240px;margin-left:10px;"></el-input>
-							</el-row>
-						</el-radio-group>
-					</el-form-item>
-				</el-form>
-			</span>
+            <span>
+                <el-form :model="dialog" ref="dialogr">
+                    <el-form-item label="拒绝原因:" prop="reasonSelect" :rules="[{ required: true, message: '必须选择原因'}]">
+                        <el-select v-model="dialog.reasonSelect" ref="selectInput" placeholder="请选择拒绝原因" filterable style="width:100%">
+                            <el-option-group
+                                v-for="(group,index) in noPassedOptions"
+                                :key="index"
+                                :value="group.label"
+                                :label="group.label">
+                                <el-option
+                                    v-for="item in group.options"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value"
+                                    ></el-option>
+                            </el-option-group>
+                        </el-select>
+                    </el-form-item>
+                </el-form>
+            </span>
 			<span slot="footer" class="dialog-footer">
 				<el-button type="primary" @click="refuse">确 定</el-button>
 				<el-button @click="noPassVisible = false">取 消</el-button>
@@ -327,19 +324,11 @@ export default {
         }
     },
     data() {
-        // 拒绝表单验证规则
-        let refuseReason = (rule, value, callback) => {
-            console.log(rule)
-            console.log(value)
-            if (this.noPassReason == '') {
-                callback(new Error('请选择拒绝理由'))
-            } else if (this.noPassReason === '其他' && this.noPassInputReason == '') {
-                callback(new Error('请输入拒绝理由'))
-            } else {
-                callback()
-            }
-        }
         return {
+            dialog:{
+  				reason:'',
+  				reasonSelect:'',
+  			},
             auditBegin: true,
             selectAuditType: '',
             selectPlatforms: [],
@@ -425,14 +414,130 @@ export default {
             selfInterva: '',
             // 拒审理由
             noPassVisible: false,
-            noPassReason: '',
-            noPassInputReason: '',
-            refuseRules: {
-                refuseReason: [{
-                    validator: refuseReason,
-                    trigger: 'blur'
-                }]
-            }
+            noPassedOptions: [
+				{
+					label: '一 政治类',
+					options: [
+						{
+							label: '101 发布内容涉及政治或敏感信息，违背相关现行政策与法律法规',
+							value: '101 发布内容涉及政治或敏感信息，违背相关现行政策与法律法规'
+						}
+					]
+				},
+				{
+					label: '二 色情淫秽、低俗类',
+					options: [
+						{
+							label: '201 发布内容涉及色情、淫秽信息',
+							value: '201 发布内容涉及色情、淫秽信息'
+						},
+						{
+							label: '202 发布内容包含低俗内容',
+							value: '202 发布内容包含低俗内容'
+						}
+					]
+				},
+				{
+					label: '三 广告类',
+					options: [
+						{
+							label: '321 视频内容中含有违规推广内容，请重新编辑后再次提交（视频内禁止手机、QQ、二维码、微信等广告）',
+							value: '321 视频内容中含有违规推广内容，请重新编辑后再次提交（视频内禁止手机、QQ、二维码、微信等广告）'
+						},
+						{
+							label: '322 内容涉嫌语音广告',
+							value: '322 内容涉嫌语音广告'
+						}
+					]
+				},
+				{
+					label: '四 旧闻、虚假信息',
+					options: [
+						{
+							label: '401 文章内容描述违背科学常理',
+							value: '401 文章内容描述违背科学常理'
+						},
+						{
+							label: '402 文中描述涉嫌无中生有或捏造谣言',
+							value: '402 文中描述涉嫌无中生有或捏造谣言'
+						},
+						{
+							label: '403 发布内容包含未被证实或与客观事实相左内容',
+							value: '403 发布内容包含未被证实或与客观事实相左内容'
+						},
+						{
+							label: '404 发布内容为过时旧闻',
+							value: '404 发布内容为过时旧闻'
+						}
+					]
+				},
+				{
+					label: '五 标题类',
+					options: [
+						{
+							label: '501 发布内容涉嫌标题党',
+							value: '501 发布内容涉嫌标题党'
+						},
+						{
+							label: '502 标题不完整或内容格式错误（含有特殊符号或句号、含有繁体字等）',
+							value: '502 标题不完整或内容格式错误（含有特殊符号或句号、含有繁体字等）'
+						},
+						{
+							label: '503 标题含错别字',
+							value: '503 标题含错别字'
+						},
+						{
+							label: '504 发布内容题文不符',
+							value: '504 发布内容题文不符'
+						},
+						{
+							label: '521 标题含不相关违规推广文字或ID',
+							value: '521 标题含不相关违规推广文字或ID'
+						}
+					]
+				},
+				{
+					label: '六 内容格式类',
+					options: [
+						{
+							label: '609 正文含敏感词汇或图片敏感',
+							value: '609 正文含敏感词汇或图片敏感'
+						},
+						{
+							label: '610 内容部分涉嫌侵权',
+							value: '610 内容部分涉嫌侵权'
+						},
+						{
+							label: '621 视频内容不适合收录（无主题、无实质内容）',
+							value: '621 视频内容不适合收录（无主题、无实质内容）'
+						},
+						{
+							label: '622 封面不合规（存在封面模糊、水印、封面二维码或封面人物不完整等问题）',
+							value: '622 封面不合规（存在封面模糊、水印、封面二维码或封面人物不完整等问题）'
+						},
+						{
+							label: '623 封面与标题或内容不符',
+							value: '623 封面与标题或内容不符'
+						},
+						{
+							label: '624 视频画质模糊',
+							value: '624 视频画质模糊'
+						},
+						{
+							label: '625视频含其他平台水印',
+							value: '625视频含其他平台水印'
+						},
+						{
+							label: '626 视频压缩Pc端处理失败导致格式有误（视频反字幕、画面过小、视频翻转、没声音或不清晰、画面黑屏或不完整……）',
+							value: '626 视频压缩Pc端处理失败导致格式有误（视频反字幕、画面过小、视频翻转、没声音或不清晰、画面黑屏或不完整……）'
+						},
+						{
+							label: '627 视频内容为外文且无翻译',
+							value: '627 视频内容为外文且无翻译'
+						}
+					]
+				}
+			]
         }
     },
     mounted() {
@@ -440,6 +545,10 @@ export default {
         // 获取一级分类
         this.getType('-1', 1)
         this.mountedGetData()
+        this.loadKey()
+    },
+    activated() { //keep-alive 组件激活
+        this.loadKey(); //组件激活时重新监控键盘
     },
     methods: {
         checkedNum(subType) {
@@ -482,6 +591,10 @@ export default {
                 if (res.code === '00001') {
                     if (level == 1) {
                         this.firpy = res.data;
+                        this.firpy.push({
+							typeName: '请选择',
+							typeId: '700000'
+						})
                         this.selectPlatforms = res.data.slice();
                         this.selectPlatforms.unshift({
                             'typeName': '全部',
@@ -547,6 +660,10 @@ export default {
                     if (this.dataList.length === 0) {
                         this.newExam = null
                         this.dynamicTags = []
+                        this.playerOptions.sources[0].src = ''
+                        this.playerOptions.poster = ''
+                        this.videoIntro = ''
+                        this.imageUrl = ''
                         if (type !== 'interval') {
                             if (this.dataList.length === 0) {
                                 this.selfInterva = window.setInterval(() => {
@@ -612,31 +729,30 @@ export default {
                 })
                 return
             }
-            if (this.newExam.urlmaintypeid) {
-                this.$message({
-                    type: 'warning',
-                    message: '请选择相应的分类再进行相关操作'
-                })
-                return
+            if(this.videoInfo){
+                if (this.videoInfo.urlmaintypeid == '' || this.videoInfo.urlmaintypeid == null || this.videoInfo.urlmaintypeid == 700000) {
+                    this.$message({
+                        type: 'warning',
+                        message: '请选择相应的分类再进行相关操作'
+                    })
+                    return
+                }
             }
             // 封面和原始一样就传空
-            if(this.oldImageUrl === this.imageUrl){
-                coverpic = ''
-            }else{
-                coverpic = this.imageUrl
-            }
+            // if(this.oldImageUrl === this.imageUrl){
+            //     coverpic = ''
+            // }else{
+            //     coverpic = this.imageUrl
+            // }
             let params = {
                 type: this.auditType,
                 param: {
                     rowkey: this.newExam.rowkey,
                     keyword: this.dynamicTags.join(','),
-                    videodescribe: this.videoIntro,
                     gradelv: this.imgLevel,
-                    newtitle: this.newExam.contenttitle,
                     tp1st:this.newExam.urlmaintypeid,
                     tp2nd:this.newExam.tp2ndid,
                     tp3rd:this.newExam.tp3rdid,
-                    coverpic: coverpic,
                     timeliness:this.timeliness,
                     isquality: Number(this.isquality)
                 }
@@ -659,13 +775,13 @@ export default {
             this.noPassVisible = true
         },
         refuse() {
-            this.$refs['refuseForm'].validate((valid) => {
+            this.$refs.dialogr.validate((valid) => {
                 if (valid) {
                     let params = {
                         type: this.auditType,
                         param: {
                             rowkey: this.newExam.rowkey,
-                            reason: (this.refuseReason === '其他') ? this.noPassInputReason : this.noPassReason
+                            reason: this.dialog.reasonSelect
                         }
                     }
                     videoNoPassed(params).then((res) => {})
@@ -770,6 +886,32 @@ export default {
                     this.imageUrl = res.url
                 }
             }
+        },
+        loadKey(){
+            let _that = this;
+            document.onkeydown = function(ev){
+                if(ev.keyCode==49){
+                    _that.imgLevel=1;
+                }else if(ev.keyCode==50){
+                    _that.imgLevel=2;
+                }else if(ev.keyCode==51){
+                    _that.imgLevel=3;
+                }else if(ev.keyCode==52){
+                    _that.imgLevel=4;
+                }else if(ev.keyCode==53){
+                    _that.imgLevel=5;
+                }else if(ev.shiftKey==1&&ev.keyCode==13){
+                    _that.pass();
+                }else if(ev.shiftKey==1&&ev.keyCode==220){
+                    _that.showRefuseDialog();
+                }else if(ev.shiftKey==1&&ev.keyCode==90){
+                    if(_that.popShow){
+                        _that.popShow=false;
+                    }else{
+                        _that.popShow=true;
+                    }
+                }
+            }
         }
     },
     watch: {
@@ -784,6 +926,24 @@ export default {
             //         _this.popShow = true
             //     }
             // })
+        },
+        "noPassVisible": function() {
+            var _this = this
+            if (!this.noPassVisible) {
+                document.onkeydown = null;
+                this.loadKey()
+            } else {
+                // 移除键盘事件
+                document.onkeydown = null;
+                document.onkeydown = function(ev){
+                    if(_this.noPassVisible&&ev.keyCode==13){
+                        _this.refuse();
+                    }
+                }
+                setTimeout(function() {
+                    _this.$refs.selectInput.focus()
+                }, 0)
+            }
         }
     },
     destroyed() {

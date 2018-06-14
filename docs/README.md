@@ -204,8 +204,7 @@ copy(event){
             v-for="(item,index) in auditPeoples"
             :key="index"
             :label="item.realname"
-            :value="item.uname"
-            >
+            :value="item.uname">
         </el-option>
     </el-select>
     <!--下拉选择组件 End-->
@@ -263,8 +262,7 @@ copy(event){
       :current-page="currentPage"
       :total="total"
       background
-      style="float:right;"
-      >
+      style="float:right;">
     </el-pagination>
 </el-row>
 ```

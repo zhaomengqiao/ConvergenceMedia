@@ -235,3 +235,163 @@ export function editLiveClass(data) {
         data: qs.stringify(params)
     })
 }
+
+// 直播黑名单列表
+export function queryBlackList(data) {
+    let params = {
+        json: JSON.stringify(data)
+    }
+    return request({
+        url: '/api/liveroommanager/queryBlackList',
+        method: 'post',
+        data: qs.stringify(params)
+    })
+}
+
+// 撤销直播黑名单
+export function removeBlack(data) {
+    let params = {
+        json: JSON.stringify(data)
+    }
+    return request({
+        url: '/api/liveroommanager/removeBlack',
+        method: 'post',
+        data: qs.stringify(params)
+    })
+}
+
+// 直播举报查询房间id
+export function queryRoomReportList(data) {
+    let params = {
+        json: JSON.stringify(data)
+    }
+    return request({
+        url: '/api/liveroommanager/queryreport',
+        method: 'post',
+        data: qs.stringify(params)
+    })
+}
+
+// 关闭直播房间
+export function finishRoom(data) {
+    let params = {
+        json: JSON.stringify(data)
+    }
+    return request({
+        url: '/api/liveroommanager/finishRoom',
+        method: 'post',
+        data: qs.stringify(params)
+    })
+}
+
+// 直播举报查询主播id
+export function queryUserReportList(data) {
+    let params = {
+        json: JSON.stringify(data)
+    }
+    return request({
+        url: '/api/liveroommanager/queryreportpeople',
+        method: 'post',
+        data: qs.stringify(params)
+    })
+}
+
+// 查询我的直播
+export function queryLiveList(data) {
+    let params = {
+        json: JSON.stringify(data)
+    }
+    return request({
+        url: '/api/liveroommanager/queryAll',
+        method: 'post',
+        data: qs.stringify(params)
+    })
+}
+
+// 截取直播回看
+export function updateLookBack(data) {
+    let params = {
+        json: JSON.stringify(data)
+    }
+    return request({
+        url: '/api/liveroommanager/videoCut',
+        method: 'post',
+        data: qs.stringify(params)
+    })
+}
+
+// 关闭直播房间服务器
+export function finishRoomTwo(data) {
+    let params = {
+        json: JSON.stringify(data)
+    }
+    return request({
+        url: '/api/liveroommanager/finishRoomTwo',
+        method: 'post',
+        data: qs.stringify(params)
+    })
+}
+
+// 更新直播观看人数
+export function updateLiveCount(data) {
+    let params = {
+        json: JSON.stringify(data)
+    }
+    return request({
+        url: '/api/liveroommanager/updateCount',
+        method: 'post',
+        data: qs.stringify(params)
+    })
+}
+
+// 删除直播房间
+export function deleteRoom(data) {
+    let params = {
+        json: JSON.stringify(data)
+    }
+    return request({
+        url: '/api/liveroommanager/deleteroom',
+        method: 'post',
+        data: qs.stringify(params)
+    })
+}
+
+// 查询主播历史
+export function queryLiveListHistory(data) {
+    let params = {
+        json: JSON.stringify(data)
+    }
+    return request({
+        url: '/api/liveroommanager/history',
+        method: 'post',
+        data: qs.stringify(params)
+    })
+}
+
+// 流名管理
+// 直播流名列表
+export function streamNameList(data) {
+    return request({
+        url: '/api/livecode/querylivecode',
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 修改直播流状态
+export function changeStreamStatus(data) {
+    return request({
+        url: '/api/livecode/updatelivecode',
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 新增直播流名
+export function addStreamName(data) {
+    return request({
+        url: '/api/livecode/addlivecode',
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}

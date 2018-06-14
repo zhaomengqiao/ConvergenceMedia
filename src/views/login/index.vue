@@ -13,7 +13,7 @@
             <span class="svg-container svg-container_login">
           <svg-icon icon-class="user" />
         </span>
-            <el-input name="username" type="text" v-model="loginForm.username" autoComplete="on" placeholder="邮箱" />
+            <el-input name="username" type="text" v-model="loginForm.username" autoComplete="on" placeholder="账号" @blur='isNeedVerifycode' />
         </el-form-item>
 
         <el-form-item prop="password">
@@ -23,6 +23,16 @@
             <el-input name="password" :type="pwdType" @keyup.enter.native="handleLogin" v-model="loginForm.password" autoComplete="on" placeholder="密码" />
             <span class="show-pwd" @click="showPwd"><svg-icon icon-class="eye" /></span>
         </el-form-item>
+        <div style="display:flex;align-items:center;margin-bottom:20px;" v-if="isNeedCode">
+            <el-form-item prop="verCode" style="flex:1;margin:0">
+                <el-input style="width:auto" id='sendCode' name="password" type="text" @keyup.enter.native="handleLogin" v-model="loginForm.verCode" autoComplete="on" placeholder="验证码" />
+            </el-form-item>
+            <div style="margin-left:4px;">
+                <el-button type="success" v-if="btnHide" @click.native.prevent="validate_time" disabled style="width: 88px;height:42px;">{{valiCode}}</el-button>
+                <el-button type="success" @click.native.prevent="validate_time" v-else style="width: 88px;height:42px;">{{valiCode}}</el-button>
+            </div>
+        </div>
+
 
         <el-button type="primary" style="width:100%;margin-bottom:30px;" :loading="loading" @click.native.prevent="handleLogin">登录</el-button>
         <!-- <div class="tips">账号:admin 密码随便填</div>
@@ -43,7 +53,9 @@ import {
     isvalidUsername
 } from '@/utils/validate'
 import {
-    verifySSOLogin
+    verifySSOLogin,
+    getVerCode,
+    isNeedVerifycode
 } from '@/api/login'
 import socialSign from './socialsignin'
 import particles from 'particles.js'
@@ -54,15 +66,27 @@ export default {
         socialSign
     },
     name: 'login',
-    mounted(){
-        this.verifySSOLogin()
-        particlesJS.load('particles','./static/data.json')
+    mounted() {
+        // this.verifySSOLogin()
+        particlesJS.load('particles', './static/data.json')
     },
     data() {
+        var validateCode = (rule, value, callback) => {
+            if (!this.isNeedCode) {
+                callback();
+            } else if (value === '') {
+                callback(new Error('请输入验证码'));
+            } else {
+                callback();
+            }
+        };
         return {
+            // 验证码
+            btnHide: false,
+            valiCode: '验证码',
             loginForm: {
-                username: 'chenqi',
-                password: '123456',
+                username: '',
+                password: '',
                 verCode: ''
             },
             loginRules: {
@@ -75,18 +99,78 @@ export default {
                     required: true,
                     message: '请输入密码',
                     trigger: 'blur'
-                }]
+                }],
+                verCode: [
+                  { validator: validateCode, trigger: 'change' }
+                ]
             },
+            isNeedCode: true,
             pwdType: 'password',
             loading: false,
             showDialog: false
         }
     },
     methods: {
-        verifySSOLogin(){
+        // 验证码
+        validate_time() {
+            if (this.loginForm.username == '') {
+                this.$message({
+                    type: 'warning',
+                    message: '请输入账号'
+                });
+                return;
+            }
+            if (this.loginForm.password == '') {
+                this.$message({
+                    type: 'warning',
+                    message: '请输入密码'
+                });
+                return;
+            }
+            var loginParams = 'username=' + this.loginForm.username + '&password=' + md5(this.loginForm.password);
+            getVerCode(loginParams).then(res => {
+                let {
+                    code,
+                    ret,
+                    state,
+                    data
+                } = res;
+                if (code === '00001') {
+                    this.btnHide = true;
+                    this.codeTimer(); //倒计时
+                    this.loginForm.verCode = data;
+                }
+                document.getElementById('sendCode').getElementsByTagName('input')[0].focus();
+            });
+        },
+        codeTimer() { //计时器
+            var _this = this;
+            var num = 60;
+            var timer = setInterval(function() {
+                _this.valiCode = num + "s";
+                num--;
+                if (num < 0) {
+                    clearInterval(timer);
+                    _this.valiCode = "重新发送";
+                    _this.btnHide = false;
+                    num = 60;
+                }
+            }, 1000);
+        },
+        isNeedVerifycode() {
+            if (this.loginForm.username == '') {
+                return;
+            }
+            isNeedVerifycode({
+                userName: this.loginForm.username
+            }).then(res => {
+                this.isNeedCode = res.verifycode;
+            });
+        },
+        verifySSOLogin() {
             verifySSOLogin().then(res => {
-                if(res.state){
-                    this.$store.dispatch('LoginByUsername','username=&password=&verifyCode=').then(() => {
+                if (res.state) {
+                    this.$store.dispatch('LoginByUsername', 'username=&password=&verifyCode=').then(() => {
                         this.$router.push({
                             path: '/'
                         })
@@ -96,11 +180,13 @@ export default {
                 }
             })
         },
-        format(time, format){
+        format(time, format) {
             var t = new Date(time);
-            var tf = function(i){return (i < 10 ? '0' : '') + i};
-            return format.replace(/yyyy|MM|dd|HH|mm|ss|SSS/g, function(a){
-                switch(a){
+            var tf = function(i) {
+                return (i < 10 ? '0' : '') + i
+            };
+            return format.replace(/yyyy|MM|dd|HH|mm|ss|SSS/g, function(a) {
+                switch (a) {
                     case 'yyyy':
                         return tf(t.getFullYear());
                         break;
@@ -144,13 +230,6 @@ export default {
                     }).catch(() => {
                         this.loading = false
                     })
-                } else {
-                    this.$notify({
-                        title: '错误',
-                        message: '请输入用户名/密码',
-                        type: 'error'
-                    });
-                    return false;
                 }
             })
         },
@@ -187,7 +266,7 @@ export default {
 $bg: #2d3a4b;
 $dark_gray: #889aa4;
 $light_gray: #eee;
-.logo-box{
+.logo-box {
     width: 70px;
     height: 67px;
     border-radius: 50%;
@@ -196,11 +275,11 @@ $light_gray: #eee;
     left: 50%;
     transform: translateX(-50%);
     box-shadow: 4px 4px 12px 0 rgba(0,0,0,.3);
-    img{
+    img {
         width: 70px;
     }
 }
-.card-box{
+.card-box {
     width: 400px;
     position: absolute;
     right: 100px;
@@ -209,7 +288,7 @@ $light_gray: #eee;
     transform: translate(-50%,-50%);
     box-shadow: 0 2px 12px 0 rgba(0,0,0,.3);
     padding: 60px 40px;
-    background-color: rgba(24,60,104,0.4)
+    background-color: rgba(24,60,104,0.4);
 }
 .login-container {
     @include relative;

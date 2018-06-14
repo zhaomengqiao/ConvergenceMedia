@@ -614,3 +614,167 @@ export function getTestMp4List(data) {
         data: qs.stringify(data)
     })
 }
+
+// 新闻预览加黑
+// 香港新闻预览加黑(瀑布、现在都用这个)
+export function getXianggangList(data) {
+    return request({
+        url: `/api/newslocaladdblack/querylocalnews`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 新闻预览加黑/取消
+export function changestate(data) {
+    return request({
+        url: `/api/newslocaladdblack/changestate`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+export function getNewbytype(data) {
+    return request({
+        url: `/api/newslocaladdblack/newbytype`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+export function platformSearch(data) {
+    return request({
+        url: `/api/newslocaladdblack/query/${data.area}`,
+        method: 'get'
+    })
+}
+
+// 文件上传
+// txt上传批量修改
+export function uploadTaskAdd(data) {
+    return request({
+        url: `/task/add`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+//文本上传地址
+export const UploadTaskUrl = `/rongmeitiapi/task/upload`;
+export const uploadFilmEditing = `/rongmeitiapi/task/upload`
+
+// 关键词管理
+// 获取关键词管理
+export function getKeyWordList(data) {
+    if(data.url=='api/invalidkeys/query'||data.url=='api/blockadskeys/query'||data.url=='api/commonkeywords/query'){
+        let data = { json: JSON.stringify(data),url:data.url }
+    }else{
+        let data = data
+    }
+    return request({
+        url: `/${data.url}`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 添加关键字管理
+export function addAuditKey(data) {
+    if(data.url=='api/commonkeywords/add'){
+        let data = { json: JSON.stringify(data),url:data.url }
+    }else{
+        let data = data
+    }
+    return request({
+        url: `/${data.url}`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 修改关键词管理
+export function updateAuditKey(data) {
+    let url = data.url
+    if(data.url == 'api/commonkeywords/update'){
+        data = {json: JSON.stringify(data)}
+    }
+    if(data.url == 'api/commonkeywords/del'){
+        data = {json: JSON.stringify(data)}
+    }
+    return request({
+        url: `/${url}`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+export const UploadXlsxUrl = `/rongmeitiapi/api/batchaddkey/importexl`
+export const exportExlData = `/rongmeitiapi/api/batchaddkey/exportexl`
+export const getTemplateshow = `/rongmeitiapi/api/batchaddkey/templateshow`
+
+// 扬子敏感词查询
+// 敏感词查询
+export function yzLexiconList(data) {
+    let param = {json: JSON.stringify(data)}
+    return request({
+        url: `/api/yzwbsensitivewords/query`,
+        method: 'post',
+        data: qs.stringify(param)
+    })
+}
+
+// 扬子敏感词添加
+export function yzLexiconAdd(data) {
+    let param = {json: JSON.stringify(data)}
+    return request({
+        url: `/api/yzwbsensitivewords/add`,
+        method: 'post',
+        data: qs.stringify(param)
+    })
+}
+
+// 扬子敏感词编辑
+export function yzLexiconEdit(data) {
+    let param = {json: JSON.stringify(data)}
+    return request({
+        url: `/api/yzwbsensitivewords/edit`,
+        method: 'post',
+        data: qs.stringify(param)
+    })
+}
+
+// 地方站关键词
+export function localLexiconList(data) {
+    let param = {json: JSON.stringify(data)}
+    return request({
+        url: `/api/localstationkeywords/query`,
+        method: 'post',
+        data: qs.stringify(param)
+    })
+}
+
+export function localLexiconAdd(data) {
+    let param = {json: JSON.stringify(data)}
+    return request({
+        url: `/api/localstationkeywords/add`,
+        method: 'post',
+        data: qs.stringify(param)
+    })
+}
+
+export function localLexiconEdit(data) {
+    let param = {json: JSON.stringify(data)}
+    return request({
+        url: `/api/localstationkeywords/update`,
+        method: 'post',
+        data: qs.stringify(param)
+    })
+}
+
+export function localLexiconDel(data) {
+    return request({
+        url: `/api/localstationkeywords/del`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}

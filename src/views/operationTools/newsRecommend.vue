@@ -279,7 +279,8 @@ import {
 } from '@/utils/contentTransform'
 import {
     parseTime,
-    contentRecommend
+    contentRecommend,
+    NumberToChineseCharacter
 } from '@/utils'
 import { removeblack, getfileUpload } from '@/api/operationTools'
 import {
