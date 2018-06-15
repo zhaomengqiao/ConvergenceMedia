@@ -1,9 +1,9 @@
 <template lang="html">
-    <section class="imgSelfExam">
+    <section class="imgSelfExam videoSelfaudit">
         <el-card :body-style="{padding:'10px 20px'}" v-if="newExam!==null">
             <el-row :gutter="4">
                 <el-col :span="4">
-                    <el-button type="primary" size="small" icon="circle-check" @click="pass">通过</el-button>
+                    <el-button type="primary" size="small" icon="circle-check" @click="showPassDialog">通过</el-button>
                     <el-button type="danger" size="small" icon="circle-cross" @click="showRefuseDialog">拒绝</el-button>
                 </el-col>
                 <el-col :span="20" class="flex_center">
@@ -180,7 +180,8 @@
                             <el-col :span="6" style="padding-bottom:20px;min-width:170px;">
                                 <div class="label-title">更新封面</div>
                                 <div class="imgUpload_Box" v-if="newExam!==null">
-                                    <el-upload
+                                    <img v-if="imageUrl" :src="imageUrl" class="small-single__img" id="coverpic">
+                                    <!-- <el-upload
                                         class="small-single__uploader"
                                         style="margin:10px 0"
                                         :action="imgUploadUrl"
@@ -188,12 +189,12 @@
                                         :before-upload="beforeUpload"
                                         :on-success="handleSuccess"
                                         :disabled="true">
-                                        <img v-if="imageUrl" :src="imageUrl" class="small-single__img" id="coverpic">
+
                                         <i v-else class="el-icon-plus avatar-uploader-icon"></i>
-                                    </el-upload>
+                                    </el-upload> -->
                                     <div class="imgUpload_Box_tools" v-if="imageUrl!=''">
                                         <i class="el-icon-zoom-in" @click="toBig"></i>
-                                        <i class="el-icon-delete ml-10" @click="removeImg"></i>
+                                        <!-- <i class="el-icon-delete ml-10" @click="removeImg"></i> -->
                                     </div>
                                 </div>
                             </el-col>
@@ -288,6 +289,18 @@
         <el-dialog :visible.sync="dialogVisible">
             <img width="100%" :src="imageUrl">
         </el-dialog>
+        <!--确认通过-->
+        <el-dialog
+            top="40vh"
+            :visible.sync="passDialog"
+            width="25%"
+            :show-close = 'false'>
+            <span style="display:flex;align-items:center"><i class="el-icon-warning" style="margin-right:10px;color:#E6A23C;font-size:30px"></i>是否确认审核通过</span>
+            <span slot="footer" class="dialog-footer">
+            <el-button @click="passDialog = false">取 消</el-button>
+            <el-button type="primary" @click="pass">确 定</el-button>
+            </span>
+        </el-dialog>
     </section>
 </template>
 
@@ -325,6 +338,7 @@ export default {
     },
     data() {
         return {
+            passDialog: false,
             dialog:{
   				reason:'',
   				reasonSelect:'',
@@ -506,6 +520,10 @@ export default {
 						{
 							label: '610 内容部分涉嫌侵权',
 							value: '610 内容部分涉嫌侵权'
+						},
+						{
+							label: '612 文章内容与投稿征文活动主题无关',
+							value: '612 文章内容与投稿征文活动主题无关'
 						},
 						{
 							label: '621 视频内容不适合收录（无主题、无实质内容）',
@@ -721,7 +739,7 @@ export default {
             // 关键词
             this.dynamicTags = this.newExam.tags ? this.newExam.tags.split(',') : []
         },
-        pass() {
+        showPassDialog(){
             if (this.imgLevel === '') {
                 this.$message({
                     type: 'warning',
@@ -738,6 +756,10 @@ export default {
                     return
                 }
             }
+            this.passDialog = true
+        },
+        pass() {
+
             // 封面和原始一样就传空
             // if(this.oldImageUrl === this.imageUrl){
             //     coverpic = ''
@@ -757,19 +779,13 @@ export default {
                     isquality: Number(this.isquality)
                 }
             }
-            this.$confirm('确认审核通过吗?', '提示', {
-                type: 'warning'
-            }).then(() => {
-                videoPassed(params).then((res) => {})
-                this.dataList.shift()
-                localStorage.setItem('selfmedia_video', JSON.stringify(this.dataList))
-                this.mountedGetData()
-            }).catch(() => {
-                this.$message({
-                    type: 'info',
-                    message: '取消'
-                })
-            })
+
+            videoPassed(params).then((res) => {})
+            this.dataList.shift()
+            localStorage.setItem('selfmedia_video', JSON.stringify(this.dataList))
+            this.mountedGetData()
+            this.isquality = false
+            this.passDialog = false
         },
         showRefuseDialog() {
             this.noPassVisible = true
@@ -788,6 +804,7 @@ export default {
                     this.dataList.shift()
                     localStorage.setItem('selfmedia_video', JSON.stringify(this.dataList))
                     this.mountedGetData()
+                    this.isquality = false
                     this.noPassVisible = false
                 }
             })
@@ -901,7 +918,7 @@ export default {
                 }else if(ev.keyCode==53){
                     _that.imgLevel=5;
                 }else if(ev.shiftKey==1&&ev.keyCode==13){
-                    _that.pass();
+                    _that.showPassDialog();
                 }else if(ev.shiftKey==1&&ev.keyCode==220){
                     _that.showRefuseDialog();
                 }else if(ev.shiftKey==1&&ev.keyCode==90){
@@ -943,6 +960,19 @@ export default {
                 setTimeout(function() {
                     _this.$refs.selectInput.focus()
                 }, 0)
+            }
+        },
+        'passDialog': function(){
+            if(this.passDialog){
+                var _that = this
+                document.onkeydown = null
+                document.onkeydown = function(ev) {
+                    if (ev.keyCode == 13) {
+                        _that.pass();
+                    }
+                }
+            }else{
+                this.loadKey()
             }
         }
     },

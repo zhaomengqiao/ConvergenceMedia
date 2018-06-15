@@ -1,15 +1,17 @@
 <template lang="html">
-    <section class="imgSelfExam">
+    <section class="imgSelfExam videoSelfaudit">
         <el-card :body-style="{padding:'10px 20px'}" v-if="newExam!==null">
             <el-row :gutter="4">
                 <el-col :span="4">
-                    <el-button type="primary" size="small" icon="circle-check" @click="pass">通过</el-button>
+                    <el-button type="primary" size="small" icon="circle-check" @click="showPassDialog">通过</el-button>
                     <el-button type="danger" size="small" icon="circle-cross" @click="showRefuseDialog">拒绝</el-button>
                 </el-col>
                 <el-col :span="20" class="flex_center">
                     <el-tag type="danger" v-if="newExam.ispartner=='1'">合作媒体</el-tag>
                     <!-- <span class="audit-title" v-html="newExam.contenttitle"></span> -->
-                    <el-input v-model="newExam.contenttitle" size="large" style="width:300px;margin:0 10px"></el-input>
+                    <el-tooltip class="item" effect="dark" :content="newExam.contenttitle" placement="bottom">
+                        <el-input v-model="newExam.contenttitle" size="large" style="width:700px;margin:0 10px;font-size:18px;"></el-input>
+                    </el-tooltip>
                     <el-button type="primary" size="mini" @click="copyContent(newExam.contenttitle,$event)">复制</el-button>
                 </el-col>
             </el-row>
@@ -40,7 +42,7 @@
                             <span class="title">当前待审：</span>
                             <span class="audit-num" style="color:#ff4949;font-weight:700" v-html="unCheckedNum"></span>
                         </div>
-                        <div class="left-select hasBorderBottom" v-if="newExam!==null">
+                        <div class="left-select hasBorderBottom" v-if="newExam!==null" style="font-weight:700">
                             <el-select v-model="newExam.urlmaintypeid" placeholder="请选择一级分类" @change="getType(newExam.urlmaintypeid,2)">
                                 <el-option
                                   v-for="item in firpy"
@@ -275,6 +277,18 @@
         <el-dialog :visible.sync="dialogVisible">
             <img width="100%" :src="imageUrl">
         </el-dialog>
+        <!--确认通过-->
+        <el-dialog
+            top="40vh"
+            :visible.sync="passDialog"
+            width="25%"
+            :show-close = 'false'>
+            <span style="display:flex;align-items:center"><i class="el-icon-warning" style="margin-right:10px;color:#E6A23C;font-size:30px"></i>是否确认审核通过</span>
+            <span slot="footer" class="dialog-footer">
+            <el-button @click="passDialog = false">取 消</el-button>
+            <el-button type="primary" @click="pass">确 定</el-button>
+            </span>
+        </el-dialog>
     </section>
 </template>
 
@@ -324,6 +338,7 @@ export default {
             }
         }
         return {
+            passDialog: false,
             auditBegin: true,
             selectAuditType: '',
             selectPlatforms: [],
@@ -424,6 +439,7 @@ export default {
         // 获取一级分类
         this.getType('-1', 1)
         this.mountedGetData()
+        this.loadKey()
     },
     methods: {
         checkedNum(subType) {
@@ -592,7 +608,7 @@ export default {
             // 关键词
             this.dynamicTags = this.newExam.tags ? this.newExam.tags.split(',') : []
         },
-        pass() {
+        showPassDialog(){
             if (this.imgLevel === '') {
                 this.$message({
                     type: 'warning',
@@ -607,7 +623,11 @@ export default {
                 })
                 return
             }
+            this.passDialog = true
+        },
+        pass() {
             // 封面和原始一样就传空
+            let coverpic
             if(this.oldImageUrl === this.imageUrl){
                 coverpic = ''
             }else{
@@ -629,19 +649,12 @@ export default {
                     isquality: Number(this.isquality)
                 }
             }
-            this.$confirm('确认审核通过吗?', '提示', {
-                type: 'warning'
-            }).then(() => {
-                videoPassed(params).then((res) => {})
-                this.dataList.shift()
-                localStorage.setItem('wemedia_video', JSON.stringify(this.dataList))
-                this.mountedGetData()
-            }).catch(() => {
-                this.$message({
-                    type: 'info',
-                    message: '取消'
-                })
-            })
+            videoPassed(params).then((res) => {})
+            this.dataList.shift()
+            localStorage.setItem('wemedia_video', JSON.stringify(this.dataList))
+            this.isquality = false
+            this.mountedGetData()
+            this.passDialog = false
         },
         showRefuseDialog() {
             this.noPassVisible = true
@@ -659,6 +672,7 @@ export default {
                     videoNoPassed(params).then((res) => {})
                     this.dataList.shift()
                     localStorage.setItem('wemedia_video', JSON.stringify(this.dataList))
+                    this.isquality = false
                     this.mountedGetData()
                     this.noPassVisible = false
                 }
@@ -758,13 +772,74 @@ export default {
                     this.imageUrl = res.url
                 }
             }
-        }
+        },
+        // 快捷键
+        loadKey() {
+            let _that = this;
+            document.onkeydown = function(ev) {
+                if (ev.keyCode == 49) {
+                    _that.imgLevel = 1;
+                } else if (ev.keyCode == 50) {
+                    _that.imgLevel = 2;
+                } else if (ev.keyCode == 51) {
+                    _that.imgLevel = 3;
+                } else if (ev.keyCode == 52) {
+                    _that.imgLevel = 4;
+                } else if (ev.keyCode == 53) {
+                    _that.imgLevel = 5;
+                } else if (ev.shiftKey == 1 && ev.keyCode == 13) {
+                    _that.showPassDialog()
+                } else if (ev.shiftKey == 1 && ev.keyCode == 220) {
+                    _that.noPassVisible = true
+                }
+            };
+        },
     },
     watch: {
         'newExam': function(){
             if(this.newExam !== null){
                 this.getType(this.newExam.urlmaintypeid,2)
                 this.getType(this.newExam.tp2ndid,3)
+            }
+        },
+        "noPassVisible": function() {
+            if(this.noPassVisible){
+                document.onkeydown = null
+                var _that = this
+                document.onkeydown = function(ev) {
+                    if (ev.keyCode == 49) {
+                        _that.noPassReason = '广告或违规推广'
+                    } else if (ev.keyCode == 50) {
+                        _that.noPassReason = '违法违规信息'
+                    } else if (ev.keyCode == 51) {
+                        _that.noPassReason = '画面画质效果差'
+                    } else if (ev.keyCode == 52) {
+                        _that.noPassReason = '内容缺失或无意义'
+                    } else if (ev.keyCode == 53) {
+                        _that.noPassReason = '纯外文无翻译'
+                    } else if (ev.keyCode == 54) {
+                        _that.noPassReason = '无声音或黑屏'
+                    } else if (ev.keyCode == 55) {
+                        _that.noPassReason = '其他'
+                    } else if (ev.keyCode == 13) {
+                        _that.refuse();
+                    }
+                }
+            }else {
+                this.loadKey()
+            }
+        },
+        'passDialog': function(){
+            if(this.passDialog){
+                var _that = this
+                document.onkeydown = null
+                document.onkeydown = function(ev) {
+                    if (ev.keyCode == 13) {
+                        _that.pass();
+                    }
+                }
+            }else{
+                this.loadKey()
             }
         }
     },

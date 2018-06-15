@@ -438,7 +438,11 @@ export default {
                         {
                             label: '611 实际发布内容与所选发文领域不一致',
                             value: '611 实际发布内容与所选发文领域不一致'
-                        }
+                        },
+						{
+							label: '612 文章内容与投稿征文活动主题无关',
+							value: '612 文章内容与投稿征文活动主题无关'
+						}
                     ]
                 }
             ]
@@ -447,6 +451,7 @@ export default {
     mounted() {
         this.getType()
         this.mountedGetData()
+        this.loadKey()
     },
     methods: {
         checkedNum(subType) {
@@ -648,6 +653,37 @@ export default {
         // 复制URL按钮
         copyContent(text, event) {
             clip(text, event)
+        },
+        loadKey(){
+            let _that = this;
+            document.onkeydown = function(ev){
+                if(ev.keyCode==49){
+                    _that.imgLevel=1;
+                }else if(ev.keyCode==50){
+                    _that.imgLevel=2;
+                }else if(ev.keyCode==51){
+                    _that.imgLevel=3;
+                }else if(ev.keyCode==52){
+                    _that.imgLevel=4;
+                }else if(ev.keyCode==53){
+                    _that.imgLevel=5;
+                }else if(ev.shiftKey==1&&ev.keyCode==13){
+                    _that.pass();
+                }else if(ev.shiftKey==1&&ev.keyCode==220){
+                    _that.noPassVisible = true
+                }else if(ev.shiftKey==1&&(ev.keyCode==38||ev.keyCode==37||ev.keyCode==219)){
+                    _that.changePage(0);
+                }else if(ev.shiftKey==1&&(ev.keyCode==40||ev.keyCode==39||ev.keyCode==221)){
+                    _that.changePage(1);
+                }else if(ev.shiftKey==1&&ev.keyCode==90){
+                    if(_that.popShow){
+                        _that.popShow=false;
+                    }else{
+                        _that.popShow=true;
+                    }
+
+                }
+            }
         }
     },
     watch: {
@@ -663,19 +699,19 @@ export default {
         "noPassVisible": function() {
             var _this = this
             if (!this.noPassVisible) {
-                // document.onkeydown = null;
-                // this.loadKey()
+                document.onkeydown = null;
+                this.loadKey()
                 setTimeout(function() {
                     _this.$refs.selectInput.blur()
                 }, 0)
             } else {
                 // 移除键盘事件
-                // document.onkeydown = null;
-                // document.onkeydown = function(ev){
-                //     if(_this.noPassVisible&&ev.keyCode==13){
-                //         _this.imgNoPassed();
-                //     }
-                // }
+                document.onkeydown = null;
+                document.onkeydown = function(ev){
+                    if(_this.noPassVisible&&ev.keyCode==13){
+                        _this.refuse();
+                    }
+                }
                 setTimeout(function() {
                     _this.$refs.selectInput.focus()
                 }, 0)

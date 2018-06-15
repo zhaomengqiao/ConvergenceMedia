@@ -29,6 +29,14 @@
                     <span v-if="JSON.parse(scope.row.videojs)[0].src==''">暂无视频展示</span>
                 </template>
             </el-table-column>
+            <el-table-column label="点赞" width="100" :show-overflow-tooltip="true" prop="crawlerzan">
+            </el-table-column>
+            <el-table-column label="阅读" width="100" :show-overflow-tooltip="true" prop="crawlerplay">
+            </el-table-column>
+            <el-table-column label="评论" width="100" :show-overflow-tooltip="true" prop="crawlercom">
+            </el-table-column>
+            <el-table-column label="收藏" width="100" :show-overflow-tooltip="true" prop="crawlerfav">
+            </el-table-column>
         </el-table>
         <el-dialog title="视频展示" :visible.sync="replyFormVisible" :close-on-click-modal="false">
             <video-player :options="playerOptions" ref="videoPlayer"></video-player>

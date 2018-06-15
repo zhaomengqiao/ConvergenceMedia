@@ -132,7 +132,7 @@
                      v-if='newExamListNum>0'
                      id="box_img"
                      :style="{fontSize: personalConfig.auditFontSize+'px',lineHeight: personalConfig.auditLineHeight+'px'}"
-                     style="column-count: 4;column-gap:20px;left: 0px;font-size:16px;" v-html="newExam.content">
+                     style="column-count: 4;column-gap:40px;left: 0px;font-size:16px;" v-html="newExam.content">
                 </div>
                 <div class="audit_nullData" v-if='newExamListNum==0'>
                     暂无审核数据
@@ -427,7 +427,11 @@ export default {
                         {
                             label: '611 实际发布内容与所选发文领域不一致',
                             value: '611 实际发布内容与所选发文领域不一致'
-                        }
+                        },
+						{
+							label: '612 文章内容与投稿征文活动主题无关',
+							value: '612 文章内容与投稿征文活动主题无关'
+						}
                     ]
                 }
             ]
@@ -574,6 +578,12 @@ export default {
                     _that.nextPage(0);
                 } else if (ev.shiftKey == 1 && (ev.keyCode == 40 || ev.keyCode == 39 || ev.keyCode == 221)) {
                     _that.nextPage(1);
+                }else if(ev.shiftKey==1&&ev.keyCode==90){
+                    if(_that.popShow){
+                        _that.popShow=false;
+                    }else{
+                        _that.popShow=true;
+                    }
                 }
             };
 
@@ -613,10 +623,10 @@ export default {
                 if (this.page_total - this.page_num < 1) {
                     return
                 }
-                box_div.scrollLeft = (~~this.page_num * ~~this.cont_width) + (this.page_num * 20);
+                box_div.scrollLeft = (~~this.page_num * ~~this.cont_width) + (this.page_num * 40);
                 this.page_num++;
             } else if (index == 0 && this.page_num > 1) {
-                box_div.scrollLeft = ((~~this.page_num - 2) * ~~this.cont_width) + ((~~this.page_num - 2) * 20);
+                box_div.scrollLeft = ((~~this.page_num - 2) * ~~this.cont_width) + ((~~this.page_num - 2) * 40);
                 this.page_num--;
             }
         },
@@ -640,7 +650,7 @@ export default {
                     let client_left = b_width.getBoundingClientRect().left;
                     let hackLeft = (hack.getBoundingClientRect().left - client_left - 10) + document.getElementById('box_div').scrollLeft;
                     let colWid = (this.cont_width - 60) / 4;
-                    let colNum = Math.ceil((hackLeft + 20) / (colWid + 20));
+                    let colNum = Math.ceil((hackLeft + 20) / (colWid + 40));
                     if (colNum < 4) colNum = 4;
                     this.page_total = Math.ceil(colNum / 4);
                     let xNum = (this.page_total * 4) - colNum;
