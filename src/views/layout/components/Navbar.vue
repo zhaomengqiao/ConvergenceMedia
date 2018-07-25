@@ -5,17 +5,26 @@
     <breadcrumb class="breadcrumb-container"></breadcrumb>
 
     <div class="right-menu">
+        <!-- <el-badge :is-dot="hasNewNotify" style="display:inline;color:#666;cursor:pointer;margin-right:10px">
+            <router-link :to="{path: '/notify'}" tag="span">
+                <svg-icon icon-class="message" />
+            </router-link>
+        </el-badge> -->
         <el-select v-model="nowRoute" placeholder="请选择跳转地址" size="mini" filterable @change="selectRoute">
             <el-option v-for="(item,index) in router_nav" :key="index" :label="generateTitle(item.name)" :value="item.path">
             </el-option>
         </el-select>
+        <el-tooltip effect="dark" content="换肤" placement="bottom">
+            <theme-picker class="theme-switch right-menu-item"></theme-picker>
+        </el-tooltip>
+        <el-tooltip effect="dark" content="全屏" placement="bottom">
+            <screenfull class="screenfull right-menu-item"></screenfull>
+        </el-tooltip>
         <!-- <error-log v-if="log.length>0" class="errLog-container right-menu-item" :logsList="log"></error-log>
         <el-badge is-dot style="display:inline;color:#666;cursor:pointer">
             <svg-icon icon-class="message" />
         </el-badge> -->
-        <!-- <el-tooltip effect="dark" content="全屏" placement="bottom">
-            <screenfull class="screenfull right-menu-item"></screenfull>
-        </el-tooltip> -->
+
 
         <!-- <el-dropdown trigger="click" class='international' @command="handleSetLanguage">
             <div>
@@ -26,11 +35,6 @@
                 <el-dropdown-item command="en" :disabled="language==='en'">English</el-dropdown-item>
             </el-dropdown-menu>
         </el-dropdown> -->
-
-        <!-- <el-tooltip effect="dark" content="换肤" placement="bottom">
-        <theme-picker class="theme-switch right-menu-item"></theme-picker>
-      </el-tooltip> -->
-
         <el-dropdown class="avatar-container right-menu-item" trigger="click">
             <div class="avatar-wrapper">
                 <span>{{ name }}</span>
@@ -56,7 +60,7 @@ import {
 } from 'vuex'
 import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
-// import ThemePicker from '@/components/ThemePicker'
+import ThemePicker from '@/components/ThemePicker'
 import Screenfull from '@/components/Screenfull'
 import ErrorLog from '@/components/ErrLog'
 import errLogStore from 'store/errLog'
@@ -68,16 +72,21 @@ import {
     getSystemNotificationByTime
 } from '@/api/commonApi'
 
+import {
+    getUnreadNotify
+} from '@/api/systemTools'
+
 export default {
     components: {
         Breadcrumb,
         Hamburger,
-        // ThemePicker,
+        ThemePicker,
         ErrorLog,
-        //Screenfull
+        Screenfull
     },
     data() {
         return {
+            hasNotify: false,
             router_nav: [],
             log: errLogStore.state.errLog,
             nowRoute: ''
@@ -88,12 +97,18 @@ export default {
             'sidebar',
             'name',
             'avatar',
-            'language'
+            'language',
+            'hasNewNotify'
         ])
     },
     mounted() {
         this.getSystemNotificationByTime();
         this.getRouter_nav()
+        // this.getUnreadNotify()
+        // var _this = this
+        // setInterval(() => {
+        //     _this.getUnreadNotify()
+        // }, 1000 * 15 * 60)
     },
     methods: {
         generateTitle,
@@ -126,7 +141,7 @@ export default {
                             } else {
                                 _this.router_nav.push({
                                     name: router2nd_name,
-                                    path: router2nd_path
+                                    path: router1st_path + '/' + router2nd_path
                                 })
                             }
                         })
@@ -159,6 +174,27 @@ export default {
         logout() {
             this.$store.dispatch('LogOut').then(() => {
                 location.reload() // 为了重新实例化vue-router对象 避免bug
+            })
+        },
+        // 获取未读通知
+        getUnreadNotify() {
+            let params = {
+                username: this.$store.getters.name,
+                projectid: 1
+            }
+            getUnreadNotify(params).then(res => {
+                if(res.code === '00000'){
+                    let unRead = res.data.filter(item => {
+                        return item.isread === 0
+                    })
+                    if(unRead.length != 0){
+                        this.hasNotify = true
+                        this.$store.dispatch('getHasNotify', this.hasNotify)
+                    }else{
+                        this.hasNotify = false
+                        this.$store.dispatch('getHasNotify', this.hasNotify)
+                    }
+                }
             })
         }
     }
@@ -204,9 +240,9 @@ export default {
                 vertical-align: -5px;
             }
         }
-        .theme-switch {
-            vertical-align: 15px;
-        }
+        // .theme-switch {
+        //     vertical-align: 15px;
+        // }
         .avatar-container {
             height: 50px;
             margin-right: 30px;

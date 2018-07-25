@@ -4,19 +4,27 @@
             <el-button type="primary"
                        @click="newsContentPreview('form')"
                        :loading="loading.contentPreview"
+                       v-if="!isDFH"
                        :disabled="btnDisabled.contentPreview">正文预览</el-button>
             <el-button type="primary"
                         @click="newsImgPreview"
                         :disabled="btnDisabled.imgsPreview"
+                        v-if="!isDFH"
                         :loading="loading.imgsPreview">缩略图预览</el-button>
             <el-button type="primary"
                        :loading="loading.save"
                        @click="newsAdd('form')"
+                       v-if="!isDFH"
                        :disabled="btnDisabled.save">保存</el-button>
+            <el-button type="primary"
+                       :loading="loading.dfhsave"
+                       v-if="isDFH"
+                       @click="newsDfhAdd('form')">保存</el-button>
             <el-button type="primary" @click="addNewsDraft('form')" :loading="loading.saveDraft">存草稿</el-button>
+            <el-button type="primary" @click="contentTransferred" :loading="loading.transferred">原文转义</el-button>
             <el-button @click="resetForm('form')">清空</el-button>
             <el-input placeholder="请输入要采集的文章URL" v-model="collectUrl" class="input-with-select" style="width:65%">
-                <el-button slot="append" type="primary">采集</el-button>
+                <el-button slot="append" type="primary" @click="newsCollect">采集</el-button>
             </el-input>
         </el-row>
         <el-row :gutter="10">
@@ -55,7 +63,7 @@
                 </el-col>
                 <el-col :span="6">
                     <el-card>
-                        <el-form-item label="平台" prop="platform" style="margin-bottom:10px" :show-message="false">
+                        <el-form-item label="平台" prop="platform" style="margin-bottom:10px" :show-message="false" v-if="!isDFH">
                             <el-select v-model="formData.platform"
                                        filterable
                                        placeholder="选择平台"
@@ -86,6 +94,14 @@
                                     <el-select v-model="formData.labelname" multiple placeholder="请选择" style="width:49%">
                                         <el-option label="新能源" value="新能源" v-if="formData.localsite!=''"></el-option>
                                     </el-select>
+                                </div>
+                            </div>
+                        </el-row>
+                        <el-row class="mt-10" v-if="pageStatus === 'add'">
+                            <div class="inline-div">
+                                <div class="inline-label">东方号：</div>
+                                <div class="inline-content">
+                                    <el-checkbox v-model="isDFH" @change="changeIsDFH">是</el-checkbox>
                                 </div>
                             </div>
                         </el-row>
@@ -175,9 +191,19 @@
                             </div>
                         </el-row>
                         <el-row class="mt-10">
-                            <el-form-item label="来源" prop="source">
+                            <el-form-item :label="isDFH?'东方号':'来源'" prop="source">
                                 <!-- <el-input v-model="formData.source" placeholder="请输入新闻来源" style="width:200px"></el-input> -->
+                                <el-select v-model="formData.source" filterable placeholder="请选择东方号" v-if="isDFH" value-key="dfhid">
+                                    <el-option
+                                        v-for="item in personalConfig.dfh"
+                                        :key="item.dfhid"
+                                        no-data-text="请到个人中心设置您的东方号"
+                                        :label="item.dfhname"
+                                        :value="item">
+                                    </el-option>
+                                </el-select>
                                 <el-autocomplete
+                                    v-else
                                     style="width:200px"
                                     v-model="formData.source"
                                     :fetch-suggestions="querySearch"
@@ -197,7 +223,7 @@
                             </el-form-item>
                         </el-row>
                     </el-card>
-                    <el-tabs type="border-card" class="mt-10">
+                    <el-tabs type="border-card" class="mt-10" v-if="!isDFH">
                         <el-tab-pane label="封面图">
                             <!--上传图片后显示的内容-->
                             <draggable :list="fileList" class="img_Box" v-if="fileList.length!==0">
@@ -211,16 +237,14 @@
                             </draggable>
                             <!--上传图片组件-->
                             <el-upload
+                                v-if="fileList.length < (isDFH ? 3 : 4)"
                                 class="edit-drag__upload"
                                 :class="fileList.length!==0?'has_imgs':''"
                                 multiple
                                 drag
-                                :limit="3"
-                                :on-exceed="handleExceed"
                                 :show-file-list="false"
                                 :action="fileUpload"
                                 :on-success="handleSuccess"
-                                :on-progress="handleProgress"
                                 :before-upload="beforeUpload">
                                 <i class="el-icon-plus" v-if="fileList.length!==0"></i>
                                 <i class="el-icon-upload" v-if="fileList.length===0"></i>
@@ -228,17 +252,46 @@
                                 <div class="el-upload__tip" slot="tip" v-if="fileList.length===0">只能上传jpg/png文件，且不超过500kb</div>
                             </el-upload>
                         </el-tab-pane>
-                        <el-tab-pane label="正文图">
+                        <el-tab-pane>
+                            <span slot="label">GIF图 <span class="tabDot" v-if="gifFileList.length!=0">1</span></span>
+                            <!--上传图片后显示的内容-->
+                            <draggable :list="gifFileList" class="img_Box" v-if="gifFileList.length!==0">
+                                <div class="img_Box_item" v-for="(item,index) in gifFileList">
+                                    <img :src="item">
+                                    <div class="img_Box_tools">
+                                        <i class="el-icon-zoom-in" @click.stop="toBig(item)"></i>
+                                        <i class="el-icon-delete ml-10" @click.stop="removeGif(item,index)"></i>
+                                    </div>
+                                </div>
+                            </draggable>
+                            <!--上传图片组件-->
+                            <el-upload
+                                v-if="gifFileList.length<1"
+                                class="edit-drag__upload"
+                                :class="gifFileList.length!==0?'has_imgs':''"
+                                multiple
+                                drag
+                                :show-file-list="false"
+                                :action="fileUpload"
+                                :on-success="handleGifSuccess"
+                                :before-upload="beforeGifUpload">
+                                <i class="el-icon-plus" v-if="gifFileList.length!==0"></i>
+                                <i class="el-icon-upload" v-if="gifFileList.length===0"></i>
+                                <div class="el-upload__text" v-if="gifFileList.length===0">将文件拖到此处，或<em>点击上传</em></div>
+                                <div class="el-upload__tip" slot="tip" v-if="gifFileList.length===0">只能上传gif文件</div>
+                            </el-upload>
+                        </el-tab-pane>
+                        <!-- <el-tab-pane label="正文图">
                             <div class="img_Box_item" v-for="(item,index) in contentImgs">
                                 <img :src="item">
                                 <div class="img_Box_tools">
                                     <i class="el-icon-zoom-in" @click.stop="toBig(item)"></i>
-                                    <i class="el-icon-delete ml-10" @click.stop="removeImg(item,index)"></i>
+                                    <i class="el-icon-delete ml-10" @click.stop="removeGif(item,index)"></i>
                                 </div>
                             </div>
                         </el-tab-pane>
-                        <el-tab-pane label="网络图">网络图</el-tab-pane>
-                        <el-tab-pane label="上传视频" v-if="formData.platform=='xianggang'||formData.platform=='yangzi'||formData.platform=='hebei'">
+                        <el-tab-pane label="网络图">网络图</el-tab-pane> -->
+                        <el-tab-pane label="上传视频" v-if="formData.platform=='xianggang'||formData.platform=='yangzi'||formData.platform=='hebei'||formData.platform=='hainan'">
                             <el-upload
 								class="avatar-videoUploader"
 								:action="videoUploadUrl"
@@ -286,7 +339,7 @@
         <!--正文预览-->
         <el-dialog title="页面预览" :visible.sync="replyFormVisible" top="5%" :close-on-click-modal="false">
 			<div >
-		  	    <iframe :src="contentPreview" style="border: 0;" width="100%" height="500px"></iframe>
+		  	    <iframe :src="contentPreview" style="border: 0;" width="100%" height="500px" v-if="replyFormVisible"></iframe>
 			</div>
 		</el-dialog>
         <!--缩略图预览-->
@@ -327,8 +380,8 @@
                   @fold="sideFold"
                   title="草稿列表/添加视频"
                   icon="draft">
-            <el-tabs type="border-card" class="mt-10">
-                <el-tab-pane label="草稿列表">
+            <el-tabs type="border-card" class="mt-10" value="1">
+                <el-tab-pane label="草稿列表" name="1">
                     <el-table :show-header='false'
                               :data='drafList'
                               highlight-current-row
@@ -353,7 +406,33 @@
                         </el-table-column>
                     </el-table>
                 </el-tab-pane>
-                <el-tab-pane label="添加视频" v-if="formData.platform === 'toutiao'||formData.platform === 'dfsport'">
+                <el-tab-pane label="图片搜索" name="2">
+                    <el-input size="small"  v-model="formImgs.keywords" style="width: 70%;" placeholder="请输入关键词,多个关键词用逗号隔开"></el-input>
+                    <el-button type="primary" @click="getHasCopyrightImg('search')">查询</el-button>
+                    <div class="imgSearch_wrap" v-loading="copyRightLoading">
+                        <div v-if="copyrightImgsList.length!==0">
+                            <el-row :gutter="10" v-loadDiv="getHasCopyrightImg">
+                                <div class="clearfix loadDiv" :style="{height: drafHeight + 'px'}">
+                                    <el-col :span="8" class="imgSearch_item" v-for="(item,index) in copyrightImgsList" :key="index">
+                                        <div class="imgSearch_item_wrap">
+                                            <img :src="item.cdnurl" alt="">
+                                            <div class="imgSearch_controls">
+                                                <div class="btn_group">
+                                                    <el-button type="text" @click="toBig(item.cdnurl)">放大</el-button>
+                                                    <el-button type="text" @click="addCopyRightImgs(item)">插入</el-button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </el-col>
+                                </div>
+                            </el-row>
+                        </div>
+                        <div class="imgSearch_null" v-else>
+                            暂无图片
+                        </div>
+                    </div>
+                </el-tab-pane>
+                <el-tab-pane label="添加视频" name="3" v-if="formData.platform === 'toutiao'||formData.platform === 'dfsport'">
                     <el-row>
                         <p style="color:#666;font-size:12px;line-height:24px;">
                             添加视频操作指引：<br>
@@ -388,8 +467,109 @@
                         </el-table>
                     </el-row>
                 </el-tab-pane>
+                <el-tab-pane label="稿件释义" name="4">
+                    <el-table :data="transferred.tableData"
+                        :show-header="false"
+                        :height="transferredHeight"
+                        :key="transferredKey"
+                        highlight-current-row
+                        style="width: 100%;">
+                        <el-table-column label="状态" width="100" :show-overflow-tooltip="true">
+                            <template slot-scope="scope">
+                                <el-tag type="success" v-if="JSON.parse(scope.row.json).contentpara">转义成功</el-tag>
+                                <el-tag type="info" v-if="!JSON.parse(scope.row.json).contentpara">转义中...</el-tag>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="title" label="标题" min-width="140" :show-overflow-tooltip="true">
+                            <template slot-scope="scope">
+                                {{ JSON.parse(scope.row.json).title }}
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="操作" width="210">
+                            <template slot-scope="scope">
+                                <div v-if="JSON.parse(scope.row.json).contentpara">
+                                    <el-button type="primary" size="mini" @click="transferredView(scope.row)">预览</el-button>
+                                    <el-button type="primary" size="mini" @click="transferredEdit(scope.row)">编辑</el-button>
+                                    <el-button type="primary" size="mini" @click="delTransferredContent(scope.row)">删除</el-button>
+                                </div>
+                                <div v-if="!JSON.parse(scope.row.json).contentpara">
+                                    <el-button type="primary" size="mini" @click="getTransferredList">刷新状态</el-button>
+                                </div>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                    <el-row class="toolbar">
+                        <el-pagination
+                            @current-change="transferredCurrentChange"
+                            @size-change="transferredSizeChange"
+                            layout="total, sizes, prev, pager, next, jumper"
+                            :page-sizes="[10, 15, 20, 50, 100]"
+                            :page-size="transferred.pageSize"
+                            :current-page="transferred.currentPage"
+                            :total="transferred.total"
+                            background
+                            style="float:right;">
+                        </el-pagination>
+                    </el-row>
+                </el-tab-pane>
+                <el-tab-pane label="热文列表" name="5">
+                    <el-table :data="hotAriticle.tableData"
+                        :height="transferredHeight"
+                        :key="transferredKey"
+                        highlight-current-row
+                        style="width: 100%;">
+                        <el-table-column prop="title" label="标题" min-width="140" :show-overflow-tooltip="true">
+                            <template slot-scope="scope">
+                                <span>{{ scope.row.title }}</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="操作" width="140">
+                            <template slot-scope="scope">
+                                <el-button type="primary" size="mini" @click="hotAriticleEdit(scope.row)">编辑</el-button>
+                                <el-button type="primary" size="mini" @click="delHotContent(scope.row)">删除</el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                    <el-row class="toolbar">
+                        <el-pagination
+                            @current-change="hotAriticleCurrentChange"
+                            @size-change="hotAriticleSizeChange"
+                            layout="total, sizes, prev, pager, next, jumper"
+                            :page-sizes="[10, 15, 20, 50, 100]"
+                            :page-size="hotAriticle.pageSize"
+                            :current-page="hotAriticle.currentPage"
+                            :total="hotAriticle.total"
+                            background
+                            style="float:right;">
+                        </el-pagination>
+                    </el-row>
+                </el-tab-pane>
             </el-tabs>
         </sideslip>
+        <el-dialog
+            :visible.sync="transferredVisible"
+            :fullscreen="true">
+            <el-row :gutter="10">
+                <el-col :span="12">
+                    <div class="transferred_title">
+                        <h3>{{ nowTitle }}</h3>
+                        <el-button type="primary" size="mini" @click="useNowContent">使用原文</el-button>
+                    </div>
+                    <div class="mt-10 transferred_content" v-html="nowContent" ref="leftDiv"
+                        :style="{height:divHeight+'px'}"
+                    ></div>
+                </el-col>
+                <el-col :span="12">
+                    <div class="transferred_title">
+                        <h3>{{ transferredTitle }}</h3>
+                        <el-button type="primary" size="mini" @click="useTransferredContent">使用义文</el-button>
+                    </div>
+                    <div class="mt-10 transferred_content" v-html="transferredContent" ref="rightDiv"
+                        :style="{height:divHeight+'px'}"
+                    ></div>
+                </el-col>
+            </el-row>
+        </el-dialog>
     </section>
 </template>
 
@@ -433,12 +613,22 @@ import {
     addNewsDraft,
     deleteNewsDraft,
     getAddVideoList,
-    newsvideoGetauth
+    newsvideoGetauth,
+    getTransferredList,
+    contentTransferred,
+    delTransferredContent,
+    getHasCopyrightImg,
+    getHotAriticleList,
+    delHotAriticle,
+    getDFHtypes,
+    dfhSaveContent,
+    collectNews
 } from '@/api/contentManage'
 import {
     getfileUpload
 } from '@/api/operationTools'
 import loadmore from '@/directive/loadMore'
+import loadDiv from '@/directive/loadDiv'
 
 export default {
     components: {
@@ -459,7 +649,8 @@ export default {
         }
     },
     directives: {
-        loadmore
+        loadmore,
+        loadDiv
     },
     data() {
         // 东方号原因检测
@@ -471,9 +662,32 @@ export default {
             }
         }
         return {
+            copyRightKey: '',
+            isDFH: false,
+            copyRightLoading: false,
+            copyrightImgsListAll: [
+
+            ],
+            copyRightImgs: {
+                currentPage: 1,
+                pageSize: 9,
+                total: 0
+            },
+            copyrightImgsList: [
+
+            ],
+            formImgs: {
+                keywords: ''
+            },
+            transferredTitle: '',
+            nowTitle: '',
+            transferredVisible: false,
+            nowContent: '',
+            transferredContent: '',
             // add 新增 | edit 编辑
             pageStatus: 'add',
             fileList: [],
+            gifFileList: [],
             contentImgs: [],
             fileShowList: [],
             editorInstance: null,
@@ -518,7 +732,9 @@ export default {
                 imgsPreview: false,
                 save: false,
                 search: false,
-                saveDraft: false
+                saveDraft: false,
+                transferred: false,
+                dfhsave: false
             },
             // 保存成功的URL dialog
             newUrlTitle: '',
@@ -533,6 +749,7 @@ export default {
                 imgsPreview: true,
                 save: true
             },
+            divHeight: 460,
             // 草稿
             drafList: [],
             drafHeight: 400,
@@ -554,6 +771,22 @@ export default {
                 stkey_video: 0,
                 lastcol_video: 20
             },
+            transferredId: 0,
+            transferred: {
+                id: 0,
+                tableData: [],
+                total: 0,
+                currentPage: 1,
+                pageSize: 10,
+            },
+            hotAriticle: {
+                tableData: [],
+                total: 0,
+                currentPage: 1,
+                pageSize: 10
+            },
+            transferredHeight: 400,
+            transferredKey: 0,
             videoList: [],
             // 视频上传
             videoUploadUrl: '',
@@ -596,19 +829,14 @@ export default {
                         required: true,
                         message: '请填写来源',
                         trigger: 'change'
-                    },
-                    {
-                        min: 2,
-                        max: 10,
-                        message: '长度在 2 到 10 个字符',
-                        trigger: 'blur'
                     }
                 ],
                 offlineReason: [{
                     validator: checkOfflineReason,
                     trigger: 'blur'
                 }]
-            }
+            },
+            dfhSendAuth: false
         }
     },
     mounted() {
@@ -616,11 +844,70 @@ export default {
         this.getOperPlatform()
         this.getEditDetail()
         this.getTableHeight()
+        this.getHotAriticleList()
+        // this.getAuth()
     },
     activated() {
         this.getEditDetail()
     },
     methods: {
+        getAuth() { //权限控制
+            let authorList = localStorage.getItem('authorList')
+            if (authorList.indexOf('sendNews/byDFH') > -1) {
+                this.dfhSendAuth = true
+            }
+        },
+        equalityTwoScroll(){
+            var timer
+            function throttle(method,context){
+                clearTimeout(timer);
+                timer=setTimeout(function(){
+                    method.call(context)
+                },100)
+            }
+            var lefDiv = this.$refs.leftDiv
+            var rightDiv = this.$refs.rightDiv
+            function leftScroll(){
+                rightDiv.scrollTop = lefDiv.scrollTop
+                rightDiv.scrollLeft= lefDiv.scrollLeft
+            }
+            function rightScroll(){
+                lefDiv.scrollTop = rightDiv.scrollTop
+                lefDiv.scrollLeft= rightDiv.scrollLeft
+            }
+            lefDiv.onscroll = function(){
+                throttle(leftScroll)
+            }
+            rightDiv.onscroll = function(){
+                throttle(rightScroll)
+            }
+        },
+        getHasCopyrightImg(type){
+            if(type === 'search'){
+                this.copyRightKey = ''
+                this.copyrightImgsList = []
+            }
+            let params = {
+                tags: this.formImgs.keywords,
+                startkey: this.copyRightKey,
+                pgsize: 10
+            }
+            this.copyRightLoading = true
+            getHasCopyrightImg(params).then(res => {
+                if(res.code === '00001'){
+                    if(res.data.length != 0){
+                        this.copyrightImgsList = this.copyrightImgsList.concat(res.data.data)
+                        this.copyRightKey = res.data.startkey
+                    }else{
+                        this.$message({
+                            message: '暂无更多图片',
+                            type: 'warning'
+                        });
+                    }
+                }
+                this.copyRightLoading = false
+            })
+        },
         // 根据显示器不同的表格高度
         getTableHeight() {
             // 可视宽度(判断)
@@ -628,9 +915,15 @@ export default {
             if (seeHeight <= 1920 && seeHeight > 1600) {
                 this.drafHeight = 600
                 this.drafTableKey += 1
+                this.transferredHeight = 600
+                this.transferredKey += 1
+                this.divHeight = 700
             } else if (seeHeight < 1380) {
                 this.drafHeight = 400
                 this.drafTableKey += 1
+                this.transferredHeight = 400
+                this.transferredKey += 1
+                this.divHeight = 400
             }
         },
         // 编辑状态
@@ -662,11 +955,14 @@ export default {
                     _this.formData.platform = _this.platformOptions[0].value;
                 }
                 _this.getNewsType();
+
                 // _this.routeChange();
             });
         },
         // 获取分类(分类不默认填写，防止编辑没有注意到分类 填选成默认分类)
         getNewsType() {
+            this.transferred.id = 0
+            this.getTransferredList()
             if (this.formData.platform == '') {
                 return;
             }
@@ -848,17 +1144,35 @@ export default {
                 return false
             }
         },
-        handleExceed(files, fileList) {
-            this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+        beforeGifUpload(file) {
+            let fileType = file.type
+            let fileSize = file.size
+
+            const isLt2M = file.size / 1024 / 1024 < 2;
+            if (fileType != 'image/gif') {
+                this.$message({
+                    message: '请上传 GIF 图片',
+                    type: 'warning'
+                });
+                return false
+            }
+            if (!isLt2M) {
+                this.$message.error('上传图片大小不能超过 2MB!')
+                return false
+            }
         },
         // 上传成功后返回
         handleSuccess(response, file, fileList) {
-            this.fileList.push(response.url)
+            if(this.fileList.length < (this.isDFH ? 3 : 4)){
+                this.fileList.push(response.url)
+            }
             // 改动封面后需重新进行图片预览
             this.btnDisabled.save = false
         },
-        handleProgress(event, file, fileList) {
-
+        handleGifSuccess(response, file, fileList) {
+            this.gifFileList.push(response.url)
+            // 改动封面后需重新进行图片预览
+            this.btnDisabled.save = false
         },
         // 放大
         toBig(url) {
@@ -871,6 +1185,16 @@ export default {
             _this.fileList.forEach((item, index) => {
                 if (item == url) {
                     _this.fileList.splice(index, 1)
+                }
+            })
+            // 改动封面后需重新进行图片预览
+            this.btnDisabled.save = false
+        },
+        removeGif(url, index) {
+            var _this = this;
+            _this.gifFileList.forEach((item, index) => {
+                if (item == url) {
+                    _this.gifFileList.splice(index, 1)
                 }
             })
             // 改动封面后需重新进行图片预览
@@ -940,7 +1264,7 @@ export default {
                     clearTimeout(time)
                     return false
                 }
-                let newData = res.data
+                var newData = res.data
                 if (newData.isabroad == 0 && this.formData.platform == 'xianggang') {
                     this.$message({
                         type: 'warning',
@@ -984,8 +1308,26 @@ export default {
                         url: imgList[i].src
                     });
                 }
+                var gifList = []
+                try {
+                    gifList = eval("(" + newData.pcgifminijs + ")")
+                } catch (e) {
+                    console.log(e)
+                }
+                this.gifFileList = []
+                if(gifList){
+                    if(gifList.length!=0 && this.gifFileList.length==0){
+                        this.gifFileList.push(gifList[0].src)
+                    }
+                }
+                if(this.formData.platform == 'xianggang'){
+                    this.formData.content = contentEditorHtml(newData,'gbk');
+                }else if(this.formData.platform == 'yangzi'){
+                    this.formData.content = contentEditorHtml(newData,'yangzi');
+                }else{
+                    this.formData.content = contentEditorHtml(newData);
+                }
 
-                this.formData.content = contentEditorHtml(newData);
                 // UEditor的ready在nextTick中 到时候会给ueditor赋值，再此赋值，ueditor还是null(页面初次打开)
                 // 搜索时还是需要赋值
                 if (this.editorInstance !== null) {
@@ -1106,10 +1448,12 @@ export default {
                     keywords: _this.dynamicTags.join(","),
                     isoriginal: Number(_this.isOriginal).toString(),
                     keywords: _this.dynamicTags.join(","),
+                    gifimg: _this.gifFileList.join(","),
                     edate: this.editTime == '' ? '' : parseTime(this.editTime, '{y}-{m}-{d} {h}:{i}:{s}')
                 },
                 type: newsType
             }
+
             // 如果没有封面，且正文有符合相关标准的图片，则自动填充
             if (isNull(imgArr) && this.fileList.length === 0) {
                 let contentImgs = [] // 所有正文图片
@@ -1151,6 +1495,8 @@ export default {
                                     })
                                 }
                                 // 这里 onload执行后
+                                // 防止iframe因链接一样的缓存
+                                _this.contentPreview = ''
                                 _this.$refs[formName].validate((valid) => {
                                     if (valid) {
                                         _this.loading.contentPreview = true
@@ -1375,7 +1721,8 @@ export default {
                                 isoriginal: Number(this.isOriginal).toString(),
                                 labelname: this.formData.labelname.join(","),
                                 localsite: this.formData.localsite.join(","),
-                                keywords: this.dynamicTags.join(",")
+                                keywords: this.dynamicTags.join(","),
+                                paraid: this.transferred.id?this.transferred.id:0
                             },
                             type: newsType
                         }
@@ -1394,6 +1741,10 @@ export default {
                         newsAdd(params).then(res => {
                             if (res.code === '00001') {
                                 this.newUrlTitle = this.formData.title
+                                // 删除转义
+                                // if(this.transferred.id && this.transferred.id!=0){
+                                //     this.delTransferredContent()
+                                // }
                                 this.resetForm('form')
                                 this.newUrl = res.data
                             }
@@ -1411,6 +1762,61 @@ export default {
                             }
                             this.urlVisible = true
                             this.loading.save = false
+                            clearTimeout(time)
+                            if (this.draft.idAdd != 0) { //是草稿编辑保存后查询更新草稿列表
+                                deleteNewsDraft({
+                                    id: this.draft.idAdd
+                                }).then(res => {
+                                    this.draft.id = 0;
+                                    this.queryNewsDraft();
+                                });
+                            }
+                        })
+                    })
+                }
+            })
+        },
+        // 东方号发文保存
+        newsDfhAdd(formName) {
+            this.$refs[formName].validate((valid) => {
+                if (valid) {
+                    if(this.dynamicTags.length === 0){
+                        this.$message({
+                            message: '请填写关键词',
+                            type: 'warning'
+                        })
+                        return false
+                    }
+                    this.$confirm('确认提交吗?', '提示', {
+                        type: 'warning'
+                    }).then(() => {
+                        let params = {
+                            title: this.formData.title,
+                            maintype: this.formData.maintype[0],
+                            subtype: (this.formData.maintype.length != 0) ? this.formData.maintype[1] : '',
+                            thirdtype: (this.formData.maintype.length != 0) ? this.formData.maintype[2] : '',
+                            isoriginal: Number(this.isOriginal).toString(),
+                            content: myReplace(this.formData.content, '_ueditor_page_break_tag_', '<hr class="pagebreak" noshade="noshade" size="1" style="user-select: none;"/>'),
+                            userid: this.formData.source.dfhid,
+                            username: this.formData.source.dfhname,
+                            source: this.formData.source.dfhname,
+                            keywords: this.dynamicTags.join(","),
+                            purl: this.formData.purl
+                        }
+                        this.loading.dfhsave = true
+                        let time = setTimeout(() => {
+                            this.loading.dfhsave = false
+                        }, timeoutTime)
+                        dfhSaveContent(params).then(res => {
+                            if(res.code === '00001'){
+                                this.resetForm('form')
+                                this.$notify({
+                                    title: '成功',
+                                    message: '保存成功',
+                                    type: 'success'
+                                });
+                            }
+                            this.loading.dfhsave = false
                             clearTimeout(time)
                             if (this.draft.idAdd != 0) { //是草稿编辑保存后查询更新草稿列表
                                 deleteNewsDraft({
@@ -1446,13 +1852,16 @@ export default {
             this.draft.id = row.id
             this.formData.platform = row.platform
             this.formData.title = row.title
-            this.formData.source = row.source
+            if(!this.isDFH){
+                this.formData.source = row.source
+            }
             this.formData.urlfrom = row.urlfrom
             if (row.urlfrom === 'dongfanghao') {
                 this.warningShow = true
             } else {
                 this.warningShow = false
             }
+
             this.formData.purl = row.url
             this.dynamicTags = row.keyword ? row.keyword.split(',') : []
             let title_pic = row.title_pic ? row.title_pic : '[]'
@@ -1503,6 +1912,7 @@ export default {
         // 复制URL按钮
         copyUrl(text, event) {
             clip(text, event)
+            this.urlVisible = false
         },
         sideShow(val) {
             this.operationTrackShow = val
@@ -1524,7 +1934,7 @@ export default {
                             maintype: this.formData.maintype[0],
                             date: this.editTime == '' ? '' : parseTime(this.editTime, '{y}-{m}-{d} {h}:{i}:{s}'),
                             title: this.formData.title,
-                            source: this.formData.source,
+                            source: this.isDFH ? this.formData.source.dfhname : this.formData.source,
                             iswnwifi: Number(this.isAllPowerfullWifi).toString(),
                             purl: ((this.pageStatus === 'edit') ? this.pageStatus : ''),
                             isofficial: Number(this.isBaijia).toString(),
@@ -1742,6 +2152,7 @@ export default {
         },
         // 清空表单
         resetForm(formName) {
+            this.operationTrackShow = false
             this.$refs[formName].resetFields()
             this.formData.title = ''
             this.formData.content = ''
@@ -1757,9 +2168,14 @@ export default {
             this.formData.source = ''
             this.fileList = []
             this.fileListShow = []
+            this.gifFileList = []
             this.pageStatus = 'add'
             this.draft.idAdd = 0
             this.draft.id = 0
+            this.transferred.id = 0
+            // this.transferred.tableData = []
+            // this.transferred.total = 0
+            this.transferredId = 0
         },
         // 可选择常用来源
         querySearch(queryString, cb) {
@@ -1772,6 +2188,297 @@ export default {
             return (restaurant) => {
                 return (restaurant.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
             };
+        },
+        getTransferredList(){
+            let params = {
+                page: this.transferred.currentPage,
+                pagesize: this.transferred.pageSize,
+                platform: this.formData.platform,
+                id: 0
+            }
+            // params.id = this.transferred.id ? this.transferred.id : 0
+
+            getTransferredList(params).then(res => {
+                if(res.code === '00001'){
+                    this.transferred.total = res.data.count
+                    this.transferred.tableData = res.data.data
+                }
+            })
+        },
+        // 原文转义
+        contentTransferred() {
+            if (this.formData.content == '') {
+                this.$message({
+                    type: 'warning',
+                    message: '请输入正文'
+                })
+                return false
+            }
+            if (this.formData.title == '') {
+                this.$message({
+                    type: 'warning',
+                    message: '请输入标题'
+                })
+                return false
+            }
+            let jsonData = {
+                title: this.formData.title,
+                content: myReplace(this.formData.content, '_ueditor_page_break_tag_', '<hr class="pagebreak" noshade="noshade" size="1" style="user-select: none;"/>')
+            }
+            let params = {
+                id: this.transferred.id,
+                platform: this.formData.platform,
+                json: JSON.stringify(jsonData)
+            }
+            this.loading.transferred = true
+            contentTransferred(params).then(res => {
+                if(res.code === '00001'){
+                    this.getTransferredList()
+                    this.resetForm('form')
+                    this.$notify({
+                        title: '成功',
+                        message: '转义成功',
+                        type: 'success',
+                        duration: 2 * 1000
+                    });
+                }
+                this.loading.transferred = false
+            })
+        },
+        transferredSizeChange(val) {
+            this.transferred.pageSize = val
+            this.transferred.id = 0
+            this.getTransferredList()
+        },
+        transferredCurrentChange(val) {
+            this.transferred.currentPage = val
+            this.transferred.id = 0
+            this.getTransferredList()
+        },
+        hotAriticleSizeChange(val) {
+            this.hotAriticle.pageSize = val
+            this.getHotAriticleList()
+        },
+        hotAriticleCurrentChange(val) {
+            this.hotAriticle.currentPage = val
+            this.getHotAriticleList()
+        },
+        paginationChange(data){
+            return data.slice((this.copyRightImgs.currentPage - 1)*this.copyRightImgs.pageSize,(this.copyRightImgs.currentPage- 1)*this.copyRightImgs.pageSize + this.copyRightImgs.pageSize)
+        },
+        copyRightImgsChange(val) {
+            this.copyRightImgs.pageSize = val
+            this.copyrightImgsList = this.paginationChange(this.copyrightImgsListAll)
+        },
+        copyRightImgsCurrentChange(val) {
+            this.copyRightImgs.currentPage = val
+            this.copyrightImgsList = this.paginationChange(this.copyrightImgsListAll)
+        },
+        transferredView(row) {
+            this.transferredId = row.id
+            this.transferredVisible = true
+            this.nowContent = JSON.parse(row.json).content
+            this.nowTitle = JSON.parse(row.json).title
+            this.transferredTitle = JSON.parse(row.json).title
+            this.transferredContent = JSON.parse(row.json).contentpara
+            this.$nextTick(() => {
+                this.equalityTwoScroll()
+            })
+        },
+        transferredEdit(row) {
+            this.transferred.id = row.id
+            this.formData.content = JSON.parse(row.json).contentpara
+            this.formData.title = JSON.parse(row.json).title
+            this.editorInstance.setContent(this.formData.content)
+            this.btnDisabled.imgsPreview = true
+            this.btnDisabled.save = true
+        },
+        useNowContent() {
+            this.transferred.id = this.transferredId
+            this.formData.content = this.nowContent
+            this.formData.title = this.nowTitle
+            this.editorInstance.setContent(this.formData.content)
+            this.transferredVisible = false
+            this.operationTrackShow = false
+            this.btnDisabled.imgsPreview = true
+            this.btnDisabled.save = true
+        },
+        useTransferredContent() {
+            this.transferred.id = this.transferredId
+            this.formData.content = this.transferredContent
+            this.formData.title = this.nowTitle
+            this.editorInstance.setContent(this.formData.content)
+            this.transferredVisible = false
+            this.operationTrackShow = false
+            this.btnDisabled.imgsPreview = true
+            this.btnDisabled.save = true
+        },
+        delTransferredContent(row) {
+            let params = {
+                id: row ? row.id : this.transferred.id
+            }
+            delTransferredContent(params).then(res => {
+                if(res.code === '00001'){
+                    if(row){
+                        this.$notify({
+                            title: '成功',
+                            message: '删除成功',
+                            type: 'success'
+                        });
+                    }
+                    this.getTransferredList()
+                }
+            })
+        },
+        addCopyRightImgs(url){
+            var editor = this.editorInstance;
+            editor.focus()
+            let ehtml = '<p><img src="' + url.cdnurl + '" data-width="' + url.width + '" data-height="' + url.height + '">&nbsp;</p>'
+            editor.execCommand('inserthtml', ehtml)
+        },
+        // 热文列表
+        getHotAriticleList() {
+            let params = {
+                startTime: '',
+                endTime: '',
+                pageNum: this.hotAriticle.currentPage,
+                pageSize: this.hotAriticle.pageSize,
+                title: ''
+            }
+            getHotAriticleList(params).then(res => {
+                if(res.code === '00001'){
+                    this.hotAriticle.tableData = res.data.data
+                    this.hotAriticle.total = res.data.total
+                }
+            })
+        },
+        hotAriticleEdit(row){
+            this.formData.platform = 'toutiao'
+            this.formData.purl = row.url
+            this.searchNeweditor()
+        },
+        delHotContent(row){
+            let params = {
+                id: row.id,
+                isdel: 1
+            }
+            delHotAriticle(params).then(res => {
+                if(res.code === '00001'){
+                    this.$notify({
+                        title: '成功',
+                        message: '删除成功',
+                        type: 'success',
+                        duration: 2 * 1000
+                    });
+                    this.getHotAriticleList()
+                }
+            })
+        },
+        changeIsDFH(){
+            this.formData.source = ''
+            if(this.isDFH){
+                this.$store.dispatch('getDFHaccount').then(() => {
+
+                })
+                this.getDFHtypes()
+            }
+        },
+        // 东方号发文 获取分类
+        getDFHtypes(){
+            this.formData.maintype = []
+            this.newsTypeLevel = []
+            getDFHtypes().then(res => {
+                if(res.code === '00001'){
+                    var level1 = []
+                    var level2 = []
+                    var level3 = []
+                    for (var i = 0; i < res.data.length; i++) {
+                        if (res.data[i].level && res.data[i].level == 1) {
+                            level1.push({
+                                value: res.data[i].typePy,
+                                label: res.data[i].typeName,
+                                typeId: res.data[i].typeId,
+                                level: res.data[i].level
+                            })
+                        } else if (res.data[i].level && res.data[i].level == 2) {
+                            level2.push({
+                                value: res.data[i].typePy,
+                                label: res.data[i].typeName,
+                                typeId: res.data[i].typeId,
+                                parentId: res.data[i].parentId,
+                                level: res.data[i].level
+                            })
+                        } else if (res.data[i].level && res.data[i].level == 3) {
+                            level3.push({
+                                value: res.data[i].typePy,
+                                label: res.data[i].typeName,
+                                typeId: res.data[i].typeId,
+                                parentId: res.data[i].parentId,
+                                level: res.data[i].level
+                            })
+                        }
+                    }
+                    // 将一/二/三级 分类进行匹配
+                    for (var i = 0; i < level1.length; i++) {
+                        for (var j = 0; j < level2.length; j++) {
+                            if (level1[i].typeId == level2[j].parentId) {
+                                if (level1[i].children == undefined) {
+                                    level1[i].children = [];
+                                }
+                                for (var k = 0; k < level3.length; k++) {
+                                    if (level2[j].typeId == level3[k].parentId) {
+                                        if (level2[j].children == undefined) {
+                                            level2[j].children = [];
+                                        }
+                                        level2[j].children.push({
+                                            value: level3[k].value,
+                                            label: level3[k].label
+                                        });
+                                    }
+                                }
+                                level1[i].children.push({
+                                    value: level2[j].value,
+                                    label: level2[j].label,
+                                    parentId: level2[j].parentId,
+                                    typeId: level2[j].typeId,
+                                    children: level2[j].children
+                                })
+                            }
+                        }
+                    }
+                    this.newsTypeLevel = level1;
+                }
+            })
+        },
+        // 新闻采集
+        newsCollect() {
+            if(this.collectUrl === ''){
+                this.$message({
+                    message: '请填写采集地址',
+                    type: 'warning'
+                })
+                return
+            }
+            this.resetForm('form')
+            let params = {
+                url: this.collectUrl
+            }
+            collectNews(params).then(res => {
+                if(res.code === '00001'){
+                    try {
+                        let data = res.data
+                        this.formData.title = data.contenttitle
+                        this.formData.source = data.source
+                        this.dynamicTags = data.keywords ? data.keywords.split(',') : []
+                        this.formData.content = contentEditorHtml(data)
+                        if (this.editorInstance !== null) {
+                            this.editorInstance.setContent(this.formData.content)
+                        }
+                    } catch (e) {
+                        console.log(e)
+                    }
+                }
+            })
         }
     }
 }
@@ -1881,5 +2588,96 @@ export default {
     width: 204px;
     height: 105px;
     background-image: url(../../assets/video_images/upload.png);
+}
+.transferred_title{
+    display: flex;
+    justify-content: space-between;
+    h3 {
+        font-size: 14px;
+        margin: 0
+    }
+}
+.transferred_content {
+    min-width: 400px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 4px;
+    img{
+        max-width: 100% !important;
+    }
+}
+.imgSearch_wrap{
+    margin-top: 10px;
+}
+.imgSearch_item{
+    margin-bottom: 10px;
+    .imgSearch_item_wrap{
+        height: 200px;
+        position: relative;
+        background-color: #fff
+    }
+    img{
+        display: block;
+        max-width: 100%;
+        max-height: 100%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%,-50%);
+    }
+    &:hover .imgSearch_controls{
+        visibility: visible;
+    }
+}
+.imgSearch_null{
+    height: 300px;
+    line-height: 300px;
+    text-align: center;
+    color: #999;
+    font-size: 24px;
+}
+.imgSearch_controls{
+    visibility: hidden;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.8);
+    position: absolute;
+    top: 0;
+    left: 0;
+    .btn_group{
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%,-50%);
+        text-align: center;
+    }
+}
+.tabDot{
+    width: 14px;
+    height: 14px;
+    text-align: center;
+    line-height: 14px;
+    background-color: #f56c6c;
+    border-radius: 50%;
+    display: inline-block;
+    font-size: 12px;
+    vertical-align: 1px;
+    color: #fff;
+}
+.aclick {
+    cursor: pointer;
+    text-decoration: none;
+    color: #666;
+    display: block;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    width: 200px;
+    &:hover {
+        color: #58B7FF;
+    }
+}
+.loadDiv{
+    overflow: auto;
 }
 </style>

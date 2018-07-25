@@ -189,6 +189,18 @@
                             <span class="contentTools_content">{{ formData.classification }}</span>
                         </label>
                     </el-row>
+                    <el-row>
+                        <label for="" class="contentTools_label clearfix" style="width:270px">
+                            <span class="contentTools_title pull-left">去重URL：</span>
+                            <span class="contentTools_content">{{ formData.duplurl }}</span>
+                        </label>
+                    </el-row>
+                    <el-row v-if="nowType=='视频'">
+                        <label for="" class="contentTools_label clearfix" style="width:270px">
+                            <span class="contentTools_title pull-left">是否剪辑：</span>
+                            <span class="contentTools_content">{{ formData.isfromcut }}</span>
+                        </label>
+                    </el-row>
                     <el-row class="manage-btn-group">
                         <!--香港-->
                         <!-- <el-button size="small"
@@ -574,7 +586,10 @@ export default {
                 rdts: '',
                 newstype: '',
                 crawlerts: '',
-                tpid: ''
+                tpid: '',
+                nocovermodify: '',
+                duplurl: '',
+                isfromcut: ''
             },
             nowType: '文章',
             newsInfo: '',
@@ -711,6 +726,13 @@ export default {
     },
     methods: {
         videoCover(){
+            if(this.formData.nocovermodify == '1'){
+                this.$message({
+                    type: 'warning',
+                    message: '该视频禁止修改封面'
+                })
+                return false
+            }
             var param = {
                 rowkey: this.formData.rowkey,
                 newurl: this.imageUrl
@@ -1081,7 +1103,7 @@ export default {
                         }
                         switch (this.formData.type) {
                             case "文章":
-                                this.contentPreview = contentToHtml(res.data,this.redKeyWords);
+                                this.contentPreview = this.newsInfo.content;
                                 this.formData.newstype = 'news'
                             break;
                             case "图集":
@@ -1190,6 +1212,20 @@ export default {
                         // 操作轨迹(香港头条隐藏操作轨迹)
                         if(this.formData.platform != '香港头条'){
                             this.queryOperlist();
+                        }
+                        // 是否允许修改封面
+                        if(res.data.nocovermodify){
+                            this.formData.nocovermodify = res.data.nocovermodify
+                        }
+                        // 去重URL
+                        if(res.data.duplurl){
+                            this.formData.duplurl = res.data.duplurl
+                        }
+                        // 是否剪辑
+                        try {
+                            this.formData.isfromcut = (res.data.isfromcut==1?'是':'否')
+                        } catch (e) {
+                            console.log(e)
                         }
                     }else{
                         this.$message({
@@ -1970,6 +2006,9 @@ export default {
             this.operationTrackData = [];
             this.tagType = '';
             this.imageUrl = '';
+            this.formData.nocovermodify = ''
+            this.formData.duplurl = ''
+            this.formData.isfromcut = ''
         },
         // 视频封面
         handleAvatarSuccess(res, file){

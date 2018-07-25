@@ -85,8 +85,8 @@ import {
 
 export default {
     data(){
-        const startTime = new Date(new Date().setHours(0, 0, 0))
-        const endTime = new Date(new Date().setHours(23, 59, 59))
+        const startTime = parseTime(new Date(new Date().setHours(0, 0, 0)), '{y}-{m}-{d} {h}:{i}:{s}')
+        const endTime = parseTime(new Date(new Date().setHours(23, 59, 59)), '{y}-{m}-{d} {h}:{i}:{s}')
         return {
             form: {
                 timeQuantum: [startTime, endTime],
@@ -157,21 +157,21 @@ export default {
         },
         // 分页
         paginationChange(data){
-            return data.slice(this.currentPage - 1,this.pageSize)
+            return data.slice((this.currentPage - 1)*this.pageSize,(this.currentPage - 1)*this.pageSize + this.pageSize)
         },
         handleCurrentChange(val) {
             this.currentPage = val
-            this.paginationChange(this.allData)
+            this.tableData = this.paginationChange(this.allData)
         },
         handleSizeChange(val) {
             this.pageSize = val
-            this.paginationChange(this.allData)
+            this.tableData = this.paginationChange(this.allData)
         },
         exportExcel(){
             var exportUrl = exportCommentAuditAll;
-            exportUrl += 'json={"startTime":' + (this.form.starttime ? '"' + this.form.starttime + '"' : '')
-            exportUrl += ',"endTime":' + '"' + this.form.endtime + '"'
-            exportUrl += ',"auditUser":' + (this.form.user ? '"' + this.form.user + '"' + '"' : '""') + '}'
+            exportUrl += 'startTime=' + (this.form.starttime ? this.form.starttime : '')
+            exportUrl += '&endTime=' + this.form.endtime
+            exportUrl += '&auditUser=' + (this.form.user ? this.form.user : '')
             console.log(exportUrl)
             window.location.href = exportUrl
         }

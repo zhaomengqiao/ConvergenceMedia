@@ -6,7 +6,6 @@
                      :collapse="false"
                      background-color="#304156"
                      text-color="#fff"
-                     active-text-color="#409EFF"
                      unique-opened>
                 <sidebar-item :routes="permission_routers"></sidebar-item>
             </el-menu>
@@ -16,7 +15,6 @@
                  :collapse="true"
                  background-color="#304156"
                  text-color="#fff"
-                 active-text-color="#409EFF"
                  unique-opened
                  v-show="isCollapse">
             <sidebar-item :routes="permission_routers"></sidebar-item>

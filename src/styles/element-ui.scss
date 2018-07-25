@@ -98,7 +98,7 @@
     margin-top: 10px;
 }
 .el-button+.el-button{
-    margin-left: 0;
+    margin-left: 0px;
 }
 /*disable title*/
 .el-button.disable_title{
@@ -444,6 +444,23 @@ a>.adv_box{
     font-size: 30px;
     color: #999
 }
+
+.edit-drag__upload.video .el-upload--text{
+    display: inline-block;
+}
+.edit-drag__upload.video .el-upload-dragger{
+    width: 200px;
+    height: 100px;
+    line-height: 100px;
+    font-size: 30px;
+    color: #999
+}
+.editVideos .edit-drag__upload.hasvideo .el-upload-dragger{
+    border: none;
+    width: 440px;
+    height: 110px;
+    line-height: 0;
+}
 // 发布图集
 .picture_content{
     textarea{
@@ -469,4 +486,25 @@ a>.adv_box{
     .el-input--small .el-input__inner{
         font-weight: bold;
     }
+}
+
+.content-manage .el-dialog{
+    min-width: 860px;
+}
+
+// 色情
+.porno{
+    position: relative;
+}
+.porno:after{
+    content: '内含色情';
+    display:block;
+    position: absolute;
+    padding: 2px 4px;
+    top: 10px;
+    right: 10px;
+    background-color: red;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700
 }

@@ -24,7 +24,7 @@ export function contentToHtml(pagewap, arr, type) {
     var content = pagewap.content;
     // 修改
     //
-    if (type == 'dongfanghao' && pagewap.contentadd != '') {
+    if (type == 'dongfanghao' && pagewap.contentadd != '' && pagewap.contentadd != null ) {
         content = pagewap.contentadd;
     }
     if (content.indexOf("<span class='keyword_red'>") != -1 || content.indexOf("<img") != -1) {
@@ -44,11 +44,15 @@ export function contentToHtml(pagewap, arr, type) {
             var n = {}, r = [];
             //遍历当前数组
             for (var i = 0; i < source.length; i++) {
-                //如果hash表中没有当前项
-                if (!n[source[i]]) {
-                    //存入hash表
-                    n[source[i]] = true;
-                    //把当前数组的当前项push到临时数组里面
+                if(source[i]!='<strong>'&&source[i]!='</strong>') {
+                    //如果hash表中没有当前项
+                    if (!n[source[i]]) {
+                        //存入hash表
+                        n[source[i]] = true;
+                        //把当前数组的当前项push到临时数组里面
+                        r.push(source[i]);
+                    }
+                }else{
                     r.push(source[i]);
                 }
             }
@@ -62,6 +66,11 @@ export function contentToHtml(pagewap, arr, type) {
     notReplaceImgArr = numRegHighLightMatch(content, "[$][#][imgidx]+[=]\\d+[#][$]");
     // 匹配视频
     notReplaceVideoArr = numRegHighLightMatch(content, "[$][#][videoidx]+[=]\\d+[#][$]");
+    // strong标签
+    let strongBegin = numRegHighLightMatch(content, "<strong>")
+    let strongEnd = numRegHighLightMatch(content, "</strong>")
+    console.log(strongBegin)
+    console.log(strongEnd)
     if (notReplaceADArr) {
         for (var i = 0; i < notReplaceADArr.length; i++) {
             content = content.replace(notReplaceADArr[i], indexStr + i + "ad@");
@@ -77,14 +86,27 @@ export function contentToHtml(pagewap, arr, type) {
             content = content.replace(notReplaceVideoArr[i], indexStr + i + "vd@");
         }
     }
+    if (strongBegin){
+        for (var i = 0; i < strongBegin.length; i++) {
+            content = content.replace(strongBegin[i], indexStr + i + "b@");
+        }
+    }
+
+    if (strongEnd){
+        for (var i = 0; i < strongEnd.length; i++) {
+            content = content.replace(strongEnd[i], indexStr + i + "e@");
+        }
+    }
 
     // 匹配nbsp
     content = content.replace(/[&]nbsp[;]/g, "@#@n@");
     // 连续四位英文/数字标红
-    var reg = new RegExp(/([0-9]|[A-z]){4}(?!>)/, "g");
-    content = content.replace(reg, function (word) {
-        return "<span class='keyword_red'>" + word + "</span>"
-    })
+    if(type !== 'seo'){
+        var reg = new RegExp(/([0-9]|[A-z]){4}(?!>)/, "g");
+        content = content.replace(reg, function (word) {
+            return "<span class='keyword_red'>" + word + "</span>"
+        })
+    }
     // 匹配符号添加转义符
     function escapeMetacharacterOfStr(input) {
         return input.replace(/[-$^()*+.\[\]|\\?{}]/gm, "\\$&");
@@ -118,6 +140,19 @@ export function contentToHtml(pagewap, arr, type) {
             content = content.replace(indexStr + i + "vd@", notReplaceVideoArr[i]);
         }
     }
+    if (strongBegin){
+        console.log(strongBegin)
+        for (var i = 0; i < strongBegin.length; i++) {
+            content = content.replace(indexStr + i + "b@", strongBegin[i]);
+        }
+    }
+
+    if (strongEnd){
+        console.log(strongEnd)
+        for (var i = 0; i < strongEnd.length; i++) {
+            content = content.replace(indexStr + i + "e@", strongEnd[i]);
+        }
+    }
     if (pagewap.isadv == 1) {
         var ads = pagewap.advslist;
         ads.forEach(function (item, index) {
@@ -144,7 +179,7 @@ export function contentToHtml(pagewap, arr, type) {
             content = content.replace(adidx, advStr);
         })
     }
-    if (pagewap.imgs != null) {
+    if (pagewap.imgs) {
         console.log("一个")
         var imgs = pagewap.imgs;
         //修改
@@ -157,15 +192,31 @@ export function contentToHtml(pagewap, arr, type) {
             }
             imgidx = idxtmp + imgidx;
             imgidx = "$#imgidx=" + imgidx + "#$";
-            // 境外使用原始图片路径
-            if (isabroad == 1) {
-                content = content.replace(imgidx, "<img src='"
-                    + imgs[x].imgorisrc + "' style='max-width:100%'>");
-            } else {
-                content = content.replace(imgidx, "<img src='"
-                    + imgs[x].src + "' style='max-width:100%'>");
+            // 匹配色情值
+            try {
+                let pornoNum = parseFloat(imgs[x].pratio) * 100
+                if(pornoNum > 90) {
+                    // 境外使用原始图片路径
+                    if (isabroad == 1) {
+                        content = content.replace(imgidx, "<div class='porno'><img src='"
+                            + imgs[x].imgorisrc + "' style='max-width:100%'></div>");
+                    } else {
+                        content = content.replace(imgidx, "<div class='porno'><img src='"
+                            + imgs[x].src + "' style='max-width:100%'></div>");
+                    }
+                }else{
+                    // 境外使用原始图片路径
+                    if (isabroad == 1) {
+                        content = content.replace(imgidx, "<img src='"
+                            + imgs[x].imgorisrc + "' style='max-width:100%'>");
+                    } else {
+                        content = content.replace(imgidx, "<img src='"
+                            + imgs[x].src + "' style='max-width:100%'>");
+                    }
+                }
+            } catch (e) {
+                console.log(e)
             }
-
             //				var imgStr = "<img ";
             //				imgStr +='src="'+pagewap.imgs[x].src+'"';
             //				imgStr += 'alt="'+pagewap.imgs[x].alt+'"';
@@ -177,7 +228,7 @@ export function contentToHtml(pagewap, arr, type) {
             //				content = content.replace(imgidx,imgStr);
         }
     }
-    if (pagewap.imgjs != null && pagewap.imgs == null) {
+    if (pagewap.imgjs && !pagewap.imgs) {
         console.log("俩个")
         let imgjs = eval("(" + pagewap.imgjs + ")");
         //修改
@@ -208,7 +259,7 @@ export function contentToHtml(pagewap, arr, type) {
 
         }
     }
-    if (pagewap.videojs != null) {//视频解析
+    if (pagewap.videojs) {//视频解析
         var video = JSON.parse(pagewap.videojs);
         for (var x = 0; x < video.length; x++) {
             var idx = parseInt(video[x].idx);
@@ -280,7 +331,13 @@ export function contentEditorHtml(pagewap,type,isrobot) {
             }
         }
     }
-    if (pagewap.imgs!=null) {
+    if(type=='yangzi'){
+        content = pagewap.yzwbcontentadd
+        if(content == undefined || content == null || content == ''){
+            content = pagewap.yzwbcontent
+        }
+    }
+    if (pagewap.imgs) {
 //				var imgs =JSON.parse(pagewap.imgs);
         var imgs =pagewap.imgs;
         for (var x = 0; x < imgs.length; x++) {
@@ -298,14 +355,18 @@ export function contentEditorHtml(pagewap,type,isrobot) {
                 imgStr +='src="'+pagewap.imgs[x].src+'"';
                 imgStr += 'alt="'+pagewap.imgs[x].alt+'"';
                 imgStr += 'describe="'+pagewap.imgs[x].describe+'"';
-                imgStr += 'width="'+pagewap.imgs[x].imgwidth+'"';
-                imgStr += 'height="'+pagewap.imgs[x].imgheight+'"';
+                if(pagewap.imgs[x].imgwidth){
+                    imgStr += 'width="'+pagewap.imgs[x].imgwidth+'"';
+                }
+                if(pagewap.imgs[x].imgheight){
+                    imgStr += 'height="'+pagewap.imgs[x].imgheight+'"';
+                }
                 imgStr += 'imgmd5="'+pagewap.imgs[x].imgmd5+'"';
                 imgStr +="/>";
                 content = content.replace(imgidx,imgStr);
         }
     }
-    if (pagewap.videojs!=null) {//视频解析
+    if (pagewap.videojs) {//视频解析
         var video =JSON.parse(pagewap.videojs);
         for (var x = 0; x < video.length; x++) {
             var idx = parseInt(video[x].idx);
@@ -329,7 +390,7 @@ export function contentEditorHtml(pagewap,type,isrobot) {
 
     }
 
-    if (pagewap.imgjs!=null&&pagewap.imgs==null) {
+    if (pagewap.imgjs && !pagewap.imgs) {
         let imgjs=eval("("+pagewap.imgjs+")");
         for (var x = 0; x < imgjs.length; x++) {
             var idx = parseInt(imgjs[x].idx);

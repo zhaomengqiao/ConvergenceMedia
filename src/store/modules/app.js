@@ -15,8 +15,10 @@ const app = {
             tableColumnShow: localStorage.getItem('tableColumn')?Number(localStorage.getItem('tableColumn')):1,
             tableRowShow: localStorage.getItem('tableRow')?Number(localStorage.getItem('tableRow')):10,
             source: localStorage.getItem('configSource')?JSON.parse(localStorage.getItem('configSource')):[],
+            dfh: localStorage.getItem('configDFH')?JSON.parse(localStorage.getItem('configDFH')):[],
             editProject: localStorage.getItem('isEditProject')?JSON.parse(localStorage.getItem('isEditProject')):[]
-        }
+        },
+        hasNewNotify: false
     },
     mutations: {
         TOGGLE_SIDEBAR: state => {
@@ -47,9 +49,16 @@ const app = {
             state.personalConfig.source = JSON.parse(source)
             localStorage.setItem("configSource", source)
         },
+        SET_DFH(state,dfh) {
+            state.personalConfig.dfh = JSON.parse(dfh)
+            localStorage.setItem("configDFH", dfh)
+        },
         SET_EDITPROJECT(state,source) {
             state.personalConfig.editProject = JSON.parse(source)
             localStorage.setItem("isEditProject", source)
+        },
+        SET_HASNOTIFY(state,source) {
+            state.hasNewNotify = source
         }
     },
     actions: {
@@ -87,6 +96,24 @@ const app = {
                 })
             })
         },
+        // 获取东方号
+        getDFHaccount({commit}, userInfo) {
+            return new Promise((resolve, reject) => {
+                let params = {
+                    configtype: 2,
+                    username: JSON.parse(localStorage.getItem('user')).username
+                }
+                getConfigSource(params).then(response => {
+                    if(response.code === '00001'){
+                        let data = response.data
+                        commit('SET_DFH', JSON.stringify(data))
+                        resolve()
+                    }
+                }).catch(error => {
+                    reject(error)
+                })
+            })
+        },
         // 获取是否编辑保护
         getEditProject({commit}, userInfo) {
             return new Promise((resolve, reject) => {
@@ -105,6 +132,11 @@ const app = {
                     reject(error)
                 })
             })
+        },
+        getHasNotify({
+            commit
+        }, notify) {
+            commit('SET_HASNOTIFY', notify)
         }
     }
 }

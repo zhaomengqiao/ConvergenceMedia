@@ -1,0 +1,896 @@
+@charset "utf-8";
+#page_download_text > div {
+    font-size: 80%;
+}
+#page_download_button_top,
+#page_download_mobile_iPhone,
+#page_download_mobile_android {
+    display: none !important;
+}
+em, i {
+    font-style: normal;
+}
+.page1-wrap {
+    position: absolute;
+    top: 16%;
+    left: 10%;
+    width: 50%;
+    height: 84%;
+}
+
+.page1-wrap .left {
+    position: absolute;
+    left: 0;
+    width: 800px;
+    height: 100%;
+}
+
+.act-users {
+    color: #fff;
+    position: relative;
+    left:7%;
+}
+.act-users-title {
+    font-weight: 100;
+    font-size: 140%;
+}
+/* 0 */
+.act-users-num span i.an.zero {
+   background-position: 6.1px 5px;
+}
+/* 1 */
+.act-users-num span i.an.one {
+    background-position:16px -82px;
+}
+/* 2 */
+.act-users-num span i.an.two {
+    background-position:6.1px -170px;
+}
+/* 3 */
+.act-users-num span i.an.three {
+    background-position:6.1px -258px;
+}
+/* 4 */
+.act-users-num span i.an.four {
+    background-position:6.1px -345px;
+}
+/* 5 */
+.act-users-num span i.an.five {
+    background-position:6.1px -431px;
+}
+/* 6 */
+.act-users-num span i.an.six {
+    background-position:6.1px -521px;
+}
+/* 7 */
+.act-users-num span i.an.seven {
+    background-position:6.1px -608px;
+}
+/* 8 */
+.act-users-num span i.an.eight {
+    background-position:6.1px -696px;
+}
+/* 9 */
+.act-users-num span i.an.nine {
+    background-position:6.1px -785px;
+}
+.comma {
+    background: url('../imgs/page1/comma.png') no-repeat left bottom;
+}
+
+.act-users-num {
+    font-size: 0;
+    color: #FFED00;
+    margin-top: 1%;
+}
+.act-users-num span {
+    display: inline-block;
+    text-indent: -999em;
+    width:80px;
+    height:110px;
+    background: url(../imgs/page1/number_bg.png) no-repeat center;
+    background-size:80px 110px;
+    margin-right: 1.26%;
+    border-radius: 15px;
+}
+.act-users-num span i {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+.act-users-num span i.an {
+    background: url('../imgs/page1/number3.png') no-repeat center;
+    background-size:68px;
+}
+.act-users-num span.comma-wrap {
+    background: none;
+    width: 20px;
+}
+/* 0 */
+.act-users-num span i.an0 {
+   background-position: 6.1px 5px;
+    -webkit-animation: run1 1.5s steps(1) 1;
+    animation: run0 1.5s steps(1) 1;
+}
+/* 1 */
+.act-users-num span i.an1 {
+    background-position:16px -82px;
+    -webkit-animation: run1 1.5s steps(1) 1;
+    animation: run1 1.5s steps(1) 1;
+}
+/* 2 */
+.act-users-num span i.an2 {
+    background-position:6.1px -170px;
+    -webkit-animation: run2 1.5s steps(2) 1;
+    animation: run2 1.5s steps(2) 1;
+}
+/* 3 */
+.act-users-num span i.an3 {
+    background-position:6.1px -258px;
+    -webkit-animation: run3 1.5s steps(3) 1;
+    animation: run3 1.5s steps(3) 1;
+}
+/* 4 */
+.act-users-num span i.an4 {
+    background-position:6.1px -345px;
+    -webkit-animation: run4 1.5s steps(4) 1;
+    animation: run4 1.5s steps(4) 1;
+}
+/* 5 */
+.act-users-num span i.an5 {
+    background-position:6.1px -431px;
+    -webkit-animation: run5 1.5s steps(5) 1;
+    animation: run5 1.5s steps(5) 1;
+}
+/* 6 */
+.act-users-num span i.an6 {
+    background-position:6.1px -521px;
+    -webkit-animation: run6 1.5s steps(6) 1;
+    animation: run6 1.5s steps(6) 1;
+}
+/* 7 */
+.act-users-num span i.an7 {
+    background-position:6.1px -608px;
+    -webkit-animation: run7 1.5s steps(7) 1;
+    animation: run7 1.5s steps(7) 1;
+}
+/* 8 */
+.act-users-num span i.an8 {
+    background-position:6.1px -696px;
+    -webkit-animation: run8 1.5s steps(8) 1;
+    animation: run8 1.5s steps(8) 1;
+}
+/* 9 */
+.act-users-num span i.an9 {
+    background-position:6.1px -785px;
+    -webkit-animation: run9 1.5s steps(9) 1;
+    animation: run9 1.5s steps(9) 1;
+}
+@-webkit-keyframes run1 {
+    0% { background-position:6.1px 0px; }
+    100% { background-position: 6.1px 5px; }
+}
+@keyframes run1 {
+    0% { background-position:6.1px 0; }
+    100% { background-position:16px -82px; }
+}
+@-webkit-keyframes run2 {
+    0% { background-position:6.1px -170px; }
+    100% { background-position:6.1px -209px; }
+}
+@keyframes run2 {
+    0% { background-position:6.1px 0; }
+    100% { background-position:6.1px -209px; }
+}
+@-webkit-keyframes run3 {
+    0% { background-position:6.1px 0; }
+    100% { background-position:6.1px -258px; }
+}
+@keyframes run3 {
+    0% { background-position:6.1px 0; }
+    100% { background-position:6.1px -311px; }
+}
+@-webkit-keyframes run4 {
+    0% { background-position:6.1px 0; }
+    100% { background-position:6.1px -345px; }
+}
+@keyframes run4 {
+    0% { background-position:6.1px 0; }
+    100% { background-position:6.1px -415px; }
+}
+@-webkit-keyframes run5 {
+    0% { background-position:6.1px 0; }
+    100% { background-position:6.1px -521px; }
+}
+@keyframes run5 {
+    0% { background-position:6.1px 0; }
+    100% { background-position:6.1px -431px; }
+}
+@-webkit-keyframes run6 {
+    0% { background-position:6.1px 0; }
+    100% { background-position:6.1px -521px; }
+}
+@keyframes run6 {
+    0% { background-position:6.1px 0; }
+    100% { background-position:6.1px -627px; }
+}
+@-webkit-keyframes run7 {
+    0% { background-position:6.1px 0; }
+    100% { background-position:6.1px -729px; }
+}
+@keyframes run7 {
+    0% { background-position:6.1px 0; }
+    100% { background-position:6.1px -608px; }
+}
+@-webkit-keyframes run8 {
+    0% { background-position:6.1px 0; }
+    100% { background-position:6.1px -696px; }
+}
+@keyframes run8 {
+    0% { background-position:6.1px 0; }
+    100% { background-position:10.1px -834px; }
+}
+@-webkit-keyframes run9 {
+    0% { background-position:6.1px 0; }
+    100% { background-position:6.1px -785px;}
+}
+@keyframes run9 {
+    0% { background-position:6.1px 0; }
+    100% { background-position:6.1px -940px; }
+}
+
+.bar-map-wrap {
+    position: relative;
+    color: #fff;
+    display: flex;
+    margin-top:-2%;
+    margin-left: 7%;
+}
+.prov-bar-wrap {
+    margin-top: 18%;
+    flex: 0 0 272px;
+    width: 342px;
+}
+.prov-bar-wrap > p {
+    font-size:22px;
+}
+.prov-bar {
+    font-size: 0;
+    height:22px;
+    /*line-height: 15px;*/
+    margin-bottom: 18px;
+}
+.prov-bar .txt {
+    display: inline-block;
+    vertical-align: top;
+    text-align: right;
+    margin-right: 10px;
+    font-size:28px;
+}
+.lyg{
+    margin-left: -28px;
+}
+.prov-bar .bar-wrap {
+    display: inline-block;
+    font-size: 0;
+    position: relative;
+    vertical-align: top;
+    width: 180px;
+    height: 100%;
+}
+.prov-bar .bar-wrap i {
+    display: inline-block;
+    height: 10px;
+    color: #edd300;
+    font-size: 14px;
+    vertical-align: top;
+    margin-left: 5px;
+}
+.prov-bar .bar-wrap .bar {
+    display: inline-block;
+    height: 100%;
+    width: 0.1%;
+}
+.prov-bar .bar-wrap .bar em{
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+    background-color: #01E9FF;
+    -webkit-animation: barrun1 1.5s 1;
+    animation: barrun1 1.5s 1;
+}
+@-webkit-keyframes barrun1 {
+    0% { width: 0;}
+    100% { width: 100%;}
+}
+@keyframes barrun1 {
+    0% { width: 0;}
+    100% { width: 100%;}
+}
+.map-wrap {
+    flex: 1;
+    position: relative;
+    margin-top: 4%;
+}
+
+.map-wrap .map {
+    position: absolute;
+    top: 12%;
+    left: 13%;
+    width: 626px;
+    height: 678px;
+    background: url(../imgs/page1/map.png) no-repeat center;
+    background-size: 626px 678px;
+}
+.map .dot {
+    position: absolute;
+    z-index: 99;
+    cursor: pointer;
+    width:18px;
+    height:18px;
+}
+.map .dot em {
+    position: absolute;
+    right: 0;
+    left: 50%;
+    width: 30px;
+    margin-left: -15px;
+    text-align: center;
+    white-space: nowrap;
+    font-size: 34px;
+    color: #fcff00;
+}
+/* 南京 */
+.map .dot1 {
+    left: 38%;
+    top: 69%;
+    width:25px;
+    height:25px;
+}
+/* 扬州 */
+.map .dot2 {
+left: 53%;
+top: 52%;
+}
+/* 南通 */
+.map .dot3 {
+    left: 82%;
+    top: 65%;
+}
+/* 无锡 */
+.map .dot4 {
+    z-index: 100;
+    left: 64%;
+    top: 82%;
+}
+/* 苏州 */
+.map .dot5 {
+left: 76%;
+top: 85%;
+}
+.map .dot .dot-center {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-color: #fcff00;
+    border-radius: 50%;
+}
+.map .dot .dot-center:before,
+.map .dot .dot-center:after,
+.map .dot:before,
+.map .dot:after {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    content: '';
+    border: 1px solid #fcff00;
+    border-radius: 50%;
+}
+.map .dot .dot-center:before {
+    -webkit-animation: breathe 4s 1s infinite;
+    animation: breathe 4s 1s infinite;
+}
+.map .dot .dot-center:after {
+    -webkit-animation: breathe 4s 2s infinite;
+    animation: breathe 4s 2s infinite;
+}
+.map .dot:before {
+    -webkit-animation: breathe 4s 3s infinite;
+    animation: breathe 4s 3s infinite;
+}
+.map .dot:after {
+    -webkit-animation: breathe 4s infinite;
+    animation: breathe 4s infinite;
+}
+
+@-webkit-keyframes breathe {
+    0% {transform: scale(1); opacity: 1;}
+    100% {transform: scale(2); opacity: 0;}
+}
+@keyframes breathe {
+    0% {transform: scale(1); opacity: 1;}
+    100% {transform: scale(2); opacity: 0;}
+}
+
+.map .dot .hover {
+    display: none;
+    position: absolute;
+    z-index: 100;
+    left: 25px;
+    top: 10px;
+    width: 118px;
+    font-size: 14px;
+    background-color: rgba(0,0,0,0.6);
+    padding: 10px 10px 10px 25px;
+    border-radius: 5px;
+}
+.map .dot1 .hover {
+    left: 30px;
+    top: 20px;
+}
+.map .dot .hover:before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    margin-top: -3px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #fcff00;
+}
+
+
+.page1-wrap .right {
+    margin-left: 800px;
+}
+
+.right {
+    color: #fff;
+    white-space: nowrap;
+}
+.right h2 {
+    font-weight: normal;
+    font-size: 60px;
+}
+.right p {
+    font-size: 53px;
+}
+/*@media (min-width: 1024px) and (max-width:1366px) {
+    #page_download_hand {
+        left: 10%;
+    }
+    .act-users-title {
+        font-size:170%;
+    }
+    .act-users-num span {
+        width: 32px;
+        height: 54px;
+        background: url('../imgs/page1/number_bg.png') no-repeat center;
+        background-size: 32px 54px;
+        margin-right: 0.6%;
+    }
+    .prov-bar-wrap {
+        margin-top: 10%;
+        flex: 0 0 50%;
+        width: 50%;
+    }
+    .map-wrap {
+        margin-top: 0;
+    }
+    .map-wrap .map {
+        width: 471px;
+        height: 481px;
+        background-size: 80%;
+        margin-left: -60px;
+    }
+    南京
+    .map .dot1 {
+        left: 196px;
+        top: 270px;
+        width: 18px;
+        height: 18px;
+    }
+    扬州
+    .map .dot2 {
+        left: 258px;
+        top: 214px;
+    }
+    南通
+    .map .dot3 {
+        left: 350px;
+        top: 260px;
+    }
+    无锡
+    .map .dot4 {
+        left: 300px;
+        top: 325px;
+    }
+    苏州
+    .map .dot5 {
+        left: 334px;
+        top: 340px;
+    }
+
+    .prov-bar {
+        margin-bottom: 5%;
+    }
+} */
+
+@media (max-width: 768px) {
+    #page_download_hand {
+        width: 94% !important;
+        top: 10% !important;
+    }
+    #page_download_show {
+        bottom: 0 !important;
+    }
+    .act-users {
+        text-align: center;
+    }
+}
+
+@media (max-width:414px) {
+    .act-users {
+        color: #fff;
+        width: 90%;
+        margin: 10% auto 0;
+    }
+    .act-users-num {
+        margin-top: 2%;
+    }
+    .act-users-num span {
+        font-size: 26px;
+        width: 32px;
+        height: 50px;
+        background: url(../imgs/page1/mobile_numberbg.png) no-repeat center;
+        background-size: 32px 50px;
+        margin-right: 1%;
+    }
+    /*.act-users-num span i.an {
+        background-image: url(../imgs/page1/mobile_number.png);
+        background-repeat: no-repeat;
+    }*/
+    .act-users-title {
+        font-size: 130%;
+    }
+
+    .act-users-num span.comma-wrap {
+        width: 16px;
+        margin-left: -2%;
+    }
+    .bar-map-wrap {
+        margin-top:10%;
+    }
+    .prov-bar-wrap {
+	    margin-top: 12%;
+        flex: 0 0 44%;
+        width: 44%;
+	}
+    .prov-bar {
+        height: 8px;
+        line-height: 8px;
+        margin-bottom: 4%;
+        white-space:nowrap;
+    }
+    .prov-bar .txt {
+        vertical-align: top;
+        text-align: right;
+        margin-right: 4%;
+        font-size: 10px;
+        width:36px;
+    }
+    .prov-bar-wrap > p {
+        font-size: 10px;
+        padding-left: 6%;
+    }
+    .prov-bar .bar-wrap {
+        width: 67%;
+    }
+    .prov-bar .bar-wrap i {
+        font-size: 10px;
+        margin-left: 2%;
+    }
+    .map-wrap {
+        margin-top: 0;
+    }
+    .map-wrap .map {
+        width: 250px;
+        height: 255px;
+        background: url(../imgs/page1/map_m.png) no-repeat center;
+        background-size: 250px 255px;
+        left: -10%;
+    }
+    .map .dot em {
+        bottom: -18px;
+        font-size: 10px;
+    }
+    .map .dot .hover {
+        left: -126px;
+        top: 100%;
+        width: 100px;
+        font-size: 12px;
+        padding: 5px 5px 5px 16px;
+    }
+    .map .dot .hover:before {
+        left: 6px;
+        margin-top: -2px;
+        width: 4px;
+        height: 4px;
+    }
+    /* 南京 */
+    .map .dot1 {
+        left: 40%;
+        top: 68%;
+        width: 14px;
+        height: 14px;
+    }
+    /* 扬州 */
+    .map .dot2 {
+        left: 55%;
+        top: 51%;
+        width: 8px;
+        height: 8px;
+    }
+    /* 南通 */
+    .map .dot3 {
+        left: 80%;
+        top: 65%;
+        width: 8px;
+        height: 8px;
+    }
+    /* 无锡 */
+    .map .dot4 {
+        left: 66%;
+        top: 82%;
+        width: 8px;
+        height: 8px;
+    }
+    /* 苏州 */
+    .map .dot5 {
+        left: 76%;
+        top: 86%;
+        width: 8px;
+        height: 8px;
+    }
+}
+
+@media (max-width: 375px) {
+    .act-users-num span {
+        width: 26px;
+        height: 30px;
+        background-size: 26px 30px;
+    }
+    .map-wrap .map {
+        left: -20%;
+    }
+    .prov-bar-wrap {
+        margin-top: 15%;
+    }
+    /*.act-users-num span i.an1,
+    .act-users-num span i.an2,
+    .act-users-num span i.an3,
+    .act-users-num span i.an4,
+    .act-users-num span i.an5,
+    .act-users-num span i.an6,
+    .act-users-num span i.an7,
+    .act-users-num span i.an8,
+    .act-users-num span i.an9,
+    .act-users-num span i.an.zero,
+    .act-users-num span i.an.one,
+    .act-users-num span i.an.two,
+    .act-users-num span i.an.three,
+    .act-users-num span i.an.four,
+    .act-users-num span i.an.five,
+    .act-users-num span i.an.six,
+    .act-users-num span i.an.seven,
+    .act-users-num span i.an.eight,
+    .act-users-num span i.an.nine {
+        background-position-x: -1px;
+    }*/
+    .act-users-num span i.an.zero {
+        background-position: 0 0;
+    }
+    .act-users-num span i.an.one {
+        background-position: 0 -30px;
+    }
+    .act-users-num span i.an.two {
+        background-position: 0 -60px;
+    }
+    .act-users-num span i.an.three {
+        background-position: 0 -90px;
+    }
+    .act-users-num span i.an.four {
+        background-position: 0 -120px;
+    }
+    .act-users-num span i.an.five {
+        background-position: 0 -150px;
+    }
+    .act-users-num span i.an.six {
+        background-position: 0 -180px;
+    }
+    .act-users-num span i.an.seven {
+        background-position: 0 -210px;
+    }
+    .act-users-num span i.an.eight {
+        background-position: 0 -240px;
+    }
+    .act-users-num span i.an.nine {
+        background-position: 0 -270px;
+    }
+    .act-users-num span i.an {
+        background-image: url(../imgs/page1/mobile_number2.png);
+        background-repeat: no-repeat;
+    }
+    /* 0 */
+    .act-users-num span i.an0 {
+        background-position: 0 0;
+        -webkit-animation: run1 1.5s steps(1) 1;
+        animation: run1 1.5s steps(1) 1;
+    }
+    /* 1 */
+    .act-users-num span i.an1 {
+        background-position: 0 -30px;
+        -webkit-animation: run1 1.5s steps(1) 1;
+        animation: run1 1.5s steps(1) 1;
+    }
+    /* 2 */
+    .act-users-num span i.an2 {
+        background-position: 0 -60px;
+        -webkit-animation: run2 1.5s steps(2) 1;
+        animation: run2 1.5s steps(2) 1;
+    }
+    /* 3 */
+    .act-users-num span i.an3 {
+        background-position: 0 -90px;
+        -webkit-animation: run3 1.5s steps(3) 1;
+        animation: run3 1.5s steps(3) 1;
+    }
+    /* 4 */
+    .act-users-num span i.an4 {
+        background-position: 0 -120px;
+        -webkit-animation: run4 1.5s steps(4) 1;
+        animation: run4 1.5s steps(4) 1;
+    }
+    /* 5 */
+    .act-users-num span i.an5 {
+        background-position: 0 -150px;
+        -webkit-animation: run5 1.5s steps(5) 1;
+        animation: run5 1.5s steps(5) 1;
+    }
+    /* 6 */
+    .act-users-num span i.an6 {
+        background-position: 0 -180px;
+        -webkit-animation: run6 1.5s steps(6) 1;
+        animation: run6 1.5s steps(6) 1;
+    }
+    /* 7 */
+    .act-users-num span i.an7 {
+        background-position: 0 -210px;
+        -webkit-animation: run7 1.5s steps(7) 1;
+        animation: run7 1.5s steps(7) 1;
+    }
+    /* 8 */
+    .act-users-num span i.an8 {
+        background-position: 0 -240px;
+        -webkit-animation: run8 1.5s steps(8) 1;
+        animation: run8 1.5s steps(8) 1;
+    }
+    /* 9 */
+    .act-users-num span i.an9 {
+        background-position: 0 -270px;
+        -webkit-animation: run9 1.5s steps(9) 1;
+        animation: run9 1.5s steps(9) 1;
+    }
+    @-webkit-keyframes run1 {
+        0% { background-position: 0 0; }
+        100% { background-position: 0 -30px; }
+    }
+    @keyframes run1 {
+        0% { background-position: 0 0; }
+        100% { background-position: 0 -30px; }
+    }
+    @-webkit-keyframes run2 {
+        0% { background-position: 0 0; }
+        100% { background-position: 0 -60px; }
+    }
+    @keyframes run2 {
+        0% { background-position: 0 0; }
+        100% { background-position: 0 -60px; }
+    }
+    @-webkit-keyframes run3 {
+        0% { background-position: 0 0; }
+        100% { background-position: 0 -90px; }
+    }
+    @keyframes run3 {
+        0% { background-position: 0 0; }
+        100% { background-position: 0 -90px; }
+    }
+    @-webkit-keyframes run4 {
+        0% { background-position: 0 0; }
+        100% { background-position: 0 -120px; }
+    }
+    @keyframes run4 {
+        0% { background-position: 0 0; }
+        100% { background-position: 0 -120px; }
+    }
+    @-webkit-keyframes run5 {
+        0% { background-position: 0 0; }
+        100% { background-position: 0 -150px; }
+    }
+    @keyframes run5 {
+        0% { background-position: 0 0; }
+        100% { background-position: 0 -150px; }
+    }
+    @-webkit-keyframes run6 {
+        0% { background-position: 0 0; }
+        100% { background-position: 0 -180px; }
+    }
+    @keyframes run6 {
+        0% { background-position: 0 0; }
+        100% { background-position: 0 -180px; }
+    }
+    @-webkit-keyframes run7 {
+        0% { background-position: 0 0; }
+        100% { background-position: 0 -210px; }
+    }
+    @keyframes run7 {
+        0% { background-position: 0 0; }
+        100% { background-position: 0 -210px; }
+    }
+    @-webkit-keyframes run8 {
+        0% { background-position: 0 0; }
+        100% { background-position: 0 -240px; }
+    }
+    @keyframes run8 {
+        0% { background-position: 0 0; }
+        100% { background-position: 0 -240px; }
+    }
+    @-webkit-keyframes run9 {
+        0% { background-position: 0 0; }
+        100% { background-position: 0 -270px; }
+    }
+    @keyframes run9 {
+        0% { background-position: 0 0; }
+        100% { background-position: 0 -270px; }
+    }
+
+    .bar-map-wrap {
+        margin-top:6.5%;
+    }
+
+    #page_download_show {
+        bottom: 2% !important;
+    }
+
+    .prov-bar .bar-wrap i {
+        font-size: 9px;
+    }
+
+}
+
+
+@media (max-width: 320px) {
+    .act-users {
+        width: 96%;
+    }
+    .prov-bar .txt {
+        margin-right: 2%;
+    }
+    .prov-bar .bar-wrap i {
+        font-size: 9px;
+        margin-left: 1%;
+    }
+    .bar-map-wrap {
+        margin-top: 8%;
+    }
+    .prov-bar-wrap {
+        margin-top: 24%;
+    }
+    .map-wrap .map {
+        left: -30%;
+    }
+}

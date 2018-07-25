@@ -41,11 +41,14 @@ export const constantRouterMap = [{
         hidden: true
     },
     {
-        path: '',
+        path: '/',
         component: Layout,
-        redirect: 'dashboard',
+        name: 'home',
+        meta: {
+            title: 'home'
+        },
         children: [{
-            path: 'dashboard',
+            path: '/dashboard',
             component: _import('dashboard/index'),
             name: 'dashboard',
             meta: {
@@ -70,7 +73,39 @@ export const constantRouterMap = [{
                 noCache: true
             }
         }]
+    },
+    {
+        path: '',
+        component: Layout,
+        hidden: true,
+        redirect: 'noredirect',
+        children: [{
+            path: 'test',
+            component: _import('test/test'),
+            name: 'notify',
+            meta: {
+                title: 'notify',
+                icon: 'personalConfig',
+                noCache: true
+            }
+        }]
     }
+    // {
+    //     path: '',
+    //     component: Layout,
+    //     hidden: true,
+    //     redirect: 'noredirect',
+    //     children: [{
+    //         path: 'notify',
+    //         component: _import('systemTools/notify'),
+    //         name: 'notify',
+    //         meta: {
+    //             title: 'notify',
+    //             icon: 'personalConfig',
+    //             noCache: true
+    //         }
+    //     }]
+    // }
     // {
     //     path: '/documentation',
     //     component: Layout,
@@ -243,6 +278,17 @@ export const asyncRouterMap = [
                             noCache: false,
                             authUrl: 'my/videoSorting'
                         }
+                    },
+                    {
+                        path: 'sortoutList',
+                        component: _import('contentAudit/contentSortout/contentSortoutList'),
+                        name: 'sortoutList',
+                        meta: {
+                            title: 'sortoutList',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'my/classifylog'
+                        }
                     }
                 ]
             },
@@ -398,18 +444,65 @@ export const asyncRouterMap = [
                             noCache: false,
                             authUrl: 'auditData/nickName/list'
                         }
+                    },
+                    {
+                        path: 'audit_nickName_Detail',
+                        component: _import('contentAudit/auditData/audit_nickName_Detail'),
+                        name: 'audit_nickName_Detail',
+                        meta: {
+                            title: 'audit_nickName_Detail',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'auditData/nickName/detail'
+                        }
                     }
                 ]
             },
             {
-                path: 'auditPatrol',
-                component: _import('contentAudit/auditPatrol/auditPatrol'),
+                path: '/audit/auditPatrol',
+                component: _import('contentAudit/index'),
+                redirect: 'noredirect',
                 name: 'auditPatrol',
                 meta: {
                     title: 'auditPatrol',
                     icon: '',
                     authUrl: 'audit/patrol'
-                }
+                },
+                children: [
+                    {
+                        path: 'auditPatrolTools',
+                        component: _import('contentAudit/auditPatrol/auditPatrol'),
+                        name: 'auditPatrolTools',
+                        meta: {
+                            title: 'auditPatrol',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'audit/patrol/tools'
+                        }
+                    },
+                    {
+                        path: 'auditPatrolList',
+                        component: _import('contentAudit/auditPatrol/auditPatrolList'),
+                        name: 'auditPatrolList',
+                        meta: {
+                            title: 'auditPatrolList',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'audit/patrol/list'
+                        }
+                    },
+                    {
+                        path: 'auditPatrolDetail',
+                        component: _import('contentAudit/auditPatrol/auditPatrolDetail'),
+                        name: 'auditPatrolDetail',
+                        meta: {
+                            title: 'auditPatrolDetail',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'audit/patrol/details'
+                        }
+                    }
+                ]
             },
             {
                 path: 'dfwCarNewsAudit',
@@ -546,17 +639,17 @@ export const asyncRouterMap = [
                             authUrl: 'send/news'
                         }
                     },
-                    // {
-                    //     path: 'editVideos',
-                    //     component: _import('contentManger/editVideos'),
-                    //     name: 'editVideos',
-                    //     meta: {
-                    //         title: 'editVideos',
-                    //         icon: '',
-                    //         noCache: false,
-                    //         authUrl: 'send/video'
-                    //     }
-                    // },
+                    {
+                        path: 'editVideos',
+                        component: _import('contentManger/editVideos'),
+                        name: 'editVideos',
+                        meta: {
+                            title: 'editVideos',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'send/video'
+                        }
+                    },
                     {
                         path: 'editPictures',
                         component: _import('contentManger/editPictures'),
@@ -903,6 +996,17 @@ export const asyncRouterMap = [
                             noCache: false,
                             authUrl: 'content/filmEditing'
                         },
+                    },
+                    {
+                        path: 'shortVideoMaintain',
+                        component: _import('operationTools/shortVideoMaintain'),
+                        name: 'shortVideoMaintain',
+                        meta: {
+                            title: 'shortVideoMaintain',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'content/shortVideoMaintain'
+                        },
                     }
                 ]
             },
@@ -1106,7 +1210,7 @@ export const asyncRouterMap = [
                     {
                         path: 'index',
                         component: _import('operationTools/keywordManage/keywordManage'),
-                        name: 'keywordManage',
+                        name: 'keywordManageTools',
                         meta: {
                             title: 'keywordManage',
                             icon: '',
@@ -1279,6 +1383,42 @@ export const asyncRouterMap = [
                             icon: '',
                             noCache: false,
                             authUrl: 'api/auditdomain/query'
+                        }
+                    }
+                ]
+            },
+            {
+                path: '/systemTools/systemNotice',
+                component: _import('systemTools/index'),
+                redirect: 'noredirect',
+                name: 'systemNotice',
+                meta: {
+                    title: 'systemNotice',
+                    icon: '',
+                    noCache: false,
+                    authUrl: 'system/noticemanager'
+                },
+                children: [
+                    {
+                        path: 'editNotice',
+                        component: _import('systemTools/systemNotice/editNotice'),
+                        name: 'editNotice',
+                        meta: {
+                            title: 'editNotice',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'notice/edit'
+                        }
+                    },
+                    {
+                        path: 'noticeList',
+                        component: _import('systemTools/systemNotice/noticeList'),
+                        name: 'noticeList',
+                        meta: {
+                            title: 'noticeList',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'system/notice/list'
                         }
                     }
                 ]

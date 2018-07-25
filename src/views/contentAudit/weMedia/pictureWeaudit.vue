@@ -3,8 +3,14 @@
         <el-card :body-style="{padding:'10px 20px'}" v-if="newExam!==null">
             <el-row :gutter="4">
                 <el-col :span="4">
-                    <el-button type="primary" size="small" icon="circle-check" @click="pass">通过</el-button>
-                    <el-button type="danger" size="small" icon="circle-cross" @click="noPassVisible = true">拒绝</el-button>
+                    <el-tooltip class="item tooltip-key" effect="dark" placement="bottom">
+                        <div slot="content">快捷键：shift+回车</div>
+                        <el-button type="primary" size="small" icon="circle-check" @click="pass">通过</el-button>
+                    </el-tooltip>
+                    <el-tooltip class="item tooltip-key" effect="dark" placement="bottom">
+                        <div slot="content">快捷键：shift+\</div>
+                        <el-button type="danger" size="small" icon="circle-cross" @click="noPassVisible = true">拒绝</el-button>
+                    </el-tooltip>
                 </el-col>
                 <el-col :span="20" class="flex_center">
                     <span class="audit-title" v-html="newExam.contenttitle"></span>
@@ -13,18 +19,18 @@
             </el-row>
         </el-card>
         <el-card style="margin-top:10px" :body-style="{padding:'10px'}">
-            <div class="url-next_page clearfix" v-if="newExam!==null">
+            <div class="url-next_page clearfix">
                 <div class="switch_div pull-left">
                     <el-button type="primary" @click="auditBegin = (!auditBegin)" size="small" style="margin-right:10px;">
                         {{ auditBegin?"停止审核(审核中)":"开始审核(停审中)" }}
                     </el-button>
                     <span>审核领域：</span>
-                    <el-select v-model="selectAuditType" popper-class='tfmaintypeSelect' placeholder="请选择审核分类" style="width:100px;">
+                    <el-select v-model="selectAuditType" popper-class='tfmaintypeSelect' placeholder="请选择审核分类" style="width:100px;" @change="changeDataType" ref="lingyuSelect">
                         <el-option v-for="(item,index) in selectPlatforms" :key="index" :label="item.typeName" :value="item.typePy">
                         </el-option>
                     </el-select>
                 </div>
-                <div class="url-source">
+                <div class="url-source" v-if="newExam!==null">
                     <span class="source"
                           v-html="newExam.source"></span>
                     ：
@@ -44,7 +50,7 @@
                             <span class="audit-num" style="color:#ff4949;font-weight:700" v-html="unCheckedNum"></span>
                         </div>
                         <div class="left-select hasBorderBottom" v-if="newExam!==null">
-                            <el-select v-model="newExam.urlmaintypepy" placeholder="请选择" style="width: 100%">
+                            <el-select v-model="newExam.urlmaintypepy" placeholder="请选择" style="width: 100%" ref="classifySelect">
                                 <el-option
                                     v-for="(item,index) in platform"
                                     :key="item.typePy"
@@ -53,6 +59,27 @@
                                 </el-option>
                             </el-select>
                         </div>
+                        <el-collapse v-model="activeName">
+                            <el-collapse-item name="timeline">
+                                <template slot="title">
+                                    <div class="collapse-title">
+                                        <div class="collapse-title_label">
+                                            时效性：
+                                        </div>
+                                        <div class="collapse-title_content">
+                                            {{ timeliness ===''?'暂未选择':timelinessOptions[timeliness].label }}
+                                        </div>
+                                    </div>
+                                </template>
+                                <div class="collapse-content">
+                                    <el-radio-group v-model="timeliness">
+                                        <div v-for="item in timelinessOptions" style="margin-bottom:6px;">
+                                            <el-radio :label="item.value">{{ item.label }}</el-radio>
+                                        </div>
+            					   </el-radio-group>
+                                </div>
+                            </el-collapse-item>
+                        </el-collapse>
                         <el-collapse v-model="activeName">
                             <el-collapse-item name="keywords">
                                 <template slot="title">
@@ -147,7 +174,9 @@
                             <!--此处4个为一行-->
                             <el-row :gutter="10" class="audit_content-box" v-if="newExam!=null">
                                 <div v-for='(item,index) in Math.ceil(currentImgs.length/4)' class="clearfix" :key="index">
-                                    <el-col :span="6" v-for="i in 4" v-if="currentImgs[(index*4)+i-1]" :key="i" style="margin-bottom:20px;">
+                                    <el-col :span="6" v-for="i in 4" v-if="currentImgs[(index*4)+i-1]" :key="i"
+                                            style="margin-bottom:20px;"
+                                            :class="(parseFloat(currentImgs[(index*4)+i-1].pratio) * 100) > 90 ? 'porno':''">
                                         <div class="audit_img_item" style="position:relative">
                                             <img :src="currentImgs[(index*4)+i-1].src">
                                             <div class="taobao_price" v-if="newExam.isadv==1">￥{{currentImgs[(index*4)+i-1].taobao.finalprice}}</div>
@@ -229,12 +258,26 @@ import {
 export default {
     data() {
         return {
+            timeliness: 0,
+            timelinessOptions: [{
+                    label: '非时效性',
+                    value: 0
+                },
+                {
+                    label: '时效性',
+                    value: 1
+                },
+                {
+                    label: '未知',
+                    value: 2
+                }
+            ],
             auditBegin: true,
             selectAuditType: '',
             selectPlatforms: [],
             unCheckedNum: 0,
             auditType: 'wemedia',
-            activeName: ['keywords', 'level'],
+            activeName: ['timeline','keywords','level'],
             popShow: false,
             imgBigBox: false,
             nowCarousel: 0,
@@ -405,6 +448,7 @@ export default {
     mounted() {
         this.getType()
         this.mountedGetData()
+        this.loadKey()
     },
     methods: {
         checkedNum(subType) {
@@ -421,8 +465,8 @@ export default {
         mountedGetData() {
             this.checkedNum('picture')
             let localData = localStorage.getItem('wemedia_img')
-            if (localData && JSON.parse(localData).length <= 9) {
-                this.dataList = JSON.parse(localData)
+            if (localData && (JSON.parse(localData).length > 0 && JSON.parse(localData).length <= 9)) {
+                this.getLocalData()
                 this.getDataList()
             } else if (localData && JSON.parse(localData).length > 9) {
                 this.getLocalData()
@@ -533,7 +577,8 @@ export default {
                     rowkey: this.newExam.rowkey,
                     gradelv: this.imgLevel,
                     mtppy: this.newExam.urlmaintypepy,
-                    keyword: this.dynamicTags.join(",")
+                    keyword: this.dynamicTags.join(","),
+                    timeliness: this.timeliness
                 }
             }
             this.$confirm('确认审核通过吗?', '提示', {
@@ -606,6 +651,50 @@ export default {
         // 复制URL按钮
         copyContent(text, event) {
             clip(text, event)
+        },
+        loadKey(){
+            let _that = this;
+            document.onkeydown = function(ev){
+                if(ev.keyCode==49){
+                    _that.imgLevel=1;
+                }else if(ev.keyCode==50){
+                    _that.imgLevel=2;
+                }else if(ev.keyCode==51){
+                    _that.imgLevel=3;
+                }else if(ev.keyCode==52){
+                    _that.imgLevel=4;
+                }else if(ev.keyCode==53){
+                    _that.imgLevel=5;
+                }else if(ev.shiftKey==1&&ev.keyCode==13){
+                    _that.changeBlur()
+                    _that.pass();
+                }else if(ev.shiftKey==1&&ev.keyCode==220){
+                    _that.noPassVisible = true
+                }else if(ev.shiftKey==1&&(ev.keyCode==38||ev.keyCode==37||ev.keyCode==219)){
+                    _that.changePage(0);
+                }else if(ev.shiftKey==1&&(ev.keyCode==40||ev.keyCode==39||ev.keyCode==221)){
+                    _that.changePage(1);
+                }
+            }
+        },
+        // 回收数据
+        recycleData() {
+            clearInterval(this.selfInterva)
+            localStorage.removeItem("wemedia_img")
+            this.dataList = []
+            let para = {
+                queue: 'wemedia_img'
+            };
+            removeDoExamData(para).then((res) => {});
+        },
+        // 改变数据类型
+        changeDataType() {
+            this.recycleData()
+            this.mountedGetData()
+        },
+        changeBlur(){
+            this.$refs.lingyuSelect.blur()
+            this.$refs.classifySelect.blur()
         }
     },
     watch: {
@@ -621,19 +710,20 @@ export default {
         "noPassVisible": function() {
             var _this = this
             if (!this.noPassVisible) {
-                // document.onkeydown = null;
-                // this.loadKey()
+                document.onkeydown = null;
+                this.loadKey()
                 setTimeout(function() {
                     _this.$refs.selectInput.blur()
                 }, 0)
             } else {
                 // 移除键盘事件
-                // document.onkeydown = null;
-                // document.onkeydown = function(ev){
-                //     if(_this.noPassVisible&&ev.keyCode==13){
-                //         _this.imgNoPassed();
-                //     }
-                // }
+                document.onkeydown = null;
+                document.onkeydown = function(ev){
+                    if(_this.noPassVisible&&ev.keyCode==13){
+                        _this.changeBlur()
+                        _this.refuse();
+                    }
+                }
                 setTimeout(function() {
                     _this.$refs.selectInput.focus()
                 }, 0)
@@ -641,12 +731,7 @@ export default {
         }
     },
     destroyed() {
-        clearInterval(this.selfInterva)
-        localStorage.removeItem("wemedia_img")
-        let para = {
-            queue: 'wemedia_img'
-        };
-        removeDoExamData(para).then((res) => {});
+        this.recycleData()
     }
 }
 </script>

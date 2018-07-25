@@ -160,10 +160,12 @@ export default {
         },
         queryPendingData() {
             getPendingData().then((res) => {
-                this.pending = res.data;
-                this.pendBoxX = this.pending.weaudit.weauditnew + this.pending.weaudit.weauditpic + this.pending.weaudit.weauditvideo;
-                this.pendBoxD = this.pending.dfhaudit.dfhauditnew + this.pending.dfhaudit.dfhauditvideo + this.pending.dfhaudit.dfhauditpic;
-                this.initChart()
+                if(res.code === '00001'){
+                    this.pending = res.data;
+                    this.pendBoxX = this.pending.weaudit.weauditnew + this.pending.weaudit.weauditpic + this.pending.weaudit.weauditvideo;
+                    this.pendBoxD = this.pending.dfhaudit.dfhauditnew + this.pending.dfhaudit.dfhauditvideo + this.pending.dfhaudit.dfhauditpic;
+                    this.initChart()
+                }
             });
         }
     }

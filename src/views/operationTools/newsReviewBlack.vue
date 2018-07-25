@@ -16,6 +16,10 @@
                 </el-form>
             </div>
             <div class="news-preview-black-right">
+                <el-row class="mb-10">
+                    <el-input v-model="form.url" placeholder="请输入URL" style="width:400px"></el-input>
+                    <el-button type="primary" @click='getNewbytype(newbytype)'>搜索</el-button>
+                </el-row>
                 <div class="right-title">
                     <ul class="right-title-list">
                         <li v-for="item in platformCities" :key='item.typePy'  :value="item.typePy" @click="getNewbytype(item.typePy)">
@@ -80,6 +84,9 @@ import {
 export default {
     data() {
         return {
+            form: {
+                url: ''
+            },
             listLoading: false,
             page: 1,
             pagesize: 10,
@@ -171,20 +178,23 @@ export default {
                     var params = {
                         tppy: _this.newbytype,
                         lastkey: _this.lastRowkey,
-                        number: 20
+                        number: 20,
+                        url: _this.form.url
                     }
                     console.log(params)
-                    getXianggangList(params).then(res => {
-                        if (res.code == "00001") {
-                            // _this.btnLoad = false;
-                            var len = _this.newsList.length;
-                            for (var i = 0; i < res.data.length; i++) {
-                                res.data[i].minibjs = eval(res.data[i].minibjs)
+                    if(_this.form.url==''){
+                        getXianggangList(params).then(res => {
+                            if (res.code == "00001") {
+                                // _this.btnLoad = false;
+                                var len = _this.newsList.length;
+                                for (var i = 0; i < res.data.length; i++) {
+                                    res.data[i].minibjs = eval(res.data[i].minibjs)
+                                }
+                                _this.newsList = _this.newsList.concat(res.data);
+                                _this.lastRowkey = _this.newsList[_this.newsList.length - 1].rowkey;
                             }
-                            _this.newsList = _this.newsList.concat(res.data);
-                            _this.lastRowkey = _this.newsList[_this.newsList.length - 1].rowkey;
-                        }
-                    })
+                        })
+                    }
                 }
             }
         },
@@ -193,7 +203,8 @@ export default {
             var params = {
                 tppy: value,
                 lastkey: '',
-                number: 20
+                number: 20,
+                url: this.form.url
             }
             this.newbytype = value;
             getXianggangList(params).then(res => {

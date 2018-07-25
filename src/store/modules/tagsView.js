@@ -29,6 +29,29 @@ const tagsView = {
                     break
                 }
             }
+        },
+        CLOSE_ALL_VIEWS: (state, view) => {
+            state.visitedViews.splice(1)
+            state.cachedViews.length = 0
+        },
+        CLOSE_THIS_VIEW: (state, vm) => {
+            let currentName = vm.$route.name;
+            let currentIndex = 0;
+            state.visitedViews.forEach((item, index) => {
+                if (item.name === currentName) {
+                    currentIndex = index
+                }
+            })
+            if (currentIndex === 0) {
+                state.visitedViews.splice(1)
+            } else {
+                state.visitedViews.splice(currentIndex + 1)
+                state.visitedViews.splice(1, currentIndex - 1)
+            }
+            let newCachepage = state.cachedViews.filter(item => {
+                return item === currentName;
+            })
+            state.cachedViews = newCachepage
         }
     },
     actions: {

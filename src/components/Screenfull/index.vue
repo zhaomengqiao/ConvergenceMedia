@@ -42,7 +42,7 @@ export default {
     click() {
       if (!screenfull.enabled) {
         this.$message({
-          message: 'you browser can not work',
+          message: '您的浏览器不支持该功能，请您尽快升级或者更换最新的谷歌浏览器',
           type: 'warning'
         })
         return false
@@ -60,6 +60,6 @@ export default {
   fill: #5a5e66;;
   width: 20px;
   height: 20px;
-  vertical-align: 10px;
+  vertical-align: -6px;
 }
 </style>

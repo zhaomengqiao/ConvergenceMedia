@@ -204,3 +204,12 @@ code {
     letter-spacing: 4px;
     line-height: 400px;
 }
+.editVideos .video-js{
+    width: 100%
+}
+.max_width_auditTitle{
+    display: inline-block;
+    max-width: 500px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}

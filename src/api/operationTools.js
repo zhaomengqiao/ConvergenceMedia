@@ -441,7 +441,7 @@ export function trampleContent(data) {
 export function edittitle(data) {
     let param = data.param
     return request({
-        url: `/api/${params.platform}/edittitle`,
+        url: `/api/${data.platform}/edittitle`,
         method: 'post',
         data: qs.stringify(param)
     })
@@ -451,7 +451,7 @@ export function edittitle(data) {
 export function editsource(data) {
     let param = data.param
     return request({
-        url: `/api/${params.platform}/editsource`,
+        url: `/api/${data.platform}/editsource`,
         method: 'post',
         data: qs.stringify(param)
     })
@@ -666,15 +666,16 @@ export const uploadFilmEditing = `/rongmeitiapi/task/upload`
 // 关键词管理
 // 获取关键词管理
 export function getKeyWordList(data) {
+    let params = ''
     if(data.url=='api/invalidkeys/query'||data.url=='api/blockadskeys/query'||data.url=='api/commonkeywords/query'){
-        let data = { json: JSON.stringify(data),url:data.url }
+        params = { json: JSON.stringify(data),url:data.url }
     }else{
-        let data = data
+        params = data
     }
     return request({
         url: `/${data.url}`,
         method: 'post',
-        data: qs.stringify(data)
+        data: qs.stringify(params)
     })
 }
 
@@ -774,6 +775,40 @@ export function localLexiconEdit(data) {
 export function localLexiconDel(data) {
     return request({
         url: `/api/localstationkeywords/del`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 小视频维护工具
+// 通过rowkey查询视频
+export function getShortVideoByRowkey(data) {
+    return request({
+        url: `/api/newsmanager/querydetailbyrowkey`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+// 通过username查询视频
+export function getShortVideoByUsername(data) {
+    return request({
+        url: `/api/newsmanager/querylistbyname`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+// 通过用户id查询视频
+export function getShortVideoByUserId(data) {
+    return request({
+        url: `/api/newsmanager/querylistbyuserid`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+// 根据rowkey加黑视频
+export function addBlackShortVideoByRowkey(data) {
+    return request({
+        url: `/api/newsmanager/addblackbyrowkey`,
         method: 'post',
         data: qs.stringify(data)
     })

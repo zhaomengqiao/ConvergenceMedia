@@ -3,8 +3,14 @@
         <el-card :body-style="{padding:'10px 20px'}">
             <el-row :gutter="4">
                 <el-col :span="4">
-                    <el-button type="primary" size="small" icon="circle-check" @click="pass">通过</el-button>
-                    <el-button type="danger" size="small" icon="circle-cross" @click="refuse">拒绝</el-button>
+                    <el-tooltip class="item tooltip-key" effect="dark" placement="bottom">
+                        <div slot="content">快捷键：shift+回车</div>
+                        <el-button type="primary" size="small" icon="circle-check" @click="pass">通过</el-button>
+                    </el-tooltip>
+                    <el-tooltip class="item tooltip-key" effect="dark" placement="bottom">
+                        <div slot="content">快捷键：shift+\</div>
+                        <el-button type="danger" size="small" icon="circle-cross" @click="refuse">拒绝</el-button>
+                    </el-tooltip>
                 </el-col>
                 <el-col :span="20" class="flex_center" v-if="newExam.contenttitle">
                     <!-- <el-tag type="danger">境外</el-tag> -->
@@ -210,10 +216,16 @@ export default {
             if (this.dataList.length != 0) {
                 this.newExam.contenttitle = this.dataList[0].title
                 this.newExam.keywords = this.dataList[0].lable01.split(',')
-                this.newExam.videoCover = this.dataList[0].coverimglink
-                this.playerOptions.sources[0].src = this.dataList[0].videolink
-                this.playerOptions.poster = this.dataList[0].coverimglink
-                this.newExam.videoCover = this.dataList[0].coverimglink
+                this.newExam.videoCover = JSON.parse(this.dataList[0].imgjs)[0].src
+                this.playerOptions.sources[0].src = JSON.parse(this.dataList[0].videojs)[0].src
+                this.playerOptions.poster = JSON.parse(this.dataList[0].imgjs)[0].src
+                try {
+                    let myPlayer = this.$refs.videoPlayer.player;
+                    myPlayer.poster(JSON.parse(this.dataList[0].imgjs)[0].src);
+                } catch (e) {
+                    console.log(e)
+                }
+                this.newExam.videoCover = JSON.parse(this.dataList[0].imgjs)[0].src
                 this.newExam.rowkey = this.dataList[0].rowkey
                 clearInterval(this.videoInterva)
             } else {
@@ -240,10 +252,20 @@ export default {
         // 没有数据开启定时器
         getInterva() {
             if (this.dataList.length === 0) {
-                this.videoInterva = setInterval(this.getAuditList, 30000)
+                var _this = this
+                if (this.dataList.length === 0) {
+                    this.videoInterva = setInterval(() => {
+                        if(_this.dataList.length === 0){
+                            _this.getAuditList()
+                        }
+                    }, 30000)
+                }
             }
         },
         pass() {
+            if(!this.newExam.rowkey){
+                return
+            }
             let params = {
                 rowkey: this.newExam.rowkey,
                 gradelv: this.videoLevel
@@ -271,6 +293,9 @@ export default {
             })
         },
         refuse() {
+            if(!this.newExam.rowkey){
+                return
+            }
             let params = {
                 rowkey: this.newExam.rowkey,
                 reason: this.videoLevel

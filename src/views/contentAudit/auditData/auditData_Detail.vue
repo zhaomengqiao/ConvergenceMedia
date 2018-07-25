@@ -210,8 +210,8 @@ export default {
             videoOptions: '',
             form: {
                 timeQuantum: [startTime, endTime],
-                starttime: startTime,
-                endtime: endTime,
+                starttime: startTime.getTime(),
+                endtime: endTime.getTime(),
                 platform: '',
                 type: '',
                 team: '',
@@ -386,11 +386,11 @@ export default {
         },
         exportExcel(){
             var exportUrl = exportExcalAuditDetail;
-            exportUrl += 'json={"starttime":' + (this.form.starttime ? '"' + this.form.starttime + '"' : '')
-            exportUrl += ',"endtime":' + '"' + this.form.endtime + '"'
-            exportUrl += ',"auditUser":' + (this.form.auditPeople ? '"' + this.form.user + '"' + '"' : '""')
-            exportUrl += ',"userType":' + (this.form.team ? '"' + this.form.team + '"' + '"' : '""')
-            exportUrl += ',"auditType":' + (this.form.type ? '"' + this.form.type + '"' + '"' : '""') + '}'
+            exportUrl += 'startTime=' + (this.form.starttime ? this.form.starttime : '')
+            exportUrl += '&endTime=' + this.form.endtime
+            exportUrl += '&auditUser=' + (this.form.user ? this.form.user : '')
+            exportUrl += '&userType=' + (this.form.team ? this.form.team : '')
+            exportUrl += '&auditType=' + (this.form.type ? this.form.type : '')
             console.log(exportUrl)
             window.location.href = exportUrl
         },

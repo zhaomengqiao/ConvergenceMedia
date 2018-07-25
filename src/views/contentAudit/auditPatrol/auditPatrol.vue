@@ -26,6 +26,26 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
+                <el-form-item>
+                    <el-select
+                        v-model="form.platform"
+                        class="select-platform"
+                        filterable
+                        placeholder="选择类型">
+                        <el-option
+                            label="全部类型"
+                            value="">
+                        </el-option>
+                        <el-option
+                            label="东方号"
+                            value="selfmedia">
+                        </el-option>
+                        <el-option
+                            label="自媒体"
+                            value="wemedia">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
                 <el-form-item label="巡查条数">
                     <el-input-number v-model="form.num" :min="1" label="巡查条数"></el-input-number>
                 </el-form-item>
@@ -58,7 +78,7 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item>
+                <el-form-item style="margin-bottom:0">
                     <el-button type="primary" @click="search">查询</el-button>
                     <el-button type="primary" @click="cancelPatrol">取消巡查</el-button>
                 </el-form-item>
@@ -66,7 +86,13 @@
        </el-form>
     </el-card>
     <el-card class="mt-10">
+        <el-row style="margin-bottom:10px;">
+            <el-checkbox-group v-model="tableConfigCheck" class="pull-right">
+                <el-checkbox :label="item" v-for="(item,index) in tableConfig" :key="index">{{ item.label }}</el-checkbox>
+            </el-checkbox-group>
+        </el-row>
         <el-table :data="tableData"
+                 :key="tableKey"
                  highlight-current-row
                  v-loading="listLoading"
                  style="width: 100%;"
@@ -79,17 +105,46 @@
             </el-table-column>
             <el-table-column label="审核人" width="140" :show-overflow-tooltip="true" prop="audituser">
             </el-table-column>
-            <el-table-column label="新闻标题" min-width="220">
+            <el-table-column label="新闻标题" min-width="220" :show-overflow-tooltip="true">
                 <template slot-scope="scope">
-                    <span class="aclick" @click="showDialog(scope.row.url)">{{ scope.row.title }} </span>
+                    <el-popover
+						  ref="popover1"
+						  placement="right"
+						  title="封面"
+						  min-width="250"
+						  height="150"
+						  trigger="hover"
+						  >
+                        <span v-if="!scope.row.page">暂无封面</span>
+						<img :src="item.src" style="width:120px;margin-left:10px;" v-for="item in JSON.parse(scope.row.page.minijs)" v-else/>
+					</el-popover>
+                    <!--404状态标题增加disable_title class-->
+                    <span v-popover:popover1 class="aclick" @click="showDialog(scope.row.url)">{{ scope.row.title }}</span>
                 </template>
             </el-table-column>
-            <el-table-column label="操作" width="140">
+            <el-table-column :key="index" v-for="(item,index) in tableConfigCheck" :show-overflow-tooltip="true" :prop="item.prop" :label="item.label" width="120" v-if="item.prop == 'tags'">
+            </el-table-column>
+            <el-table-column :key="index" v-for="(item,index) in tableConfigCheck" :show-overflow-tooltip="true" :prop="item.prop" :label="item.label" width="80" v-if="item.prop == 'classify'">
+            </el-table-column>
+            <el-table-column :key="index" v-for="(item,index) in tableConfigCheck" :show-overflow-tooltip="true" :prop="item.prop" :label="item.label" width="80" v-if="item.prop == 'timeliness'">
+                <template slot-scope="scope">
+                    {{ scope.row.timeliness | getTimeliness }}
+                </template>
+            </el-table-column>
+            <el-table-column :key="index" v-for="(item,index) in tableConfigCheck" :show-overflow-tooltip="true" :prop="item.prop" :label="item.label" width="170" v-if="item.prop == 'audittime'">
+            </el-table-column>
+            <el-table-column :key="index" v-for="(item,index) in tableConfigCheck" :show-overflow-tooltip="true" :prop="item.prop" :label="item.label" width="140" v-if="item.prop == 'source'">
+            </el-table-column>
+            <el-table-column :show-overflow-tooltip="true" prop="rejectreason" label="驳回理由" min-width="200">
+                <template slot-scope="scope">
+                    {{ scope.row.rejectreason == '' ? '--' : scope.row.rejectreason}}
+                </template>
+            </el-table-column>
+            <el-table-column label="操作" width="200">
                 <template slot-scope="scope">
                     <el-button type="primary" @click="pass(scope.row)" v-if="scope.row.auditstatus==0">通过</el-button>
                     <el-button type="danger" @click="refuse(scope.row)" v-if="scope.row.auditstatus==0">拒绝</el-button>
-                    <span v-if="scope.row.auditstatus==1">已通过</span>
-                    <span v-if="scope.row.auditstatus==2">已拒绝</span>
+                    <el-button type="success" @click="manage(scope.row)" v-if="getManageAuth(scope.row.newstype)">管理</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -158,6 +213,29 @@ export default {
         const startTime = parseTime(new Date().setHours(0, 0, 0), '{y}-{m}-{d} {h}:{i}:{s}')
         const endTime = parseTime(new Date().setHours(23, 59, 59), '{y}-{m}-{d} {h}:{i}:{s}')
         return {
+            tableKey: 0,
+            tableConfigCheck: [],
+            tableConfig: [{
+                    prop: "tags",
+                    label: "标签"
+                },
+                {
+                    prop: "classify",
+                    label: "分类"
+                },
+                {
+                    prop: "timeliness",
+                    label: "时效性"
+                },
+                {
+                    prop: "audittime",
+                    label: "审核时间"
+                },
+                {
+                    prop: "source",
+                    label: "来源"
+                }
+            ],
             replyFormVisible: false,
             contentPreview: '',
             pictureInfo: '',
@@ -177,13 +255,14 @@ export default {
             },
             // 以上是标题点击所需数据
             form: {
-                timeQuantum: [],
+                timeQuantum: [startTime,endTime],
                 starttime: startTime,
                 endtime: endTime,
                 type: 0,
                 team: '',
                 num: 100,
-                user: ''
+                user: '',
+                platform: ''
             },
             patrols: [
                 {
@@ -205,7 +284,12 @@ export default {
             pageSize: 10,
             currentPage: 1,
             total: 0,
-            listLoading: false
+            listLoading: false,
+            auth: {
+                article: false,
+                picture: false,
+                video: false
+            }
         }
     },
     filters: {
@@ -223,12 +307,57 @@ export default {
                 default:
                     return '新闻'
             }
+        },
+        getTimeliness(val) {
+            switch (Number(val)) {
+                case 0:
+                    return '非时效性'
+                    break;
+                case 1:
+                    return '时效性'
+                    break;
+                case 2:
+                    return '未知'
+                    break;
+                default:
+                    return '未知'
+                    break;
+            }
         }
     },
     mounted(){
         this.getAllAuditUser()
     },
     methods: {
+        getManageAuth(type) {
+            const authListStr = localStorage.getItem('authorList')
+            switch (Number(type)) {
+                case 0:
+                    if (authListStr.indexOf('content/black/dftt/article') != -1) {
+                        return true
+                    }else{
+                        return false
+                    }
+                    break
+                case 1:
+                    if (authListStr.indexOf('content/black/dftt/pic') != -1) {
+                        return true
+                    }else{
+                        return false
+                    }
+                    break
+                case 2:
+                    if (authListStr.indexOf('content/black/dftt/video') != -1) {
+                        return true
+                    }else{
+                        return false
+                    }
+                    break
+                default:
+                    return false
+                    break
+            }
+        },
         search() {
             this.currentPage = 1
             this.getList()
@@ -248,7 +377,8 @@ export default {
                 startTime: this.form.starttime,
                 endTime: this.form.endtime,
                 pageNum: this.currentPage,
-                pageSize: this.pageSize
+                pageSize: this.pageSize,
+                audittype: this.form.platform
             }
             this.listLoading = true
             getAuditPatrol(params).then(res => {
@@ -332,6 +462,31 @@ export default {
             this.currentPage = val
             this.getList()
         },
+        //管理
+        manage(data) {
+            let type = ''
+            switch (Number(data.newstype)) {
+                case 0:
+                    type = '文章'
+                    break;
+                case 1:
+                    type = '图集'
+                    break;
+                case 2:
+                    type = '视频'
+                    break;
+                default:
+
+            }
+            this.$router.push({
+                path: '/operationTools/contentManageTools/contentManage',
+                query: {
+                    url: data.url,
+                    platform: 'toutiao',
+                    type: type
+                }
+            });
+        },
         showDialog(url) {
             this.replyFormVisible = true
             let params = {
@@ -367,6 +522,11 @@ export default {
                 }
             })
         }
+    },
+    watch: {
+        'tableConfigCheck': function(){
+            this.tableKey += 1
+        }
     }
 }
 </script>
@@ -374,5 +534,13 @@ export default {
 <style lang="scss" scoped="scoped">
 .auditPatrol{
     padding: 20px;
+}
+.aclick {
+    cursor: pointer;
+    text-decoration: none;
+    color: #666;
+    &:hover{
+        color: #58B7FF;
+    }
 }
 </style>

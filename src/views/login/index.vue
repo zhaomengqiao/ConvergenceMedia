@@ -13,7 +13,7 @@
             <span class="svg-container svg-container_login">
           <svg-icon icon-class="user" />
         </span>
-            <el-input name="username" type="text" v-model="loginForm.username" autoComplete="on" placeholder="账号" @blur='isNeedVerifycode' />
+            <el-input name="username" type="text" v-model="loginForm.username" autoComplete="off" placeholder="账号" @blur='isNeedVerifycode' />
         </el-form-item>
 
         <el-form-item prop="password">
@@ -25,7 +25,7 @@
         </el-form-item>
         <div style="display:flex;align-items:center;margin-bottom:20px;" v-if="isNeedCode">
             <el-form-item prop="verCode" style="flex:1;margin:0">
-                <el-input style="width:auto" id='sendCode' name="password" type="text" @keyup.enter.native="handleLogin" v-model="loginForm.verCode" autoComplete="on" placeholder="验证码" />
+                <el-input style="width:auto" ref="sendCode" id='sendCode' name="password" type="text" @keyup.enter.native="handleLogin" v-model="loginForm.verCode" autoComplete="off" placeholder="验证码" />
             </el-form-item>
             <div style="margin-left:4px;">
                 <el-button type="success" v-if="btnHide" @click.native.prevent="validate_time" disabled style="width: 88px;height:42px;">{{valiCode}}</el-button>
@@ -100,9 +100,10 @@ export default {
                     message: '请输入密码',
                     trigger: 'blur'
                 }],
-                verCode: [
-                  { validator: validateCode, trigger: 'change' }
-                ]
+                verCode: [{
+                    validator: validateCode,
+                    trigger: 'change'
+                }]
             },
             isNeedCode: true,
             pwdType: 'password',
@@ -140,8 +141,8 @@ export default {
                     this.codeTimer(); //倒计时
                     this.loginForm.verCode = data;
                 }
-                document.getElementById('sendCode').getElementsByTagName('input')[0].focus();
-            });
+                this.$refs.sendCode.focus()
+            })
         },
         codeTimer() { //计时器
             var _this = this;

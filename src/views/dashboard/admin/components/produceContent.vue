@@ -35,21 +35,21 @@ export default {
         return {
             chart: null,
             produceStyle: {
-                height:'260px',
-                boxSizing:'border-box',
-                overflow:'auto',
+                height: '260px',
+                boxSizing: 'border-box',
+                overflow: 'auto',
                 padding: '10px'
             },
-            prodBoxD:0,
-            prodBoxX:0,
-            produce:'',
-            radius:'50%',
-            prodSpace:'',
-            listLoading:false,
+            prodBoxD: 0,
+            prodBoxX: 0,
+            produce: '',
+            radius: '50%',
+            prodSpace: '',
+            listLoading: false,
             platform: 'toutiao'
         }
     },
-    created() {
+    created()  {
         var url = window.location.href
         this.platform = getPlatformByUrl(url).add;
     },
@@ -72,54 +72,59 @@ export default {
         this.chart = null
     },
     methods: {
-        setPendingDiv(){
+        setPendingDiv() {
             var _that = this;
-            if(1920>window.innerWidth){
+            if (1920 > window.innerWidth) {
                 _that.radius = '45%';
-                _that.prodSpace='           ';
-            }else{
+                _that.prodSpace = '           ';
+            } else {
                 _that.radius = '60%';
-                _that.prodSpace='                              ';
+                _that.prodSpace = '                              ';
             }
         },
-        queryProduceData(){
-            this.listLoading=true;
-            let para = {day:1,articleType: this.articleType,platform: this.platform}
-            getProduceData(para).then((res)=>{
-                this.produce=res.data;
-                this.prodBoxD=this.produce.dfh.news+this.produce.dfh.video+this.produce.dfh.picture;
-                this.prodBoxX=this.produce.wemedia.news+this.produce.wemedia.video+this.produce.wemedia.picture;
-                this.getProduceData();
-                this.listLoading=false;
+        queryProduceData() {
+            this.listLoading = true;
+            let para = {
+                day: 1,
+                articleType: this.articleType,
+                platform: this.platform
+            }
+            getProduceData(para).then((res) => {
+                if (res.code === '00001') {
+                    this.produce = res.data;
+                    this.prodBoxD = this.produce.dfh.news + this.produce.dfh.video + this.produce.dfh.picture;
+                    this.prodBoxX = this.produce.wemedia.news + this.produce.wemedia.video + this.produce.wemedia.picture;
+                    this.getProduceData();
+                }
+                this.listLoading = false;
             });
         },
-        getProduceData () {
-            let  _that = this;
+        getProduceData() {
+            let _that = this;
             _that.chart = echarts.init(_that.$el, 'macarons')
-           _that.chart.setOption({
-                title : {
-                    text: '融媒体('+ _that.prodBoxX+')'+_that.prodSpace+'东方号('+ _that.prodBoxD+')',
+            _that.chart.setOption({
+                title: {
+                    text: '融媒体(' + _that.prodBoxX + ')' + _that.prodSpace + '东方号(' + _that.prodBoxD + ')',
                     subtext: '',
-                    textStyle:{
-                        fontStyle:'16px'
+                    textStyle: {
+                        fontStyle: '16px'
                     },
-                    x:'center'
+                    x: 'center'
                 },
-                tooltip : {
+                tooltip: {
                     trigger: 'item',
                     formatter: "{a} <br/>{b} : {c} ({d}%)"
                 },
                 legend: {
-                    data:['新闻','视频','图集',],
-                    bottom:"0px",
+                    data: ['新闻', '视频', '图集', ],
+                    bottom: "0px",
                     align: "auto"
                 },
-                color:['#01b8c0','#8ed5e7',  '#fea928', '#eeff9f','#6e7074', '#546570', '#c4ccd3'],
-                series : [
-                    {
+                color: ['#01b8c0', '#8ed5e7', '#fea928', '#eeff9f', '#6e7074', '#546570', '#c4ccd3'],
+                series: [{
                         name: '新媒体',
                         type: 'pie',
-                        radius : _that.radius,
+                        radius: _that.radius,
                         center: ['25%', '50%'],
                         label: {
                             normal: {
@@ -128,15 +133,23 @@ export default {
                             },
                         },
                         labelLine: {
-                            normal:{
-                                length:8,
-                                length2:5
+                            normal: {
+                                length: 8,
+                                length2: 5
                             }
                         },
-                        data:[
-                            {value:_that.produce.wemedia.news, name:'新闻'},
-                            {value:_that.produce.wemedia.video, name:'视频'},
-                            {value:_that.produce.wemedia.picture, name:'图集'},
+                        data: [{
+                                value: _that.produce.wemedia.news,
+                                name: '新闻'
+                            },
+                            {
+                                value: _that.produce.wemedia.video,
+                                name: '视频'
+                            },
+                            {
+                                value: _that.produce.wemedia.picture,
+                                name: '图集'
+                            },
                         ],
                         itemStyle: {
                             emphasis: {
@@ -149,7 +162,7 @@ export default {
                     {
                         name: '东方号',
                         type: 'pie',
-                        radius : _that.radius,
+                        radius: _that.radius,
                         center: ['70%', '50%'],
                         label: {
                             normal: {
@@ -158,15 +171,23 @@ export default {
                             },
                         },
                         labelLine: {
-                            normal:{
-                                length:8,
-                                length2:5
+                            normal: {
+                                length: 8,
+                                length2: 5
                             }
                         },
-                        data:[
-                            {value:_that.produce.dfh.news, name:'新闻'},
-                            {value:_that.produce.dfh.video, name:'视频'},
-                            {value:_that.produce.dfh.picture, name:'图集'},
+                        data: [{
+                                value: _that.produce.dfh.news,
+                                name: '新闻'
+                            },
+                            {
+                                value: _that.produce.dfh.video,
+                                name: '视频'
+                            },
+                            {
+                                value: _that.produce.dfh.picture,
+                                name: '图集'
+                            },
                         ],
                         itemStyle: {
                             emphasis: {
@@ -181,7 +202,7 @@ export default {
         }
     },
     watch: {
-        "articleType": function(){
+        "articleType": function() {
             this.queryProduceData();
         }
     }

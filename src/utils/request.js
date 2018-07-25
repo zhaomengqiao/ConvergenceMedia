@@ -22,6 +22,9 @@ const service = axios.create({
 
 // request拦截器
 service.interceptors.request.use(config => {
+    config.headers={
+      'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'
+    }
     // Do something before request is sent
     //config.headers['Content-Type'] = 'application/x-www-form-urlencoded'
     // if (store.getters.token) {
@@ -53,7 +56,7 @@ service.interceptors.response.use(
             Message.error({
                 message: '用户无权限'
             })
-        } else if (res.code !== '00001' && res.code !== '00005' && res.code !== '201' && res.code !== '200') {
+        } else if (res.code !== '00000' && res.code !== '00001' && res.code !== '00005' && res.code !== '201' && res.code !== '200') {
             let msg = res.ret?res.ret:'加载失败'
             Message.error({
                 message: msg
@@ -62,7 +65,7 @@ service.interceptors.response.use(
         return res
     },
     error => {
-        console.log(error.message) // for debug
+        console.log(error) // for debug
         Message({
             message: error.data?error.data.ret:error.message,
             type: 'error',

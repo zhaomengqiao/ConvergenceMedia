@@ -2,43 +2,56 @@
     <section class="auditData_comment_all">
         <el-card>
             <el-form :inline="true" :model="form">
-                <el-form-item label="审核类型" style="margin-bottom:0">
-                    <el-select v-model="form.type" style="width:200px;"
-                        filterable placeholder="选择审核类型">
-                        <el-option
-                            v-for="(item,index) in types"
-                            :key="index"
-                            :label="item.mean"
-                            :value="item.logtype"
-                            >
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="审核时间" style="margin-bottom:0">
-                    <el-date-picker value-format="yyyy-MM-dd HH:mm:ss"
-                        v-model="form.timeQuantum"
-                        type="datetimerange"
-                        placeholder="选择时间范围"
-                        @change="getTopTime">
-                    </el-date-picker>
-                </el-form-item>
-                <el-form-item label="审核人员" style="margin-bottom:0">
-                    <el-select v-model="form.user" style="width:200px;"
-                        filterable placeholder="请选择审核人员">
-                        <el-option
-                            v-for="(item,index) in users"
-                            :key="index"
-                            :label="item.realName"
-                            :value="item.userName">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item style="margin-bottom:0">
-                    <el-button type="primary" @click="search">查询</el-button>
-                </el-form-item>
-                <el-form-item style="margin-bottom:0">
-                    <el-button type="primary" @click="exportExcel">导出</el-button>
-                </el-form-item>
+                <el-row>
+                    <el-form-item label="审核类型">
+                        <el-select v-model="form.type" style="width:200px;"
+                            filterable placeholder="选择审核类型">
+                            <el-option
+                                v-for="(item,index) in types"
+                                :key="index"
+                                :label="item.mean"
+                                :value="item.logtype"
+                                >
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="审核时间">
+                        <el-date-picker value-format="yyyy-MM-dd HH:mm:ss"
+                            v-model="form.timeQuantum"
+                            type="datetimerange"
+                            placeholder="选择时间范围"
+                            @change="getTopTime">
+                        </el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="审核人员">
+                        <el-select v-model="form.user" style="width:200px;"
+                            filterable placeholder="请选择审核人员">
+                            <el-option
+                                v-for="(item,index) in users"
+                                :key="index"
+                                :label="item.realName"
+                                :value="item.userName">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-row>
+                <el-row>
+                    <el-form-item style="margin-bottom:0">
+                        <el-input v-model="form.title" placeholder="请输入新闻标题"></el-input>
+                    </el-form-item>
+                    <el-form-item style="margin-bottom:0">
+                        <el-input v-model="form.url" placeholder="请输入新闻链接"></el-input>
+                    </el-form-item>
+                    <el-form-item style="margin-bottom:0">
+                        <el-input v-model="form.username" placeholder="请输入用户名"></el-input>
+                    </el-form-item>
+                    <el-form-item style="margin-bottom:0">
+                        <el-button type="primary" @click="search">查询</el-button>
+                    </el-form-item>
+                    <el-form-item style="margin-bottom:0">
+                        <el-button type="primary" @click="exportExcel">导出</el-button>
+                    </el-form-item>
+                </el-row>
             </el-form>
         </el-card>
         <el-card class="mt-10">
@@ -101,15 +114,18 @@ import {
 
 export default {
     data(){
-        const startTime = new Date(new Date().setHours(0, 0, 0))
-        const endTime = new Date(new Date().setHours(23, 59, 59))
+        const startTime = parseTime(new Date(new Date().setHours(0, 0, 0)), '{y}-{m}-{d} {h}:{i}:{s}')
+        const endTime = parseTime(new Date(new Date().setHours(23, 59, 59)), '{y}-{m}-{d} {h}:{i}:{s}')
         return {
             form: {
                 timeQuantum: [startTime, endTime],
                 starttime: startTime,
                 endtime: endTime,
                 user: '',
-                type: ''
+                type: '',
+                username: '',
+                title: '',
+                url: ''
             },
             types: [],
             users: [],
@@ -132,7 +148,11 @@ export default {
             this.getList()
         },
         getCommentDetailLog(){
-            getCommentDetailLog().then(res => {
+            let params = {
+                platform: 'comment',
+                newstype: 'comment'
+            }
+            getCommentDetailLog(params).then(res => {
                 if(res.code === '00001'){
                     this.types = res.data
                     this.types.unshift({
@@ -157,7 +177,10 @@ export default {
                 auditUser: this.form.user,
                 pageNum: this.currentPage,
                 pageSize: this.pageSize,
-                auditType: this.form.type
+                auditType: this.form.type,
+                userName: this.form.username,
+                url: this.form.url,
+                title: this.form.title
             }
             this.listLoading = true
             getCommentAuditDetailList(params).then(res => {
@@ -212,10 +235,10 @@ export default {
         },
         exportExcel(){
             var exportUrl = exportCommentDetail;
-            exportUrl += 'json={"startTime":' + (this.form.starttime ? '"' + this.form.starttime + '"' : '')
-            exportUrl += ',"endTime":' + '"' + this.form.endtime + '"'
-            exportUrl += ',"auditType":' + '"' + this.form.type + '"'
-            exportUrl += ',"auditUser":' + (this.form.user ? '"' + this.form.user + '"' + '"' : '""') + '}'
+            exportUrl += 'startTime=' + (this.form.starttime ? this.form.starttime : '')
+            exportUrl += '&endTime=' + this.form.endtime
+            exportUrl += '&auditType=' + this.form.type
+            exportUrl += '&auditUser=' + (this.form.user ? this.form.user  : '')
             console.log(exportUrl)
             window.location.href = exportUrl
         }

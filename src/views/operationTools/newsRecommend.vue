@@ -68,8 +68,8 @@
                             </el-button-group>
                         </div>
                     </el-row>
-                    <el-col :span="6" class='box_div' id='box_div' style="position:relative">
-                        <div class="box_img" id="box_img" style="position:absolute;width:100%;column-count: 4;column-gap:20px;left: 0px;font-size:16px;" v-html="newsInfo.content">
+                    <el-col :span="6" class='box_div' id='box_div' style="position:relative;padding:10px;">
+                        <div class="box_img" id="box_img" style="position:absolute;column-count: 4;column-gap:20px;left: 0px;font-size:16px;" v-html="newsInfo.content">
                         </div>
                     </el-col>
                 </el-row>
@@ -83,7 +83,7 @@
                             <el-input v-model.trim="form.searchUrl" placeholder="新闻ID或者URL"></el-input>
                         </el-col>
                         <el-col :span="6">
-                            <el-button type="primary" icon="el-icon-search" :disabled="isOtherLink" @click="getNewsTopInfo"></el-button>
+                            <el-button type="primary" icon="el-icon-search" :disabled="isOtherLink||isActive" @click="getNewsTopInfo"></el-button>
                         </el-col>
                     </el-row>
                     <el-row v-if="!isOtherLink">
@@ -121,6 +121,40 @@
                             <el-form-item label="是否大图">
                                 <el-radio v-model="form.bigPic" label="1" size="small">是</el-radio>
                             </el-form-item>
+                            <el-form-item label="黑名单" v-show="isblacklist==1">
+                                <el-tag :key="tag" v-for="tag in form.dynamicTags" :closable="true" :close-transition="false" @close="handleClose(tag)">
+                                    {{tag}}
+                                </el-tag>
+                                <el-input class="input-new-tag" v-if="inputVisible" v-model="inputValue" ref="saveTagInput" size="mini" @keyup.enter.native="handleInputConfirm" @blur="handleInputConfirm">
+                                </el-input>
+                                <el-button v-else class="button-new-tag" size="small" @click="showInput">+ New Tag</el-button>
+                            </el-form-item>
+                            <el-upload class="small-upload" :action="imgUploadUrl" list-type="picture-card" accept='.jpg,.png' :on-preview="handlePictureCardPreview" :on-remove="handleRemove" :on-success="handleSuccess">
+                                <i class="el-icon-plus"></i>
+                            </el-upload>
+                            <el-dialog v-model="dialogVisible" :close-on-click-modal="false">
+                                <img width="100%" :src="dialogImageUrl" alt="">
+                            </el-dialog>
+                        </el-form>
+                    </el-row>
+                    <el-row v-if="isActive" style="margin-bottom:10px;">
+                        <el-form :model="form">
+                            <el-form-item label="" prop="title" :rules="[{ required: true, message: '请输入标题', trigger: 'blur' }]">
+                                <el-input v-model.trim="form.title" placeholder="请输入标题" size="small"></el-input>
+                            </el-form-item>
+                            <el-form-item label="" :rules="[{ required: true, message: '请输入来源', trigger: 'blur' }]">
+                                <el-input v-model="form.source" placeholder="请输入来源" size="small"></el-input>
+                            </el-form-item>
+                            <el-form-item label="是否大图">
+                                <el-radio v-model="form.bigPic" label="1" size="small">是</el-radio>
+                            </el-form-item>
+                            <el-form-item label="打开方式">
+        						<el-radio-group v-model="openMethods">
+        							<el-radio :label="1">商城</el-radio>
+        							<el-radio :label="2">统计链接</el-radio>
+        							<el-radio :label="3">外链</el-radio>
+        						</el-radio-group>
+        					</el-form-item>
                             <el-form-item label="黑名单" v-show="isblacklist==1">
                                 <el-tag :key="tag" v-for="tag in form.dynamicTags" :closable="true" :close-transition="false" @close="handleClose(tag)">
                                     {{tag}}
@@ -202,6 +236,12 @@
                                 <el-radio v-for="(item,index) in selectOptions.qzOptions" :label="item.value" :key="index">{{ item.label }}</el-radio>
                             </el-radio-group>
                         </el-form-item>
+                        <el-form-item label="是否大图" v-if="form.sourcetype=='news'" class="radio-el-form">
+    						<el-radio-group v-model="isBigPic">
+    							<el-radio :label="2">小图</el-radio>
+    							<el-radio :label="3">大图</el-radio>
+    						</el-radio-group>
+    					</el-form-item>
                         <el-row>
                             <el-button type="primary" @click="handleSave" :disabled="form.status=='审核中'||form.status=='404'">置顶</el-button>
                         </el-row>
@@ -338,7 +378,10 @@ export default {
                     label: "新闻状态"
                 }
             ],
+            isBigPic: 2,
+            openMethods: 1,
             checkedCities: [],
+            saveUrl: '',
             form: {
                 timeQuantum: '',
                 searchUrl: '',
@@ -587,7 +630,8 @@ export default {
             isblacklist: 0,
             inputVisible: false,
             inputValue: '',
-            clickIndex: 1
+            clickIndex: 1,
+            isActive: false
         }
     },
     activated() {
@@ -674,17 +718,32 @@ export default {
                 this.page_num--;
             }
         },
-        changeSourceType() {
-            if (this.form.sourcetype === 'otherlink' || this.form.sourcetype === 'adv_h5') {
+        changeSourceType(val) {
+            // 是否可以选择专题
+            if(val === 'topic' && (Number(this.newsInfo.issptopic) !== 1 || !this.newsInfo.issptopic)) {
+                this.$message({
+                    message: '该新闻无法置顶至专题，请重新选择',
+                    type: 'warning'
+                });
+                this.form.sourcetype = ''
+                return
+            }
+            if (this.form.sourcetype === 'otherlink' || this.form.sourcetype === 'adv_h5'|| this.form.sourcetype === 'autonews') {
                 this.isOtherLink = true;
+                this.isActive = false
                 this.form.islocal = 1;
                 if (this.form.sourcetype === 'adv_h5') {
                     this.isblacklist = 1;
                 } else {
                     this.isblacklist = 0;
                 }
+            } else if(this.form.sourcetype === 'votelink'){
+                this.isActive = true
+                this.isOtherLink=false;
+                this.form.islocal = 1
             } else {
-                this.isOtherLink = false;
+                this.isOtherLink=false;
+                this.isActive = false
                 this.form.islocal = 0;
             }
         },
@@ -912,7 +971,7 @@ export default {
             newsSearchTop(para).then((res) => {
                 if (res.code == '00001' && res.data) {
                     this.newsInfo = res.data;
-                    this.form.searchUrl = res.data.url;
+                    this.saveUrl = res.data.url;
                     this.maintype = res.data.urlmaintype
                     this.newsInfo.content = contentToHtml(this.newsInfo);
                     if (res.data.pushtypeid) {
@@ -1017,8 +1076,33 @@ export default {
                     providPrefix = 'checkall,';
                 }
                 if (valid) {
+                    let contentUrl = ''
+                    // 需求：
+                    // 1. 置顶新闻，专题，必须有查询内容：且必须使用查询后的结果，不使用文本框里的URL
+                    // 2. 活动，外链，验证是标准的http://或者是https://开头，链接中间不存在其他的http字符串
+                    if(this.form.sourcetype === 'news' || this.form.sourcetype === 'topic') {
+                        if(!this.newsInfo){
+                            this.$message({
+                                message: '该新闻暂无内容，无法置顶',
+                                type: 'warning'
+                            });
+                            return
+                        }
+                        contentUrl = this.saveUrl
+                    }else{
+                        let urlRep = /(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)([a-zA-Z0-9\-\.\?\,\'\/\\\+&amp;%\$#_]*)?/
+                        if(urlRep.test(this.form.searchUrl) && this.form.searchUrl.match(/http/g).length == 1){
+                            contentUrl = this.form.searchUrl
+                        }else{
+                            this.$message({
+                                message: '请填写正确格式的url,url中不能出现两次http',
+                                type: 'warning'
+                            });
+                            return
+                        }
+                    }
                     let para = {
-                        content: this.form.searchUrl,
+                        content: contentUrl,
                         endTime: this.form.endTime==''?'':parseTime(this.form.endTime, '{y}-{m}-{d} {h}:{i}:{s}'),
                         idx: this.form.idx,
                         isoneself: this.form.isoneself,
@@ -1037,7 +1121,10 @@ export default {
                         title: this.form.title,
                         source: this.form.source,
                         imgs: this.form.imgsrc.length === 0 ? '' : this.form.imgsrc.join(','),
-                        bigPic: this.form.bigPic
+                        bigPic: (this.isActive||this.isOtherLink) ? Number(this.form.bigPic).toString():this.isBigPic
+                    }
+                    if(this.form.sourcetype=='news'){
+                        para.isnopic = this.isBigPic
                     }
                     if (this.isblacklist == 1) {
                         para.blacklist = this.form.dynamicTags.join(',');

@@ -152,8 +152,8 @@ export default {
         return {
             form: {
                 timeQuantum: [startTime, endTime],
-                starttime: startTime,
-                endtime: endTime,
+                starttime: startTime.getTime(),
+                endtime: endTime.getTime(),
                 platform: '',
                 type: '',
                 team: '',
@@ -193,6 +193,10 @@ export default {
                 {
                     label: '视频',
                     value: 'video'
+                },
+                {
+                    label: '小视频',
+                    value: 'minivideo'
                 }
             ],
             teams: [
@@ -281,25 +285,25 @@ export default {
             }
         },
         paginationChange(data){
-            return data.slice(this.currentPage - 1,this.pageSize)
+            return data.slice((this.currentPage - 1)*this.pageSize,(this.currentPage - 1)*this.pageSize + this.pageSize)
         },
         // 分页
         handleCurrentChange(val) {
             this.currentPage = val
-            this.paginationChange(this.allData)
+            this.tableData = this.paginationChange(this.allData)
         },
         handleSizeChange(val) {
             this.pageSize = val
-            this.paginationChange(this.allData)
+            this.tableData = this.paginationChange(this.allData)
         },
         exportExcel(){
             var exportUrl = exportExcalAuditAll;
-            exportUrl += 'json={"starttime":' + (this.form.starttime ? '"' + this.form.starttime + '"' : '')
-            exportUrl += ',"endtime":' + '"' + this.form.endtime + '"'
-            exportUrl += ',"auditUser":' + (this.form.auditPeople ? '"' + this.form.user + '"' + '"' : '""')
-            exportUrl += ',"userType":' + (this.form.team ? '"' + this.form.team + '"' + '"' : '""')
-            exportUrl += ',"auditType":' + (this.form.platform ? '"' + this.form.platform + '"' + '"' : '""')
-            exportUrl += ',"newsType":' + (this.form.type ? '"' + this.form.type + '"' + '"' : '""') + '}'
+            exportUrl += 'startTime=' + (this.form.starttime ? this.form.starttime : '')
+            exportUrl += '&endTime=' + this.form.endtime
+            exportUrl += '&auditUser=' + (this.form.user ? this.form.user : '')
+            exportUrl += '&userType=' + (this.form.team ? this.form.team : '')
+            exportUrl += '&auditType=' + (this.form.platform ? this.form.platform : '')
+            exportUrl += '&newsType=' + (this.form.type ? this.form.type : '')
             console.log(exportUrl)
             window.location.href = exportUrl
         }

@@ -37,6 +37,9 @@
                               clearable></el-input>
                 </el-form-item>
                 <el-form-item>
+                    <el-checkbox v-model="logtype" v-if="auth.isAll">东方号发文</el-checkbox>
+                </el-form-item>
+                <el-form-item>
                     <el-button type="primary" @click="searchList">查询</el-button>
                 </el-form-item>
                 <el-radio-group class="pull-right" v-model="labelData" @change="changeLabelData">
@@ -66,6 +69,7 @@
 						<img :src="item.src" style="width:120px;margin-left:10px;" v-for="item in JSON.parse(scope.row.minijs)" v-if="JSON.parse(scope.row.minibjs)!=null&&JSON.parse(scope.row.minibjs)!=''"/>
 					</el-popover>
                     <!--404状态标题增加disable_title class-->
+                    <el-tag type="danger" v-if="scope.row.urlfrom === 'dongfanghao_cms'">东方号</el-tag>
                     <el-button v-popover:popover1
                           @click="showReplyForm(scope.row)"
                           class="dialog-span title-button"
@@ -92,7 +96,7 @@
                     <span>{{ formData.platformLabel }}</span>
                 </template>
             </el-table-column>
-            <el-table-column label="操作" width="280" fixed="right">
+            <el-table-column label="操作" width="310" fixed="right">
                 <template slot-scope="scope">
                     <el-button type="primary" size="small"
                                @click="modify(scope.row)"
@@ -156,6 +160,7 @@ export default {
             // 标题dialog
             contentPreview: '',
             // 表单（涵盖获取list所传的所有参数）
+            logtype: false,
             formData: {
                 stime: '',
                 etime: '',
@@ -432,7 +437,11 @@ export default {
             this.listLoading = true;
             switch (this.labelData) {
                 case "create": //我的发布
-                    queryContentCreateList(this.formData).then((res) => {
+                    var params = JSON.parse(JSON.stringify(this.formData))
+                    if(this.logtype){
+                        params.logtype = '4207'
+                    }
+                    queryContentCreateList(params).then((res) => {
                         if (res.code === '00001') {
                             // 数据数量为0时，返回没有data
                             if (res.data) {
@@ -532,6 +541,26 @@ export default {
         },
         // 状态判断
         nowStatus(row) {
+            let isaudit = row.isaudit
+            switch (Number(isaudit)) {
+                case 2:
+                    return '审核拒绝'
+                    break;
+                case 3:
+                    return '审核驳回'
+                    break;
+                case 4:
+                    return '审核驳回保存'
+                    break;
+                case 5:
+                    return '审核驳回保存后通过'
+                    break;
+                case 6:
+                    return '审核驳回保存后拒绝'
+                    break;
+                default:
+            }
+
             var isban, isblack, isupload;
             // 加黑/404(扬子使用扬子字段)
             switch (this.formData.platform) {

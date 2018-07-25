@@ -230,3 +230,84 @@ export function delConfigSource(data) {
         method: 'get'
     })
 }
+
+// 系统公告
+// 查询未读
+let notifyUrl = 'http://172.18.250.87:3433/notice'
+export function getSystemNotify(data) {
+    return request({
+        url: `${notifyUrl}/notify/findnoticelist`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+export function getUnreadNotify(data) {
+    return request({
+        url: `${notifyUrl}/notify/noticeuser`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+export function getNotifyDetail(data) {
+    return request({
+        url: `${notifyUrl}/notify/setisread`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 查询部门树
+export function getDeptnoTree(data) {
+    return request({
+        url: `${notifyUrl}/user/depttree`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 查询部门下的人员
+export function getDeptnoUser(data) {
+    return request({
+        url: `${notifyUrl}/user/userlist`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 新增公告
+export function addNotice(data) {
+    return request({
+        url: `${notifyUrl}/notify/addnotice`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 查询列表
+export function getNotifyList(data) {
+    return request({
+        url: `${notifyUrl}/notify/findnoticelist`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 设置过期
+export function setNotifyDisabled(data) {
+    return request({
+        url: `${notifyUrl}/notify/setovertime`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 查询全部东方号账号
+export function getAllDFHaccount(data) {
+    return request({
+        url: `/afterlogin/newsconfig/dfhuser`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}

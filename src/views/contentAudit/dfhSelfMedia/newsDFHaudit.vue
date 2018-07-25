@@ -50,7 +50,7 @@
                     {{ auditBegin?"停止审核(审核中)":"开始审核(停审中)" }}
                 </el-button>
                 <span>审核领域：</span>
-                <el-select v-model="selectAuditType" popper-class='tfmaintypeSelect' placeholder="请选择审核分类" style="width:100px;">
+                <el-select v-model="selectAuditType" popper-class='tfmaintypeSelect' placeholder="请选择审核分类" style="width:100px;" @change="changeDataType" ref="lingyuSelect">
                     <el-option v-for="(item,index) in platform" :key="index" :label="item.typeName" :value="item.typePy">
                     </el-option>
                 </el-select>
@@ -60,9 +60,10 @@
                       v-html="newExam.source"
                        :style="newExam.dfhviplv>0?{color: 'red'}:''"></span>
                 <img v-if='newExam.dfhviplv>0' src="../../../assets/audit_images/dfhvip.png" style="vertical-align:-3px;">
-                ：
-                <a :href="newExam.purl" id='self-news' v-html="newExam.purl" style="color:#409EFF;vertical-align:middle" target="_blank"></a>
-                <el-button type="primary" size="mini" @click="copyTitle(newExam.purl,$event)">复制</el-button>
+                <el-tooltip effect="dark" content="发文领域" placement="bottom" v-if="newExam.dfhfield" style="font-size:12px">
+                    <el-tag type="danger">{{ newExam.dfhfield }}</el-tag>
+                </el-tooltip>
+                <el-button type="primary" size="mini" @click="copyTitle(newExam.purl,$event)">复制URL</el-button>
             </div>
             <div class="page-div" v-if="imgAllLoaded">
                 <el-tooltip class="item tooltip-key" effect="dark" v-if="page_num>1" placement="bottom">
@@ -86,7 +87,22 @@
                     </span>
                 </div>
                 <div class="list_li" style="border-bottom: 1px solid #bbbbbb;">
-                    <el-select v-model="newExam.tfmaintype" popper-class='tfmaintypeSelect' :disabled="newExamListNum==0" placeholder="请选择" style="width: 100%">
+                    <span>
+						个人队列：<span class="list_red">{{personNum}}</span>
+                    </span>
+                </div>
+                <div class="list_li" style="border-bottom: 1px solid #bbbbbb;">
+                    <span>时效性：</span>
+                    <div class="mt-10">
+                        <el-radio-group v-model="timeliness">
+                            <div v-for="item in timelinessOptions" style="margin-bottom:6px;">
+                                <el-radio :label="item.value">{{ item.label }}</el-radio>
+                            </div>
+                        </el-radio-group>
+                    </div>
+                </div>
+                <div class="list_li" style="border-bottom: 1px solid #bbbbbb;">
+                    <el-select v-model="newExam.tfmaintype" popper-class='tfmaintypeSelect' :disabled="newExamListNum==0" placeholder="请选择" style="width: 100%" ref="classifySelect">
                         <el-option v-for="(item,index) in platform" :key="index" :label="item.typeName" :value="item.typePy" :disabled="item.typeName=='猎奇'||item.typeName=='NBA'||item.typeName=='娱乐八卦'||item.typeName=='女性'||item.typeName=='微看点'||item.typeName=='本地政务'||item.typeName=='新闻'||item.typeName=='段子'">
                         </el-option>
                     </el-select>
@@ -206,6 +222,21 @@ import {
 export default {
     data() {
         return {
+            timelinessOptions: [{
+                    label: '非时效性',
+                    value: 0
+                },
+                {
+                    label: '时效性',
+                    value: 1
+                },
+                {
+                    label: '未知',
+                    value: 2
+                }
+            ],
+            timeliness: 0,
+            personNum: 0,
             popShow: false,
             imgBigBox: false,
             imgBigUrl: '',
@@ -453,6 +484,11 @@ export default {
         } else if (selfmedia_news.length <= 9) {
             this.newExamList = selfmedia_news;
             this.newExamListNum = this.newExamList.length;
+            // if (this.newExamListNum > 0) {
+            //     this.newExam = this.newExamList[0];
+            //     this.dynamicTags = this.newExam.keywords ? this.newExam.keywords.split(',') : [];
+            //     this.newExam.content = contentToHtml(this.newExam, this.redKeyWords, 'dongfanghao');
+            // }
             this.getNewExam();
         } else {
             this.checkedNum('news');
@@ -461,10 +497,11 @@ export default {
             if (this.newExamListNum > 0) {
                 this.newExam = this.newExamList[0];
                 this.dynamicTags = this.newExam.keywords ? this.newExam.keywords.split(',') : [];
-                this.newExam.content = contentToHtml(this.newExam, this.redKeyWords);
+                this.newExam.content = contentToHtml(this.newExam, this.redKeyWords, 'dongfanghao');
             }
             this.getExamPlatType(this.newExam.tfmaintype);
             localStorage.setItem('selfmedia_news', JSON.stringify(this.newExamList));
+            this.checkedPersonNum()
         }
     },
     mounted() {
@@ -493,6 +530,11 @@ export default {
             UncheckedNum(para).then((res) => {
                 this.isNumNews = res.data;
             });
+        },
+        // 个人待审数量
+        checkedPersonNum() {
+            var selfmedia_news = JSON.parse(localStorage.getItem('selfmedia_news'))
+            this.personNum = selfmedia_news ? selfmedia_news.length : 0
         },
         // 权限控制
         getAuth() {
@@ -571,6 +613,7 @@ export default {
                 } else if (ev.keyCode == 84) {
                     _that.radiopj = 15;
                 } else if (ev.shiftKey == 1 && ev.keyCode == 13) {
+                    _that.changeBlur()
                     _that.newPassed();
                 } else if (ev.shiftKey == 1 && ev.keyCode == 220) {
                     _that.noPassVisible = true
@@ -600,7 +643,7 @@ export default {
             if (this.newExamListNum > 0) {
                 this.newExam = this.newExamList[0];
                 this.dynamicTags = this.newExam.keywords ? this.newExam.keywords.split(',') : [];
-                this.newExam.content = contentToHtml(this.newExam, this.redKeyWords);
+                this.newExam.content = contentToHtml(this.newExam, this.redKeyWords, 'dongfanghao');
                 if (this.newExam.rowkey.indexOf('_e') == -1) {
                     this.isEdit = true;
                 }
@@ -611,6 +654,7 @@ export default {
             this.page_num = 1;
             this.radiopj = 0;
             localStorage.setItem('selfmedia_news', JSON.stringify(this.newExamList));
+            this.checkedPersonNum()
             if (this.newExamListNum == 0) {
                 this.page_total = 0;
                 this.page_num = 1
@@ -649,7 +693,7 @@ export default {
                     }
                     let client_left = b_width.getBoundingClientRect().left;
                     let hackLeft = (hack.getBoundingClientRect().left - client_left - 10) + document.getElementById('box_div').scrollLeft;
-                    let colWid = (this.cont_width - 60) / 4;
+                    let colWid = (this.cont_width - 120) / 4;
                     let colNum = Math.ceil((hackLeft + 20) / (colWid + 40));
                     if (colNum < 4) colNum = 4;
                     this.page_total = Math.ceil(colNum / 4);
@@ -693,11 +737,12 @@ export default {
                             }
                             this.newExamListNum = this.newExamList.length;
                             localStorage.setItem('selfmedia_news', JSON.stringify(this.newExamList));
+                            this.checkedPersonNum()
                         }
                         if (this.newExamListNum > 0 && this.newExam.length == 0) {
                             this.newExam = this.newExamList[0];
                             this.dynamicTags = this.newExam.keywords ? this.newExam.keywords.split(',') : [];
-                            this.newExam.content = contentToHtml(this.newExam, this.redKeyWords);
+                            this.newExam.content = contentToHtml(this.newExam, this.redKeyWords, 'dongfanghao');
                             this.$nextTick(() => {
                                 this.loadDataContent()
                             })
@@ -748,7 +793,8 @@ export default {
                 param: {
                     rowkey: this.newExam.rowkey,
                     gradelv: this.radiopj,
-                    mtppy: this.newExam.tfmaintype
+                    mtppy: this.newExam.tfmaintype,
+                    timeliness: this.timeliness
                 }
             };
             this.$confirm('确认审核通过吗?', '提示', {
@@ -764,6 +810,28 @@ export default {
                 });
             });
         },
+        // 回收数据
+        recycleData() {
+            clearInterval(this.selfInterva)
+            localStorage.removeItem("selfmedia_news")
+            this.checkedPersonNum()
+            this.newExamList = []
+            this.newExam = ''
+            this.newExamListNum = 0
+            let para = {
+                queue: 'selfmedia_news'
+            };
+            removeDoExamData(para).then((res) => {});
+        },
+        // 改变数据类型
+        changeDataType() {
+            this.recycleData()
+            this.getNewExam()
+        },
+        changeBlur(){
+            this.$refs.lingyuSelect.blur()
+            this.$refs.classifySelect.blur()
+        }
     },
     activated() { //keep-alive 组件激活
         this.loadKey(); //组件激活时重新监控键盘
@@ -795,6 +863,7 @@ export default {
                 document.onkeydown = null;
                 document.onkeydown = function(ev){
                     if(_this.noPassVisible&&ev.keyCode==13){
+                        _this.changeBlur()
                         _this.newNoPassed();
                     }
                 }
@@ -810,12 +879,7 @@ export default {
         }
     },
     destroyed() {
-        clearInterval(this.selfInterva)
-        localStorage.removeItem("selfmedia_news")
-        let para = {
-            queue: 'selfmedia_news'
-        };
-        removeDoExamData(para).then((res) => {});
+        this.recycleData()
     }
 }
 </script>

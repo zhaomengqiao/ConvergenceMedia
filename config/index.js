@@ -30,7 +30,10 @@ module.exports = {
 			assetsPublicPath: '/',
 			proxyTable: {
                 '/rongmeitiapi': {
-                    target: 'http://172.18.250.87:4633',
+                    target: 'http://172.18.250.87:8800',
+                    // target: 'http://172.18.2.197:8080',
+                    // target: 'http://172.18.250.87:4633',
+                    // target: 'http://172.18.250.87:8800',
                     changeOrigin: true,
                     pathRewrite: {
                         '^/rongmeitiapi': '/rongmeitiapi'

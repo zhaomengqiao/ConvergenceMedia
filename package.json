@@ -10,7 +10,7 @@
     "build:prod": "cross-env NODE_ENV=production env_config=prod node build/build.js",
     "build:sit": "cross-env NODE_ENV=production env_config=sit node build/build.js",
     "build:sit-preview": "cross-env NODE_ENV=production env_config=sit npm_config_preview=true  npm_config_report=true node build/build.js",
-    "lint": "eslint --ext .js,.vue src",
+    "lint": "eslint --fix --ext .js,.vue src",
     "test": "npm run lint"
   },
   "dependencies": {
@@ -36,6 +36,7 @@
     "vue-count-to": "1.0.10",
     "vue-i18n": "7.3.2",
     "vue-multiselect": "2.0.6",
+    "vue-picture-preview": "^1.2.0",
     "vue-router": "3.0.1",
     "vue-splitpane": "1.0.0",
     "vuedraggable": "2.15.0",
@@ -83,6 +84,7 @@
     "particles.js": "^2.0.0",
     "postcss-loader": "^2.0.8",
     "pushstate-server": "2.1.0",
+    "qrcodejs2": "0.0.2",
     "qs": "^6.5.1",
     "rimraf": "2.6.0",
     "sass-loader": "6.0.6",

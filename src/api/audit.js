@@ -316,7 +316,7 @@ export function getRejectType(data) {
 // 获取驳回内容
 export function getNewsReject(data) {
     return request({
-        url: `wemedia/newsReject/detail/${data.size}`,
+        url: `wemedia/newsReject/detail/${data.size}/${data.type}`,
         method: 'get'
     })
 }
@@ -352,6 +352,18 @@ export function newsRejectSave(data) {
     }
     return request({
         url: `wemedia/newsReject/save`,
+        method: 'post',
+        data: qs.stringify(params)
+    })
+}
+
+// 驳回编辑三步合一保存
+export function newsRejectSaveAll(data) {
+    let params = {
+        json: JSON.stringify(data)
+    }
+    return request({
+        url: `wemedia/newsReject/saveall`,
         method: 'post',
         data: qs.stringify(params)
     })
@@ -431,6 +443,18 @@ export function getNickNameAuditList(data) {
 // 导出昵称审核监控
 export const exportNickNameAuditAll = `/rongmeitiapi/afterlogin/reviewmonitoring/exportusernamecount?`
 
+// 昵称审核监控详情
+// 查询
+export function getNickNameAuditDetail(data) {
+    return request({
+        url: `afterlogin/reviewmonitoring/reviewusernamelist`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+// 导出昵称审核
+export const exportNickNameAuditDetail = `/rongmeitiapi/afterlogin/reviewmonitoring/exportusernamelist?`
+
 // 评论审核详情列表
 // 查询
 export function getCommentAuditDetailList(data) {
@@ -453,7 +477,7 @@ export function getCommentAuditDetailNum(data) {
 // 审核日志编号获取
 export function getCommentDetailLog(data) {
     return request({
-        url: `afterlogin/reviewmonitoring/logtypesbyplatform?platform=comment&newstype=comment`,
+        url: `afterlogin/reviewmonitoring/logtypesbyplatform?platform=${data.platform}&newstype=${data.newstype}`,
         method: 'get'
     })
 }
@@ -564,5 +588,114 @@ export function searchExamVerification(data) {
         url: `searcheAudit/checkDataVaild`,
         method: 'post',
         data: qs.stringify(data)
+    })
+}
+
+// 巡查监控
+// 获取巡查人员列表
+export function getAuditPatrolUser(data) {
+    return request({
+        url: `afterlogin/reviewmonitoring/getreviewpatroluser`,
+        method: 'get'
+    })
+}
+// 巡查监控报表
+export function getAuditPatrolList(data) {
+    return request({
+        url: `afterlogin/reviewmonitoring/reviewauditpatrolcountlist`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+// 巡查报表导出
+export const exportPatrolListExcel = `/rongmeitiapi/afterlogin/reviewmonitoring/exportreviewauditpatrolcountlist?`
+
+// 巡查详情
+// 巡查详情列表
+export function getAuditPatrolDetail(data) {
+    return request({
+        url: `afterlogin/reviewmonitoring/reviewauditpatrollist`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+// 查询新闻详情
+export function getPatrolContentDetail(data) {
+    return request({
+        url: `afterlogin/reviewmonitoring/detail?url=${data.url}`,
+        method: 'get'
+    })
+}
+// 巡查详情导出
+export const exportPatrolDetailExcel = `/rongmeitiapi/afterlogin/reviewmonitoring/exportreviewauditpatrollist?`
+
+// 分拣日志
+export function searchTableData(data) {
+    let params = {json: JSON.stringify(data)}
+    return request({
+        url: `addtagslog/query`,
+        method: 'post',
+        data: qs.stringify(params)
+    })
+}
+
+export function searchUserData(data) {
+    return request({
+        url: `addtagslog/queryuser`,
+        method: 'get'
+    })
+}
+
+export function changeTableData(data) {
+    let params = {json: JSON.stringify(data)}
+    return request({
+        url: `addtagslog/update`,
+        method: 'post',
+        data: qs.stringify(params)
+    })
+}
+
+// 上传视频
+export function uploadVideo(data) {
+    let params = {json: JSON.stringify(data)}
+    return request({
+        url: `api/newsvideo/getauth`,
+        method: 'post',
+        data: qs.stringify(params)
+    })
+}
+// $.ajax({
+//     url: 'http://shshwl.up0.v1.wcsapi.com/file/upload',
+//     type: "POST",
+//     processData: false,
+//     async: true,
+//     data: {
+//         token: res.data.auth,
+//         key: res.data.newFileName,
+//         file: file,
+//         fileBinaryData: new BinaryFile(file)
+//     },
+//     headers: {
+//         "Accept": "*/*",
+//         "token": res.data.auth,
+//         "Content-Type": 'multipart/form-data',
+//         "Content-Length": fileSize
+//     },
+//     success: function(response, textStatus, jqXHR) {
+//
+//     }
+// })
+
+// 上传
+export function videoUpload(data) {
+    return request({
+        url: `http://shshwl.up0.v1.wcsapi.com/file/upload`,
+        method: 'post',
+        data: qs.stringify(data),
+        headers: {
+            "Accept": "*/*",
+            "token": data.auth,
+            "Content-Type": 'multipart/form-data'
+        }
     })
 }

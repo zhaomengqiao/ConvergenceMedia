@@ -169,10 +169,6 @@ export default {
                 },
                 series : this.chartData
             })
-            var _this = this;
-            window.addEventListener('resize', function(){
-				_this.chart.resize
-			})
         }
     }
 }

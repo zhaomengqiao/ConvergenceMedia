@@ -3,8 +3,14 @@
         <el-card :body-style="{padding:'10px 20px'}" v-if="newExam!==null">
             <el-row :gutter="4">
                 <el-col :span="4">
-                    <el-button type="primary" size="small" icon="circle-check" @click="showPassDialog">通过</el-button>
-                    <el-button type="danger" size="small" icon="circle-cross" @click="showRefuseDialog">拒绝</el-button>
+                    <el-tooltip class="item tooltip-key" effect="dark" placement="bottom">
+                        <div slot="content">快捷键：shift+回车</div>
+                        <el-button type="primary" size="small" icon="circle-check" @click="showPassDialog">通过</el-button>
+                    </el-tooltip>
+                    <el-tooltip class="item tooltip-key" effect="dark" placement="bottom">
+                        <div slot="content">快捷键：shift+\</div>
+                        <el-button type="danger" size="small" icon="circle-cross" @click="showRefuseDialog">拒绝</el-button>
+                    </el-tooltip>
                 </el-col>
                 <el-col :span="20" class="flex_center">
                     <el-tag type="danger" v-if="newExam.ispartner=='1'">合作媒体</el-tag>
@@ -17,18 +23,18 @@
             </el-row>
         </el-card>
         <el-card style="margin-top:10px" :body-style="{padding:'10px'}">
-            <div class="url-next_page clearfix" v-if="newExam!==null">
+            <div class="url-next_page clearfix">
                 <div class="switch_div pull-left">
                     <el-button type="primary" @click="auditBegin = (!auditBegin)" size="small" style="margin-right:10px;">
                         {{ auditBegin?"停止审核(审核中)":"开始审核(停审中)" }}
                     </el-button>
                     <span>审核领域：</span>
-                    <el-select v-model="selectAuditType" popper-class='tfmaintypeSelect' placeholder="请选择审核分类" style="width:100px;">
+                    <el-select ref="lingyuSelect" v-model="selectAuditType" popper-class='tfmaintypeSelect' placeholder="请选择审核分类" style="width:100px;" @change="changeDataType">
                         <el-option v-for="(item,index) in selectPlatforms" :key="index" :label="item.typeName" :value="item.typePy">
                         </el-option>
                     </el-select>
                 </div>
-                <div class="url-source">
+                <div class="url-source" v-if="newExam!==null">
                     <span class="source"
                           v-html="newExam.source"></span>：
                     <a :href="newExam.purl" target="_blank" class="url" v-html="newExam.purl"></a>
@@ -43,15 +49,16 @@
                             <span class="audit-num" style="color:#ff4949;font-weight:700" v-html="unCheckedNum"></span>
                         </div>
                         <div class="left-select hasBorderBottom" v-if="newExam!==null" style="font-weight:700">
-                            <el-select v-model="newExam.urlmaintypeid" placeholder="请选择一级分类" @change="getType(newExam.urlmaintypeid,2)">
+                            <el-select v-model="newExam.urlmaintypeid" placeholder="请选择一级分类" @change="getType(newExam.urlmaintypeid,2)" ref="type_1st">
                                 <el-option
                                   v-for="item in firpy"
                                   :key="item.typeId"
                                   :label="item.typeName"
-                                  :value="item.typeId">
+                                  :value="item.typeId"
+                                  :disabled="item.typeId==700000">
                                 </el-option>
                             </el-select>
-                            <el-select v-model="newExam.tp2ndid" placeholder="请选择二级分类" @change="getType(newExam.tp2ndid,3)">
+                            <el-select v-model="newExam.tp2ndid" placeholder="请选择二级分类" @change="getType(newExam.tp2ndid,3)" ref="type_2nd">
                                 <el-option
                                   v-for="item in secpy"
                                   :key="item.typeId"
@@ -59,7 +66,7 @@
                                   :value="item.typeId">
                                 </el-option>
                             </el-select>
-                            <el-select v-model="newExam.tp3rdid" placeholder="请选择三级分类">
+                            <el-select v-model="newExam.tp3rdid" placeholder="请选择三级分类" ref="type_3rd">
                                 <el-option
                                   v-for="item in thipy"
                                   :key="item.typeId"
@@ -192,7 +199,7 @@
                 </el-col>
                 <el-col style="flex:1">
                     <el-card :body-style="{padding:'10px'}">
-                        <el-carousel trigger="click" height="360px" v-if="newExam!==null" :autoplay="false" indicator-position="none" :initial-index="nowIndex" :key="carouselKey">
+                        <!-- <el-carousel trigger="click" height="360px" v-if="newExam!==null" :autoplay="false" indicator-position="none" :initial-index="nowIndex" :key="carouselKey">
                             <el-carousel-item v-for="(item,index) in newExam.cmsphoto" :key="index">
                                 <div class="carousel_img">
                                     <el-row class="carousel_img-controls">
@@ -202,7 +209,7 @@
                                 </div>
                             </el-carousel-item>
                         </el-carousel>
-                        <div class="no_carousel" v-if="newExam===null">暂无图片</div>
+                        <div class="no_carousel" v-if="newExam===null">暂无图片</div> -->
                         <el-row class="video_pictures" :gutter="4" v-if="newExam===null">
                             <el-col :span="8" v-for="i in 12" :key="i">
                                 <div class="video_pictures-item">
@@ -211,9 +218,13 @@
                             </el-col>
                         </el-row>
                         <el-row class="video_pictures" :gutter="4" v-if="newExam!==null">
-                            <el-col :span="8" v-for="(item,index) in newExam.cmsphoto" :key="index" style="margin-bottom:10px;">
+                            <el-col :span="8" v-for="(item,index) in newExam.cmsphoto" :key="index" style="margin-bottom:10px;" :class="(parseFloat(item.pratio) * 100) > 90 ? 'porno':''">
                                 <div class="pictureHasImg" @click="changeBigImg(item,index)">
-                                    <img :src="item.src" alt="" style="width:auto;height:auto;max-width:100%;max-height:100%;display:block;">
+                                    <img :src="item.src" alt="" style="width:100%;height:auto;display:block;">
+                                    <div class="picControl">
+                                        <el-button type="primary" size="mini" icon="el-icon-check" @click="coverToBig(item.src)">放大</el-button>
+                                        <el-button type="primary" size="mini" icon="el-icon-check" @click="setCover(item.src)">设为封面</el-button>
+                                    </div>
                                 </div>
                             </el-col>
                         </el-row>
@@ -289,6 +300,9 @@
             <el-button type="primary" @click="pass">确 定</el-button>
             </span>
         </el-dialog>
+        <div class="img_show_wrap" v-if="imgBig_visible" @click="imgBig_visible=false">
+            <img :src="imgBig_url" alt="">
+        </div>
     </section>
 </template>
 
@@ -338,6 +352,8 @@ export default {
             }
         }
         return {
+            imgBig_url: '',
+            imgBig_visible: false,
             passDialog: false,
             auditBegin: true,
             selectAuditType: '',
@@ -384,7 +400,7 @@ export default {
             inputVisible: false,
             inputValue: '',
             isquality: false,
-            timeliness: 1,
+            timeliness: 0,
             videoIntro: '',
             timelinessOptions: [{
                     label: '非时效性',
@@ -454,16 +470,18 @@ export default {
             })
         },
         mountedGetData() {
+            this.newExam = null
             this.checkedNum('video')
             let localData = localStorage.getItem('wemedia_video')
-            if (localData && JSON.parse(localData).length <= 3) {
-                this.dataList = JSON.parse(localData)
+            if (localData && (JSON.parse(localData).length > 0 && JSON.parse(localData).length <= 3)) {
+                this.getLocalData()
                 this.getDataList()
                 console.log('获取 本地数据+接口数据')
             } else if (localData && JSON.parse(localData).length > 3) {
                 this.getLocalData()
                 console.log('获取 本地数据')
             } else {
+                // this.dataList = []
                 this.getDataList()
                 console.log('获取 接口数据')
             }
@@ -486,6 +504,10 @@ export default {
                         this.selectPlatforms.unshift({
                             'typeName': '全部',
                             'typePy': ''
+                        })
+                        this.firpy.push({
+                            typeName: '请选择',
+                            typeId: '700000'
                         })
                     } else if (level == 2) {
                         this.secpy = res.data;
@@ -560,24 +582,26 @@ export default {
                         }
                     } else {
                         clearInterval(this.selfInterva)
-                        this.newExam = this.dataList[0]
-                        // 视频信息
-                        try {
-                            this.playerOptions.sources[0].src = this.newExam.videominia[0].src
-                            this.playerOptions.poster = this.newExam.imgminia[0].src
-                        }catch(err) {
-                            console.log(err)
+                        if(!this.newExam) {
+                            this.newExam = this.dataList[0]
+                            // 视频信息
+                            try {
+                                this.playerOptions.sources[0].src = this.newExam.videominia[0].src
+                                this.playerOptions.poster = this.newExam.imgminia[0].src
+                            }catch(err) {
+                                console.log(err)
+                            }
+                            this.imageUrl = ''
+                            if (this.newExam.imgminia[0].src) {
+                                this.imageUrl = this.newExam.imgminia[0].src
+                                this.oldImageUrl = this.newExam.imgminia[0].src
+                            }
+                            // 简介
+                            this.videoIntro = this.newExam.content
+                            // 关键词
+                            this.dynamicTags = this.newExam.tags ? this.newExam.tags.split(',') : []
+                            localStorage.setItem('wemedia_video', JSON.stringify(this.dataList))
                         }
-                        this.imageUrl = ''
-                        if (this.newExam.imgminia[0].src) {
-                            this.imageUrl = this.newExam.imgminia[0].src
-                            this.oldImageUrl = this.newExam.imgminia[0].src
-                        }
-                        // 简介
-                        this.videoIntro = this.newExam.content
-                        // 关键词
-                        this.dynamicTags = this.newExam.tags ? this.newExam.tags.split(',') : []
-                        localStorage.setItem('wemedia_video', JSON.stringify(this.dataList))
                     }
                 })
             }
@@ -609,6 +633,9 @@ export default {
             this.dynamicTags = this.newExam.tags ? this.newExam.tags.split(',') : []
         },
         showPassDialog(){
+            if(!this.newExam){
+                return
+            }
             if (this.imgLevel === '') {
                 this.$message({
                     type: 'warning',
@@ -616,7 +643,7 @@ export default {
                 })
                 return
             }
-            if (!this.newExam.urlmaintypeid) {
+            if (!this.newExam.urlmaintypeid || this.newExam.urlmaintypeid==700000) {
                 this.$message({
                     type: 'warning',
                     message: '请选择相应的分类再进行相关操作'
@@ -641,11 +668,11 @@ export default {
                     videodescribe: this.videoIntro,
                     gradelv: this.imgLevel,
                     newtitle: this.newExam.contenttitle,
-                    tp1st:this.newExam.urlmaintypeid,
-                    tp2nd:this.newExam.tp2ndid,
-                    tp3rd:this.newExam.tp3rdid,
+                    tp1st: this.newExam.urlmaintypeid,
+                    tp2nd: this.newExam.tp2ndid,
+                    tp3rd: this.newExam.tp3rdid,
                     coverpic: coverpic,
-                    timeliness:this.timeliness,
+                    timeliness: this.timeliness,
                     isquality: Number(this.isquality)
                 }
             }
@@ -657,6 +684,9 @@ export default {
             this.passDialog = false
         },
         showRefuseDialog() {
+            if(!this.newExam){
+                return
+            }
             this.noPassVisible = true
         },
         refuse() {
@@ -788,12 +818,38 @@ export default {
                 } else if (ev.keyCode == 53) {
                     _that.imgLevel = 5;
                 } else if (ev.shiftKey == 1 && ev.keyCode == 13) {
+                    _that.changeBlur();
                     _that.showPassDialog()
                 } else if (ev.shiftKey == 1 && ev.keyCode == 220) {
                     _that.noPassVisible = true
                 }
             };
         },
+        coverToBig(url) {
+            this.imgBig_visible = true
+            this.imgBig_url = url
+        },
+        // 回收数据
+        recycleData() {
+            clearInterval(this.selfInterva)
+            localStorage.removeItem("wemedia_video")
+            this.dataList = []
+            let params = {
+                queue: 'wemedia_video'
+            }
+            removeDoExamData(params).then((res) => {});
+        },
+        // 改变数据类型
+        changeDataType() {
+            this.recycleData()
+            this.mountedGetData()
+        },
+        changeBlur(){
+            this.$refs.lingyuSelect.blur()
+            this.$refs.type_1st.blur()
+            this.$refs.type_2nd.blur()
+            this.$refs.type_3rd.blur()
+        }
     },
     watch: {
         'newExam': function(){
@@ -822,10 +878,15 @@ export default {
                     } else if (ev.keyCode == 55) {
                         _that.noPassReason = '其他'
                     } else if (ev.keyCode == 13) {
+                        if(!_that.newExam){
+                            return
+                        }
+                        _that.changeBlur()
                         _that.refuse();
                     }
                 }
             }else {
+                document.onkeydown = null
                 this.loadKey()
             }
         },
@@ -835,21 +896,18 @@ export default {
                 document.onkeydown = null
                 document.onkeydown = function(ev) {
                     if (ev.keyCode == 13) {
+                        _that.changeBlur()
                         _that.pass();
                     }
                 }
             }else{
+                document.onkeydown = null
                 this.loadKey()
             }
         }
     },
     destroyed() {
-        clearInterval(this.selfInterva)
-        localStorage.removeItem("wemedia_video")
-        let params = {
-            queue: 'wemedia_video'
-        }
-        removeDoExamData(params).then((res) => {});
+        this.recycleData()
     }
 }
 </script>
@@ -1053,13 +1111,24 @@ export default {
     line-height: 90px;
 }
 .pictureHasImg {
-    height: 90px;
     margin: 0 auto;
     display: flex;
     align-items: center;
     justify-content: center;
     background-color: #f3f3f3;
     cursor: pointer;
+    position: relative;
+    &:hover .picControl{
+        visibility: visible;
+    }
+    .picControl {
+        position: absolute;
+        visibility: hidden;
+        top: 50%;
+        left: 50%;
+        margin-left: -87px;
+        margin-top: -16px;
+    }
 }
 .carousel_img{
     margin:0 auto;
@@ -1078,5 +1147,23 @@ export default {
     top: 50%;
     left: 50%;
     transform: translate(-50%,-50%);
+}
+.img_show_wrap{
+    position: fixed;
+    z-index: 9999;
+    top: 0;
+    left: 0;
+    background-color: #333;
+    height: 100%;
+    width: 100%;
+    img{
+        display: block;
+        max-width: 100%;
+        max-height: 100%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%,-50%);
+    }
 }
 </style>

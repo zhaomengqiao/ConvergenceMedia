@@ -3,8 +3,14 @@
         <el-card :body-style="{padding:'10px 20px'}" v-if="newExam!==null">
             <el-row :gutter="4">
                 <el-col :span="4">
-                    <el-button type="primary" size="small" icon="circle-check" @click="pass">通过</el-button>
-                    <el-button type="danger" size="small" icon="circle-cross" @click="noPassVisible = true">拒绝</el-button>
+                    <el-tooltip class="item tooltip-key" effect="dark" placement="bottom">
+                        <div slot="content">快捷键：shift+回车</div>
+                        <el-button type="primary" size="small" icon="circle-check" @click="pass">通过</el-button>
+                    </el-tooltip>
+                    <el-tooltip class="item tooltip-key" effect="dark" placement="bottom">
+                        <div slot="content">快捷键：shift+\</div>
+                        <el-button type="danger" size="small" icon="circle-cross" @click="noPassVisible = true">拒绝</el-button>
+                    </el-tooltip>
                 </el-col>
                 <el-col :span="20" class="flex_center">
                     <!--原创标记-->
@@ -36,26 +42,27 @@
             </el-row>
         </el-card>
         <el-card style="margin-top:10px" :body-style="{padding:'10px'}">
-            <div class="url-next_page" v-if="newExam!==null">
+            <div class="url-next_page clearfix">
                 <div class="switch_div pull-left">
                     <el-button type="primary" @click="auditBegin = (!auditBegin)" size="small" style="margin-right:10px;">
                         {{ auditBegin?"停止审核(审核中)":"开始审核(停审中)" }}
                     </el-button>
                     <span>审核领域：</span>
-                    <el-select v-model="selectAuditType" popper-class='tfmaintypeSelect' placeholder="请选择审核分类" style="width:100px;">
+                    <el-select v-model="selectAuditType" popper-class='tfmaintypeSelect' placeholder="请选择审核分类" style="width:100px;" @change="changeDataType" ref="lingyuSelect">
                         <el-option v-for="(item,index) in selectPlatforms" :key="index" :label="item.typeName" :value="item.typePy">
                         </el-option>
                     </el-select>
                 </div>
-                <div class="url-source">
+                <div class="url-source" v-if="newExam!==null">
                     <!--dfhviplv 判断东方号大V-->
                     <span class="source"
                           v-html="newExam.source"
                            :style="newExam.dfhviplv>0?{color: 'red'}:''"></span>
                     <img v-if='newExam.dfhviplv>0' src="../../../assets/audit_images/dfhvip.png" style="vertical-align:-3px;">
-                    ：
-                    <a :href="newExam.purl" target="_blank" class="url" v-html="newExam.purl"></a>
-                    <el-button type="primary" size="mini" @click="copyContent(newExam.purl,$event)">复制</el-button>
+                    <el-tooltip effect="dark" content="发文领域" placement="bottom" v-if="newExam.dfhfield" style="font-size:12px">
+                        <el-tag type="danger">{{ newExam.dfhfield }}</el-tag>
+                    </el-tooltip>
+                    <el-button type="primary" size="mini" @click="copyContent(newExam.purl,$event)">复制URL</el-button>
                 </div>
                 <div class="next_btn-group" v-if="pageTotal>1">
                     <el-button type="primary" size="small" @click="changePage(-1)" v-if="currentPage!==1">上一页</el-button>
@@ -70,7 +77,7 @@
                             <span class="audit-num" style="color:#ff4949;font-weight:700" v-html="unCheckedNum"></span>
                         </div>
                         <div class="left-select hasBorderBottom" v-if="newExam!==null">
-                            <el-select v-model="newExam.urlmaintypepy" placeholder="请选择" style="width: 100%">
+                            <el-select v-model="newExam.urlmaintypepy" placeholder="请选择" style="width: 100%" ref="classifySelect">
                                 <el-option
                                     v-for="(item,index) in platform"
                                     :key="item.typePy"
@@ -79,6 +86,27 @@
                                 </el-option>
                             </el-select>
                         </div>
+                        <el-collapse v-model="activeName">
+                            <el-collapse-item name="timeline">
+                                <template slot="title">
+                                    <div class="collapse-title">
+                                        <div class="collapse-title_label">
+                                            时效性：
+                                        </div>
+                                        <div class="collapse-title_content">
+                                            {{ timeliness ===''?'暂未选择':timelinessOptions[timeliness].label }}
+                                        </div>
+                                    </div>
+                                </template>
+                                <div class="collapse-content">
+                                    <el-radio-group v-model="timeliness">
+                                        <div v-for="item in timelinessOptions" style="margin-bottom:6px;">
+                                            <el-radio :label="item.value">{{ item.label }}</el-radio>
+                                        </div>
+            					   </el-radio-group>
+                                </div>
+                            </el-collapse-item>
+                        </el-collapse>
                         <el-collapse v-model="activeName">
                             <el-collapse-item name="keywords">
                                 <template slot="title">
@@ -173,7 +201,9 @@
                             <!--此处4个为一行-->
                             <el-row :gutter="10" class="audit_content-box" v-if="newExam!=null">
                                 <div v-for='(item,index) in Math.ceil(currentImgs.length/4)' class="clearfix" :key="index">
-                                    <el-col :span="6" v-for="i in 4" v-if="currentImgs[(index*4)+i-1]" :key="i" style="margin-bottom:20px;">
+                                    <el-col :span="6" v-for="i in 4" v-if="currentImgs[(index*4)+i-1]" :key="i"
+                                            style="margin-bottom:20px;"
+                                            :class="(parseFloat(currentImgs[(index*4)+i-1].pratio) * 100) > 90 ? 'porno':''">
                                         <div class="audit_img_item" style="position:relative">
                                             <img :src="currentImgs[(index*4)+i-1].src">
                                             <div class="taobao_price" v-if="newExam.isadv==1">￥{{currentImgs[(index*4)+i-1].taobao.finalprice}}</div>
@@ -255,12 +285,26 @@ import {
 export default {
     data() {
         return {
+            timeliness: 0,
+            timelinessOptions: [{
+                    label: '非时效性',
+                    value: 0
+                },
+                {
+                    label: '时效性',
+                    value: 1
+                },
+                {
+                    label: '未知',
+                    value: 2
+                }
+            ],
             auditBegin: true,
             selectAuditType: '',
             selectPlatforms: [],
             unCheckedNum: 0,
             auditType: 'selfmedia',
-            activeName: ['keywords', 'level'],
+            activeName: ['timeline','keywords', 'level'],
             popShow: false,
             imgBigBox: false,
             nowCarousel: 0,
@@ -468,8 +512,8 @@ export default {
         mountedGetData() {
             this.checkedNum('picture')
             let localData = localStorage.getItem('selfmedia_img')
-            if (localData && JSON.parse(localData).length <= 9) {
-                this.dataList = JSON.parse(localData)
+            if (localData && (JSON.parse(localData).length > 0 && JSON.parse(localData).length <= 9)) {
+                this.getLocalData()
                 this.getDataList()
             } else if (localData && JSON.parse(localData).length > 9) {
                 this.getLocalData()
@@ -580,7 +624,8 @@ export default {
                     rowkey: this.newExam.rowkey,
                     gradelv: this.imgLevel,
                     mtppy: this.newExam.urlmaintypepy,
-                    keyword: this.dynamicTags.join(",")
+                    keyword: this.dynamicTags.join(","),
+                    timeliness: this.timeliness
                 }
             }
             this.$confirm('确认审核通过吗?', '提示', {
@@ -668,6 +713,7 @@ export default {
                 }else if(ev.keyCode==53){
                     _that.imgLevel=5;
                 }else if(ev.shiftKey==1&&ev.keyCode==13){
+                    _that.changeBlur()
                     _that.pass();
                 }else if(ev.shiftKey==1&&ev.keyCode==220){
                     _that.noPassVisible = true
@@ -684,6 +730,25 @@ export default {
 
                 }
             }
+        },
+        // 回收数据
+        recycleData() {
+            clearInterval(this.selfInterva)
+            localStorage.removeItem("selfmedia_img")
+            this.dataList = []
+            let para = {
+                queue: 'selfmedia_img'
+            };
+            removeDoExamData(para).then((res) => {});
+        },
+        // 改变数据类型
+        changeDataType() {
+            this.recycleData()
+            this.mountedGetData()
+        },
+        changeBlur(){
+            this.$refs.lingyuSelect.blur()
+            this.$refs.classifySelect.blur()
         }
     },
     watch: {
@@ -709,6 +774,7 @@ export default {
                 document.onkeydown = null;
                 document.onkeydown = function(ev){
                     if(_this.noPassVisible&&ev.keyCode==13){
+                        _this.changeBlur()
                         _this.refuse();
                     }
                 }
@@ -719,12 +785,7 @@ export default {
         }
     },
     destroyed() {
-        clearInterval(this.selfInterva)
-        localStorage.removeItem("selfmedia_img")
-        let para = {
-            queue: 'selfmedia_img'
-        };
-        removeDoExamData(para).then((res) => {});
+        this.recycleData()
     }
 }
 </script>

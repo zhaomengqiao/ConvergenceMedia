@@ -1,4 +1,5 @@
 <!--审核页面用{{}}渲染的动态数据与高亮插件冲突，尽量用v-html-->
+<!--在使用enter作为快捷键时，会与element-ui中很多获取焦点的组件冲突，尽量使用自定义快捷键时先blur-->>
 <template>
 <section class="new-self">
     <!--新媒体新闻工具条-->
@@ -35,13 +36,13 @@
                     {{ auditBegin?"停止审核(审核中)":"开始审核(停审中)" }}
                 </el-button>
                 <span>审核领域：</span>
-                <el-select v-model="selectAuditType" popper-class='tfmaintypeSelect' placeholder="请选择审核分类" style="width:100px;">
+                <el-select v-model="selectAuditType" popper-class='tfmaintypeSelect' placeholder="请选择审核分类" style="width:100px;" @change="changeDataType" ref='lingyuSelect'>
                     <el-option v-for="(item,index) in selectPlatforms" :key="index" :label="item.typeName" :value="item.typePy">
                     </el-option>
                 </el-select>
             </div>
             <div class="url-div" v-if="newExam.length!=0">
-                <span v-html="newExam.source"></span>：<a :href="newExam.purl" id='self-news' v-html="newExam.purl" style="color:#409EFF;vertical-align:middle" target="_blank"></a>
+                <span v-html="newExam.source" class="max_width_auditTitle" style="vertical-align:middle"></span>：<a :href="newExam.purl" id='self-news' v-html="newExam.purl" style="color:#409EFF;vertical-align:middle" target="_blank"></a>
                 <el-button type="primary" size="mini" @click="copyTitle(newExam.purl,$event)">复制</el-button>
             </div>
             <div class="page-div" v-if="imgAllLoaded">
@@ -66,7 +67,22 @@
                     </span>
                 </div>
                 <div class="list_li" style="border-bottom: 1px solid #bbbbbb;">
-                    <el-select v-model="newExam.tfmaintype" popper-class='tfmaintypeSelect' :disabled="newExamListNum==0" placeholder="请选择" style="width: 100%;float:left">
+                    <span>
+						个人队列：<span class="list_red">{{personNum}}</span>
+                    </span>
+                </div>
+                <div class="list_li" style="border-bottom: 1px solid #bbbbbb;">
+                    <span>时效性：</span>
+                    <div class="mt-10">
+                        <el-radio-group v-model="timeliness">
+                            <div v-for="item in timelinessOptions" style="margin-bottom:6px;">
+                                <el-radio :label="item.value">{{ item.label }}</el-radio>
+                            </div>
+                        </el-radio-group>
+                    </div>
+                </div>
+                <div class="list_li" style="border-bottom: 1px solid #bbbbbb;">
+                    <el-select v-model="newExam.tfmaintype" popper-class='tfmaintypeSelect' :disabled="newExamListNum==0" placeholder="请选择" style="width: 100%;float:left" ref="classifySelect">
                         <el-option v-for="(item,index) in platform" :key="index" :label="item.typeName" :value="item.typePy" :disabled="item.typeName=='猎奇'||item.typeName=='NBA'||item.typeName=='娱乐八卦'||item.typeName=='女性'||item.typeName=='微看点'||item.typeName=='本地政务'||item.typeName=='新闻'||item.typeName=='段子'">
                         </el-option>
                     </el-select>
@@ -149,9 +165,7 @@
             </el-carousel>
             <!-- <img width="100%" :src="imgBigUrl" alt=""> -->
         </el-dialog>
-
     </el-row>
-
 </section>
 </template>
 
@@ -181,6 +195,21 @@ export default {
     ],
     data() {
         return {
+            timelinessOptions: [{
+                    label: '非时效性',
+                    value: 0
+                },
+                {
+                    label: '时效性',
+                    value: 1
+                },
+                {
+                    label: '未知',
+                    value: 2
+                }
+            ],
+            timeliness: 0,
+            personNum: 0,
             imgBigBox: false,
             imgBigUrl: '',
             auditBegin: true,
@@ -291,7 +320,12 @@ export default {
         } else if (wemedia_news.length <= 9) {
             this.newExamList = wemedia_news;
             this.newExamListNum = this.newExamList.length;
-            this.getNewExam();
+            this.getNewExam()
+            if (this.newExamListNum > 0) {
+                this.newExam = this.newExamList[0];
+                this.dynamicTags = this.newExam.keywords ? this.newExam.keywords.split(',') : [];
+                this.newExam.content = contentToHtml(this.newExam, this.redKeyWords);
+            }
         } else {
             this.checkedNum('news');
             this.newExamList = wemedia_news;
@@ -303,6 +337,7 @@ export default {
             }
             this.getExamPlatType(this.newExam.tfmaintype);
             localStorage.setItem('wemedia_news', JSON.stringify(this.newExamList));
+            this.checkedPersonNum()
         }
     },
     mounted() {
@@ -331,6 +366,11 @@ export default {
             UncheckedNum(para).then((res) => {
                 this.isNumNews = res.data;
             });
+        },
+        // 个人待审数量
+        checkedPersonNum() {
+            var wemedia_news = JSON.parse(localStorage.getItem('wemedia_news'))
+            this.personNum = wemedia_news ? wemedia_news.length : 0
         },
         setReason() {
             this.dialog.reason = this.dialog.reasonSelect;
@@ -416,8 +456,10 @@ export default {
                 } else if (ev.keyCode == 84) {
                     _that.radiopj = 15;
                 } else if (ev.shiftKey == 1 && ev.keyCode == 13) {
+                    _that.changeBlur()
                     _that.newPassed();
                 } else if (_that.noPassVisible && ev.keyCode == 13) {
+                    _that.changeBlur()
                     _that.submitEditPassed();
                 } else if (ev.shiftKey == 1 && ev.keyCode == 220) {
                     _that.newNoPassed();
@@ -430,7 +472,7 @@ export default {
 
         },
         getInterva() { //定时加载
-            if (this.newExamList.length <= 9) {
+            if (this.newExamList.length <= 4) {
                 this.getNewExam();
             }
             this.checkedNum('news');
@@ -452,6 +494,8 @@ export default {
             this.page_num = 1;
             this.radiopj = 0;
             localStorage.setItem('wemedia_news', JSON.stringify(this.newExamList));
+            this.checkedPersonNum()
+            this.checkedPersonNum()
             if (this.newExamListNum == 0) {
                 this.page_total = 0;
                 this.page_num = 1
@@ -490,7 +534,7 @@ export default {
                     }
                     let client_left = b_width.getBoundingClientRect().left;
                     let hackLeft = (hack.getBoundingClientRect().left - client_left - 10) + document.getElementById('box_div').scrollLeft;
-                    let colWid = (this.cont_width - 60) / 4;
+                    let colWid = (this.cont_width - 120) / 4;
                     let colNum = Math.ceil((hackLeft + 20) / (colWid + 40));
                     if (colNum < 4) colNum = 4;
                     this.page_total = Math.ceil(colNum / 4);
@@ -534,6 +578,7 @@ export default {
                             }
                             this.newExamListNum = this.newExamList.length;
                             localStorage.setItem('wemedia_news', JSON.stringify(this.newExamList));
+                            this.checkedPersonNum()
                         }
                         if (this.newExamListNum > 0 && this.newExam.length == 0) {
                             this.newExam = this.newExamList[0];
@@ -623,7 +668,8 @@ export default {
                 param: {
                     rowkey: this.newExam.rowkey,
                     gradelv: this.radiopj,
-                    mtppy: this.newExam.tfmaintype
+                    mtppy: this.newExam.tfmaintype,
+                    timeliness: this.timeliness
                 }
             };
             this.$confirm('确认审核通过吗?', '提示', {
@@ -639,6 +685,29 @@ export default {
                 });
             });
         },
+        // 回收数据
+        recycleData() {
+            clearInterval(this.selfInterva)
+            localStorage.removeItem("wemedia_news")
+            this.checkedPersonNum()
+            this.newExamList = []
+            this.newExam = ''
+            this.newExamListNum = 0
+            let para = {
+                queue: 'wemedia_news'
+            };
+            removeDoExamData(para).then((res) => {});
+        },
+        // 改变数据类型
+        changeDataType() {
+            this.recycleData()
+            this.getNewExam()
+        },
+        // 取消焦点
+        changeBlur(div){
+            this.$refs.lingyuSelect.blur()
+            this.$refs.classifySelect.blur()
+        }
     },
     activated() { //keep-alive 组件激活
         this.loadKey(); //组件激活时重新监控键盘
@@ -664,12 +733,7 @@ export default {
         }
     },
     destroyed() {
-        clearInterval(this.selfInterva)
-        localStorage.removeItem("wemedia_news")
-        let para = {
-            queue: 'wemedia_news'
-        };
-        removeDoExamData(para).then((res) => {});
+        this.recycleData()
     }
 }
 </script>

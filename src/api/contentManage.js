@@ -672,13 +672,6 @@ export function yangList(data) {
 }
 
 // 优质视频列表
-// 分类获取
-export function newsvideoapiGettypes(data) {
-    return request({
-        url: `/api/${data.type}/gettypes`,
-        method: 'get'
-    })
-}
 
 // 东方头条-视频-删除优质
 export function videoDelQuality(data) {
@@ -723,16 +716,174 @@ export function videoAliyun(data) {
 export function newsvideoGetauth(data) {
     let params = {json: JSON.stringify(data)}
     let url = ''
-    if(params.type=='share'){
-        url=`/${params.type}/getauth`
-    }else if(params.type=='sportsvideopublish'){
+    if(data.type=='share'){
+        url=`/${data.type}/getauth`
+    }else if(data.type=='sportsvideopublish'){
         url=`/afterlogin/${params.type}/getauth`
     }else{
-        url=`/api/${params.type}/getauth`
+        url=`/api/${data.type}/getauth`
     }
     return request({
         url: url,
         method: 'post',
         data: qs.stringify(params)
+    })
+}
+
+// 查询原文转义
+export function getTransferredList(data) {
+    return request({
+        url: '/api/addnewspara/querypara',
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 原文转义
+export function contentTransferred(data) {
+    return request({
+        url: '/api/addnewspara/savepara',
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 删除转义
+export function delTransferredContent(data) {
+    return request({
+        url: '/api/addnewspara/delpara',
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 图片搜索
+export function getHasCopyrightImg(data) {
+    return request({
+        url: '/share/searchrightimg',
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 发布视频分类
+export function newsvideoapiGettypes(data) {
+    let params = {json: JSON.stringify(data)}
+    let url = ''
+    if(data.type === 'sportsvideopublish'){
+        url = `afterlogin/${data.type}/gettypes`
+    }else{
+        url = `api/${data.type}/gettypes`
+    }
+    return request({
+        url: url,
+        method: 'get'
+    })
+}
+
+// 发视频缩略图预览
+export function newsvideoMinipreview(data) {
+    let params = {json: JSON.stringify(data)}
+    let url = ''
+    if(data.type === 'sportsvideopublish'){
+        url = `afterlogin/${data.type}/minipreview`
+    }else{
+        url = `api/${data.type}/minipreview`
+    }
+    return request({
+        url: url,
+        method: 'post',
+        data: qs.stringify(params)
+    })
+}
+
+// 视频发布
+export function newsvideoSavevideos(data) {
+    let params = {json: JSON.stringify(data)}
+    let url = ''
+    if(data.type === 'sportsvideopublish'){
+        url = `afterlogin/${data.type}/savevideos`
+    }else{
+        url = `api/${data.type}/savevideos`
+    }
+    return request({
+        url: url,
+        method: 'post',
+        data: qs.stringify(params)
+    })
+}
+
+// 热文列表
+// 原文转义
+export function getHotAriticleList(data) {
+    return request({
+        url: '/afterlogin/hotnewslist/query',
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 删除热文
+export function delHotAriticle(data) {
+    return request({
+        url: '/afterlogin/hotnewslist/update',
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 东方号发文获取分类
+export function getDFHtypes(data) {
+    return request({
+        url: '/afterlogin/dfhnewsadd/type/0',
+        method: 'get'
+    })
+}
+
+// 东方号发文正文预览
+export function dfhContentPreview(data) {
+    return request({
+        url: '/afterlogin/dfhnewsadd/content-preview',
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 东方号发文缩略图预览
+export function dfhImgsPreview(data) {
+    return request({
+        url: '/afterlogin/dfhnewsadd/mini-preview',
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 东方号发文保存
+export function dfhSaveContent(data) {
+    let param = {
+        json: JSON.stringify(data)
+    }
+    return request({
+        url: '/afterlogin/dfhnewsadd/save',
+        method: 'post',
+        data: qs.stringify(param)
+    })
+}
+
+// 新闻采集
+export function collectNews(data) {
+    return request({
+        url: `/afterlogin/newscrawlercollect/query?url=${data.url}`,
+        method: 'get'
+    })
+}
+
+// 游戏盒子
+let gameBoxUrl = 'http://106.75.73.67:8070/gameBox'
+// let gameBoxUrl = 'https://api.mv.dftoutiao.com/gameBox'
+export function getGameList(data) {
+    return request({
+        url: `${gameBoxUrl}/game/getGamesByHot/pageNum/${data.pageNum}/pageSize/${data.pageSize}`,
+        method: 'get'
     })
 }

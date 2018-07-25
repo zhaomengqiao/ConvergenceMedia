@@ -67,7 +67,7 @@
         </el-table-column>
         <el-table-column prop="pushurl" label="推流URL" width="500"></el-table-column>
         <el-table-column prop="hlsurl" label="拉流URL" width="500"></el-table-column>
-        <el-table-column prop="operate" fixed="right" label="操作" width="500">
+        <el-table-column prop="operate" fixed="right" label="操作" width="560">
             <template slot-scope="scope">
                 	<el-button  type="primary" v-if="scope.row.commentflag=='是'&&isAuth.queryCommentList" @click.native.prevent="showCommentDetail(scope.$index, scope.row)" size="small">查看评论</el-button>
                    	<el-button v-if="(scope.row.livestatus=='直播'||scope.row.livestatus=='回看')&&isAuth.updateTitleAndPic" @click.native.prevent="editRoom(scope.$index, roomManage[scope.$index])" type="primary" size="small">编辑</el-button>
@@ -76,6 +76,7 @@
                     <el-button  @click="showCount(scope.$index, scope.row)" v-if="isAuth.updateCount"  type="primary" size="small">更改人数</el-button>
 					<el-button  @click="repairContentRoom(scope.$index, scope.row)" v-if='scope.row.roomtype=="3"||scope.row.roomtype=="4"'  type="primary" size="small">维护内容</el-button>
                     <el-button  v-if="scope.row.livestatus=='回看'&&scope.row.roomtype!='3'&&isAuth.videoCut"  @click="showLookBack(scope.$index, scope.row)" type="primary" size="small">设置回看</el-button>
+                    <el-button type="primary" @click="getQrcode(scope.row)">生成二维码</el-button>
                 </template>
         </el-table-column>
     </el-table>
@@ -167,6 +168,11 @@
 			    <el-button type="primary" @click="updateLook">确 定</el-button>
 			  </span>
     </el-dialog>
+    <el-dialog
+        :visible.sync="dialogVisible"
+        width="30%">
+        <div id="qrcode" style="text-align:center" v-if="dialogVisible"></div>
+    </el-dialog>
 
 </div>
 </template>
@@ -191,9 +197,15 @@
 .green {
     color: green;
 }
+#qrcode{
+    text-align: center;
+    display: flex;
+    justify-content: center;
+}
 </style>
 <script>
 import $ from 'jquery'
+import QRCode from 'qrcodejs2'
 import {
     queryLiveList,
     updateLookBack,
@@ -226,6 +238,7 @@ export default {
             }
         }
         return {
+            dialogVisible: false,
             videoOptionsLeft: {
                 source: {
                     type: "video/mp4", //视频格式
@@ -396,7 +409,7 @@ export default {
             getLivePlatform(params).then(res => {
                 this.livePlatform = res.data;
                 this.roomManagePara.livePlat = res.data[0].value;
-                // this.getClassify();
+                this.getClassify();
             });
         },
         // 视频上传
@@ -775,6 +788,25 @@ export default {
             if (value.length == 2) {
                 this.lookBack.videourl.splice(0, 1)
             }
+        },
+        // 生成二维码
+        getQrcode(row){
+            this.dialogVisible = true
+            this.$nextTick(() => {
+                var qrcodeText = ''
+                console.log(process.env.NODE_ENV)
+                if(process.env.NODE_ENV == 'development') {
+                    qrcodeText = `http://test.mv.dftoutiao.com:8090/liveshow_v3/liveManager/createJumpHtml?roomid=${row.roomid}`
+                }else{
+                    qrcodeText = `http://api.mv.dftoutiao.com/liveshow_v3/liveManager/createJumpHtml?roomid=${row.roomid}`
+                }
+                let qrcode = new QRCode('qrcode', {
+                    width: 100,
+                    height: 100, // 高度
+                    text:  qrcodeText// 二维码内容
+                    // render: 'canvas' // 设置渲染方式（有两种方式 table和canvas，默认是canvas）
+                })
+            })
         }
     }
 }

@@ -1,22 +1,32 @@
 <template lang="html">
     <section class="rejectEdit">
         <el-row type="flex" :gutter="10" style="align-items:center">
-            <el-col style="max-width:310px;">
-                <el-button type="primary"
+            <el-col style="max-width:440px;">
+                <!-- <el-button type="primary"
                            :disabled="btnDisabled.contentPreview"
                            :loading="loading.contentPreview"
                            @click="newsContentPreview">正文预览</el-button>
                 <el-button type="primary"
                            :loading="loading.imgsPreview"
                            :disabled="btnDisabled.imgsPreview"
-                           @click="newsImgPreview">缩略图预览</el-button>
-                <el-button type="primary"
+                           @click="newsImgPreview">缩略图预览</el-button> -->
+                <!-- <el-button type="primary"
                            :loading="loading.save"
                            :disabled="btnDisabled.save"
-                           @click="newsAdd">保存</el-button>
+                           @click="newsAdd">保存</el-button> -->
+                <el-button type="primary"
+                           @click="saveContent">保存</el-button>
                 <el-button type="danger"
                            :loading="loading.refuse"
                            @click="refuse">拒绝</el-button>
+                <el-select v-model="newsQuestion" placeholder="请选择" style="width:120px;" @change='changeDataType'>
+                    <el-option
+                        v-for="(item,index) in newsQuestionList"
+                        :key="index"
+                        :label="item.label"
+                        :value="item.value">
+                    </el-option>
+                </el-select>
             </el-col>
             <el-col style="flex:1">
                 <div class="url-source" v-if="newExam!=null">
@@ -221,7 +231,9 @@ import {
     rejectContentPreview,
     rejectImgPreview,
     newsRejectSave,
-    newsRejectNoPasse
+    newsRejectSaveAll,
+    newsRejectNoPasse,
+    removeDoExamData
 } from '@/api/audit'
 import {
     contentEditorHtml
@@ -238,6 +250,33 @@ export default {
     },
     data() {
         return {
+            newsQuestion: 'wenshou',
+            newsQuestionList: [
+                {
+                    label: '文首问题',
+                    value: 'wenshou'
+                },
+                {
+                    label: '文尾问题',
+                    value: 'wenwei'
+                },
+                {
+                    label: '文中问题',
+                    value: 'wenzhong'
+                },
+                {
+                    label: '图片问题',
+                    value: 'tupian'
+                },
+                {
+                    label: '标题问题',
+                    value: 'biaoti'
+                },
+                {
+                    label: '其他问题',
+                    value: 'qita'
+                }
+            ],
             fileUpload: '',
             activeName: ['rejectReason', 'level'],
             activeNameRight: ['keywords'],
@@ -376,8 +415,8 @@ export default {
         mountedGetData() {
             // this.checkedNum('video')
             let localData = localStorage.getItem('reject_news')
-            if (localData && JSON.parse(localData).length <= 3) {
-                this.dataList = JSON.parse(localData)
+            if (localData && (JSON.parse(localData).length > 0 && JSON.parse(localData).length <= 3)) {
+                this.getLocalData()
                 this.getDataList()
                 console.log('获取 本地数据+接口数据')
             } else if (localData && JSON.parse(localData).length > 3) {
@@ -390,7 +429,8 @@ export default {
         },
         getDataList(type) {
             let params = {
-                size: this.newsSize
+                size: this.newsSize,
+                type: this.newsQuestion
             }
             getNewsReject(params).then(res => {
                 let _this = this
@@ -414,6 +454,7 @@ export default {
                     this.newExam = null
                     this.form.content = ''
                     this.form.rejectReason = ''
+                    this.form.title = ''
                 } else {
                     clearInterval(this.selfInterva)
                     this.newExam = this.dataList[0]
@@ -647,6 +688,50 @@ export default {
                 }
             })
         },
+        // 三步合一的保存
+        saveContent() {
+            if (!this.form.content) {
+                this.$message({
+                    type: 'warning',
+                    message: '无正文信息，无法保存'
+                })
+                return
+            }
+            if (!this.contentLevel) {
+                this.$message({
+                    type: 'warning',
+                    message: '请选择评级'
+                })
+                return
+            }
+
+            this.$refs.ruleForm.validate((valid) => {
+                if (valid) {
+                    this.$confirm('确认提交吗?', '提示', {
+                        type: 'warning'
+                    }).then(() => {
+                        let params = {
+                            rowkey: this.newExam.rowkey,
+                            imgStrs: this.fileList,
+                            purl: this.newExam.purl,
+                            content: this.form.content,
+                            source: this.newExam.source,
+                            level: this.contentLevel,
+                            mainType: this.newExam.urlmaintypepy,
+                            subType: this.newExam.tfsubtype,
+                            cts: this.newExam.crawlerts,
+                            title: this.form.title
+                        }
+                        this.dataList.shift()
+                        localStorage.setItem('reject_news', JSON.stringify(this.dataList))
+                        this.mountedGetData()
+                        newsRejectSaveAll(params).then(res => {
+
+                        })
+                    })
+                }
+            })
+        },
         // 拒绝
         refuse() {
             if (!this.newExam.rowkey) {
@@ -729,6 +814,21 @@ export default {
                 }
 
             }
+        },
+        // 回收数据
+        recycleData() {
+            clearInterval(this.selfInterva)
+            localStorage.removeItem("reject_news")
+            this.dataList = []
+            let para = {
+                queue: 'reject_news'
+            };
+            removeDoExamData(para).then((res) => {});
+        },
+        // 改变数据类型
+        changeDataType() {
+            this.recycleData()
+            this.mountedGetData()
         }
     },
     watch: {
@@ -742,6 +842,9 @@ export default {
                 this.editorInstance.setContent(this.form.content)
             }
         }
+    },
+    destroyed() {
+        this.recycleData()
     }
 }
 </script>

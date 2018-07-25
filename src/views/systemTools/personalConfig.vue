@@ -120,12 +120,49 @@
                                 <el-button v-else class="button-new-tag" size="small" @click="showInput('source')">+ 来源</el-button>
                             </div>
                         </el-row>
-                        <el-row class="config-row--row" style="margin-top:30px;">
+                        <el-row class="config-row--row">
                             <div class="config-content--title pull-left">
                                 编辑保护
                             </div>
                             <div class="config-content--content pull-left clearfix">
                                 <el-checkbox v-model="isEditProject" @change="addEditProject">是</el-checkbox>
+                            </div>
+                        </el-row>
+                        <el-row class="config-row--row">
+                            <div class="config-content--title pull-left">
+                                东方号
+                            </div>
+                            <div class="config-content--content pull-left clearfix">
+                                <el-tag
+                                    :key="index"
+                                    v-for="(tag,index) in dfhTags"
+                                    closable
+                                    :disable-transitions="false"
+                                    @close="handleClose(tag,'dfh')">
+                                    {{tag.dfhname}}
+                                </el-tag>
+                                <div style="display:inline-block" v-if="dfhVisible">
+                                    <el-select v-model="dfhValue"
+                                               value-key="userid"
+                                               filterable
+                                               remote
+                                               :remote-method="getAllDFH"
+                                               placeholder="请选择"
+                                               ref="dfhTagInput"
+                                               size="small"
+                                               :loading="dfhLoading"
+                                               no-data-text="请输入关键词进行模糊匹配">
+                                        <el-option
+                                            v-for="item in allDFH"
+                                            :key="item.userid"
+                                            :label="item.mediaName"
+                                            :value="item">
+                                        </el-option>
+                                    </el-select>
+                                    <el-button size="small" type="primary" @click="addDFH">确认</el-button>
+                                    <el-button size="small" @click="closeAddDFH">取消</el-button>
+                                </div>
+                                <el-button v-else class="button-new-tag" size="small" @click="showInput('dfh')">+ 新增东方号</el-button>
                             </div>
                         </el-row>
                     </el-card>
@@ -141,7 +178,9 @@ import {
 } from 'vuex';
 import {
     addConfigSource,
-    delConfigSource
+    delConfigSource,
+    getSystemNotify,
+    getAllDFHaccount
 } from '@/api/systemTools'
 
 export default {
@@ -155,15 +194,29 @@ export default {
             sourceTags: [],
             sourceVisible: false,
             sourceValue: '',
-            isEditProject: false
+            dfhTags: [],
+            dfhVisible: false,
+            dfhValue: '',
+            allDFH: [],
+            isEditProject: false,
+            dfhLoading: false,
+            dfhSendAuth: false
         }
     },
     mounted() {
         this.isEditProject = Boolean(this.personalConfig.editProject)
         this.getSource()
+        this.getDFH()
         this.getEditProject()
+        this.getAuth()
     },
     methods: {
+        getAuth() { //权限控制
+            let authorList = localStorage.getItem('authorList')
+            if (authorList.indexOf('sendNews/byDFH') > -1) {
+                this.dfhSendAuth = true
+            }
+        },
         addSource(){
             let params = {
                 sourcename: this.sourceValue,
@@ -189,6 +242,27 @@ export default {
             this.$store.dispatch('getConfigSource').then(() => {
                 this.sourceTags = this.personalConfig.source
             })
+        },
+        getDFH(){
+            this.$store.dispatch('getDFHaccount').then(() => {
+                this.dfhTags = this.personalConfig.dfh
+            })
+        },
+        getAllDFH(query) {
+            if (query !== '') {
+                this.dfhLoading = true;
+                let params = {
+                    mediaName: query
+                }
+                getAllDFHaccount(params).then(res => {
+                    if(res.code === '00001'){
+                        this.allDFH = res.data
+                    }
+                    this.dfhLoading = false
+                })
+            } else {
+                this.allDFH = [];
+            }
         },
         addEditProject(){
             let params = {
@@ -229,11 +303,28 @@ export default {
             })
             this.delSource(tag)
         },
+        // 删除东方号
+        handleCloseDFH(tag) {
+            let params = {
+                id: tag.id
+            }
+            delConfigSource(params).then(res => {
+                if(res.code === '00001'){
+                    this.getDFH()
+                }
+            })
+        },
         showInput(type) {
             this[type + 'Visible'] = true
-            this.$nextTick(_ => {
-                this.$refs[type + 'TagInput'].$refs.input.focus();
-            });
+            if(type === 'source'){
+                this.$nextTick(_ => {
+                    this.$refs[type + 'TagInput'].$refs.input.focus();
+                });
+            }else{
+                this.$nextTick(_ => {
+                    this.$refs[type + 'TagInput'].focus();
+                });
+            }
         },
         handleInputConfirm(type) {
             if(this.sourceValue){
@@ -241,6 +332,27 @@ export default {
             }
             this[type + 'Visible'] = false;
             this[type + 'Value'] = '';
+        },
+        // 确认新增
+        addDFH() {
+            let params = {
+                dfhname: this.dfhValue.mediaName,
+                dfhid: this.dfhValue.userid,
+                dfhhead: this.dfhValue.mediaHeadPic,
+                isdfhblock: 0,
+                configtype: 2
+            }
+            addConfigSource(params).then(res => {
+                if(res.code === '00001'){
+                    this.closeAddDFH()
+                    this.getDFH()
+                }
+            })
+        },
+        closeAddDFH() {
+            this.dfhVisible = false
+            this.dfhValue = ''
+            this.allDFH = []
         }
     },
     computed: {

@@ -42,8 +42,9 @@
                     <p v-if="newLive.tuiliuSelect==1&&!canCreate" style="color:red;margin:2px 0;line-height:14px">请输入正确的推流流名</p>
                     <el-input v-if='newLive.tuiliuSelect=="2"' placeholder="请输入拉流地址(flvurl)" :disabled="flvEdit" v-model="newLive.tuiliu" class="w30" @keyup.native="isWhiteEdit">
                     </el-input>
-                    <el-checkbox v-model="isPull" v-if='newLive.tuiliuSelect=="2"' @change="setLookBack">拉流转推</el-checkbox>
-                    <el-checkbox v-model="isRepush" v-if='newLive.tuiliuSelect=="2"' :disabled="!isPull" @change="setRepush">生成回看</el-checkbox>
+                    <el-checkbox v-model="isPull" v-if='newLive.tuiliuSelect=="2"' @change="setLookBack('pull')" >拉流转推</el-checkbox>
+                    <el-checkbox v-model="isWhitePull" v-if='newLive.tuiliuSelect=="2"' @change="setLookBack('whitepull')" >白名单拉流转推</el-checkbox>
+                    <el-checkbox v-model="isRepush" v-if='newLive.tuiliuSelect=="2"' :disabled="!isPull&&!isWhitePull" @change="setRepush">生成回看</el-checkbox>
                     <div v-if='newLive.tuiliuSelect=="2"' class="w40">
                         <el-input v-model.number="newLive.hlsurl" placeholder="请输入拉流地址(hlsurl)" :disabled="hlsEdit"></el-input>
                     </div>
@@ -235,6 +236,7 @@ export default {
             editType: false,
             isRepush: false,
             isPull: false,
+            isWhitePull: false,
             roomAdminArr: [],
             newLive: {
                 livePlatform: '',
@@ -365,12 +367,26 @@ export default {
                 this.newLive.livePlatform = res.data[0].value;
             });
         },
+        PullCheck(type){
+            if(type=='pull'){
+                if(this.isPull){
+                    this.isWhitePull = false
+                }
+            }
+            if(type=='whitepull'){
+                if(this.isWhitePull){
+                    this.isPull = false
+                }
+            }
+        },
         getRepush() {
-            if (this.isPull && this.isRepush) {
+            if(this.isWhitePull){
+                this.newLive.repush = 3
+            }else if(this.isPull && this.isRepush){
                 this.newLive.repush = 1
-            } else if (this.isPull && !this.isRepush) {
+            }else if(this.isPull && !this.isRepush){
                 this.newLive.repush = 2
-            } else {
+            }else{
                 this.newLive.repush = 0
             }
         },
@@ -405,9 +421,10 @@ export default {
         setRepush() {
             this.getRepush();
         },
-        setLookBack() {
+        setLookBack(type) {
+            this.PullCheck(type)
             if (this.newLive.thirdurl != "") {
-                if (this.isPull) {
+                if (this.isPull || this.isWhitePull) {
                     setCreateUrl('').then(res => {
                         this.newLive.tuiliu = res.data.flvurl;
                         this.whiteEdit = false;
@@ -435,9 +452,10 @@ export default {
                         type: 'warning'
                     });
                     this.isPull = false;
+                    this.isWhitePull = false;
                     return false
                 } else {
-                    if (this.isPull) {
+                    if (this.isPull || this.isWhitePull) {
                         setCreateUrl('').then(res => {
                             this.newLive.hlsurl = res.data.hlsurl;
                             this.hlsEdit = true;
