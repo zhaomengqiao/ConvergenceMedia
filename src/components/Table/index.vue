@@ -1,16 +1,38 @@
 <template lang="html">
     <div class="hulk_table">
+        <el-row class="mb-10" v-if="option.dynamicColumn">
+            <el-dropdown class="fr">
+                <el-button type="primary">
+                更多菜单<i class="el-icon-arrow-down el-icon--right"></i>
+                </el-button>
+                <el-dropdown-menu slot="dropdown">
+                    <el-checkbox-group v-model="checkList">
+                        <el-dropdown-item>
+                            <el-checkbox label="复选框 A"></el-checkbox>
+                        </el-dropdown-item>
+                        <el-dropdown-item>
+                            <el-checkbox label="复选框 B"></el-checkbox>
+                        </el-dropdown-item>
+                        <el-dropdown-item>
+                            <el-checkbox label="复选框 C"></el-checkbox>
+                        </el-dropdown-item>
+                    </el-checkbox-group>
+                </el-dropdown-menu>
+            </el-dropdown>
+        </el-row>
         <!-- 表格主体Begin -->
         <el-table :data="tableData"
                   highlight-current-row
-                  v-loading="loading"
                   tooltip-effect="dark"
-                  stripe border>
+                  stripe border
+                  v-loading="option.listLoading">
             <!--普通列表-->
             <el-table-column v-for="(item, index) in table_config" v-if="item.type=='primary'"
                              :key="index"
                              :label="item.label"
                              :width="item.width"
+                             :show-overflow-tooltip="true"
+                             :min-width="item.minWidth ? item.minWidth: ''"
                              :prop="item.prop">
             </el-table-column>
             <!--标题展示列-->
@@ -43,7 +65,7 @@
                              :label="item.label"
                              :width="item.width">
                 <template slot-scope="scope">
-                    <el-tag :type="item.tagType(scope.row[item.prop])">{{ scope.row[item.prop] }}</el-tag>
+                    <el-tag :type="item.tagType(scope.row)">{{ item.tagText(scope.row) }}</el-tag>
                     {{ item.content ? scope.row[item.content]: '' }}
                 </template>
             </el-table-column>
@@ -71,9 +93,9 @@
                 @size-change="handleSizeChange"
                 layout="total, sizes, prev, pager, next, jumper"
                 :page-sizes="[10, 15, 20, 50, 100]"
-                :page-size="pageSize"
-                :current-page="currentPage"
-                :total="total"
+                :page-size="pagination.pageSize"
+                :current-page="pagination.currentPage"
+                :total="pagination.total"
                 background
                 style="float:right;">
             </el-pagination>
@@ -92,19 +114,20 @@ export default {
                 return []
             }
         },
-        loading: {
-            type: Boolean,
-            default: false
-        },
         table_config: {
             type: Array,
             default: () => {
                 return []
             }
         },
-        total: {
-            type: Number,
-            default: 0
+        getList: Function,
+        pagination: {
+            type: Object,
+            default: {}
+        },
+        option: {
+            type: Object,
+            default: {}
         }
     },
     created(){
@@ -112,6 +135,7 @@ export default {
     },
     data() {
         return {
+            checkList: [],
             buttonColumnWidth: 140,
             currentPage: 1,
             pageSize: 10,
@@ -132,16 +156,13 @@ export default {
             buttonWidth += 28
             this.buttonColumnWidth = buttonWidth
         },
-        getList() {
-
-        },
         // 分页
         handleSizeChange(val) {
-            this.pageSize = val
+            this.pagination.pageSize = val
             this.getList()
         },
         handleCurrentChange(val) {
-            this.currentPage = val
+            this.pagination.currentPage = val
             this.getList()
         }
     }

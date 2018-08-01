@@ -223,7 +223,8 @@
                 </el-table-column> -->
             <el-table-column label="操作" width="150" align="center" fixed="right">
                 <template slot-scope="scope">
-                        <span v-if=" new Date(scope.row.endTime).getTime() > new Date().getTime()">
+                        <span v-if="scope.row.isdelete==1">数据已删除</span>
+                        <span v-else-if="new Date(scope.row.endTime).getTime() > new Date().getTime()">
                             <el-button type="primary" size="small" @click="handleDel(scope.$index, scope.row)">删除</el-button>
                             <el-button type="danger" size="small" @click="handleEditor(scope.$index, scope.row)">修改</el-button>
                         </span>

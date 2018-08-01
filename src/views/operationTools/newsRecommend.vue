@@ -1075,6 +1075,12 @@ export default {
                 if (this.newsAreasList.length === this.form.provid.split(',').length) {
                     providPrefix = 'checkall,';
                 }
+                var sourcetype;
+                if(this.form.sourcetype === 'votelink'){
+                    sourcetype = this.form.sourcetype+'_'+this.openMethods
+                }else{
+                    sourcetype = this.form.sourcetype
+                }
                 if (valid) {
                     let contentUrl = ''
                     // 需求：

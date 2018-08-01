@@ -531,6 +531,7 @@ export function judgeAppClassify(data) {
 }
 
 export const getfileUpload = `/rongmeitiapi/api/fileUpload/file`// getVideoUpload 新闻图片上传
+export const getfileAbsoluteUpload = `/rongmeitiapi/api/fileUpload/filetocdn`
 
 // 评论管理-----------------
 // 评论白名单列表
@@ -660,8 +661,9 @@ export function uploadTaskAdd(data) {
 }
 
 //文本上传地址
-export const UploadTaskUrl = `/rongmeitiapi/task/upload`;
+export const UploadTaskUrl = `/rongmeitiapi/task/upload`
 export const uploadFilmEditing = `/rongmeitiapi/task/upload`
+export const disposeCover = `/api/videomanager/filecoverhandle`
 
 // 关键词管理
 // 获取关键词管理
@@ -809,6 +811,153 @@ export function getShortVideoByUserId(data) {
 export function addBlackShortVideoByRowkey(data) {
     return request({
         url: `/api/newsmanager/addblackbyrowkey`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 游戏盒子
+let gameBoxUrl = ''
+if(process.env.NODE_ENV == 'development') {
+    gameBoxUrl = `http://106.75.73.67:8070/gameBox`
+}else{
+    gameBoxUrl = `https://wxmini.dftoutiao.com/gameBox`
+}
+// let gameBoxUrl = 'http://106.75.73.67:8070/gameBox'
+let headers = {
+    'Content-Type':'application/json;charset=UTF-8'
+}
+// let gameBoxUrl = 'https://api.mv.dftoutiao.com/gameBox'
+// 游戏盒子 --> 查询分类
+export function getGameClassList(data) {
+    return request({
+        url: `${gameBoxUrl}/type/getAllType/pageNum/${data.pageNum}/pageSize/${data.pageSize}/states/${data.states}`,
+        method: 'get'
+    })
+}
+
+// 游戏盒子 --> 新增类型
+export function addGameClass(data) {
+    return request({
+        url: `${gameBoxUrl}/type/addType`,
+        method: 'put',
+        data: JSON.stringify(data),
+        headers
+    })
+}
+
+// 游戏盒子 --> 删除类型
+export function removeGameClass(data) {
+    return request({
+        url: `${gameBoxUrl}/type/deleteType/id/${data.id}`,
+        method: 'delete'
+    })
+}
+
+// 游戏盒子 --> 修改类型
+export function updateGameClass(data) {
+    return request({
+        url: `${gameBoxUrl}/type/updateType`,
+        method: 'post',
+        data: JSON.stringify(data),
+        headers
+    })
+}
+
+// 游戏盒子 --> 按类型查询游戏
+export function getGamesByClass(data) {
+    return request({
+        url: `${gameBoxUrl}/game/getGamesByTypeId/typeId/${data.typeId}/pageNum/${data.pageNum}/pageSize/${data.pageSize}/states/${data.states}`,
+        method: 'get',
+        data: JSON.stringify(data),
+        headers
+    })
+}
+
+// 游戏盒子 --> 新增游戏
+export function addGame(data) {
+    return request({
+        url: `${gameBoxUrl}/game/addGame`,
+        method: 'put',
+        data: JSON.stringify(data),
+        headers
+    })
+}
+
+// 游戏盒子 --> 编辑游戏
+export function updateGame(data) {
+    return request({
+        url: `${gameBoxUrl}/game/updateGame`,
+        method: 'post',
+        data: JSON.stringify(data),
+        headers
+    })
+}
+
+// 游戏盒子 --> 删除游戏
+export function deleteGame(data) {
+    return request({
+        url: `${gameBoxUrl}/game/deleteGame/id/${data.id}`,
+        method: 'delete',
+        headers
+    })
+}
+
+// 游戏盒子 --> 置顶游戏
+export function setTopGame(data) {
+    return request({
+        url: `${gameBoxUrl}/game/addTabGame/id/${data.id}/rank/${data.rank}`,
+        method: 'PUT',
+        headers
+    })
+}
+
+// 游戏盒子 --> 置顶游戏
+export function setNewsGame(data) {
+    return request({
+        url: `${gameBoxUrl}/game/addNewGame/id/${data.id}/rank/${data.rank}`,
+        method: 'PUT',
+        headers
+    })
+}
+
+// 视频封面替换
+export function changeVideoCover(data) {
+    return request({
+        url: `api/videomanager/filecoverhandle`,
+        method: 'post',
+        data: data
+    })
+}
+
+// 体育专栏配置
+// 体育专栏查询
+export function getSportsSpecialColumns(data) {
+    return request({
+        url: `sportscolumninfo/query/${data.pageSize}/${data.pageNum}`,
+        method: 'get'
+    })
+}
+// 添加体育专栏
+export function addSportsSpecialColumn(data) {
+    return request({
+        url: `sportscolumninfo/add`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+// 编辑体育专栏
+export function editSportsSpecialColumn(data) {
+    return request({
+        url: `sportscolumninfo/update`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+// 启用/停用/删除 体育专栏(与编辑相同)
+export function changeSportsSpecialColumn(data) {
+    return request({
+        url: `sportscolumninfo/update`,
         method: 'post',
         data: qs.stringify(data)
     })

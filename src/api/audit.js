@@ -699,3 +699,13 @@ export function videoUpload(data) {
         }
     })
 }
+
+// 审核修改封面 图片处理
+export function disposeCovers(data) {
+    return request({
+        timeout: 45000,
+        url: `wemedia/video/coverhandle`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}

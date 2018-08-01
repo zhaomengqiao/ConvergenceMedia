@@ -167,7 +167,7 @@
                         </div>
                     </el-card>
                 </el-col>
-                <el-col style="flex:1">
+                <el-col style="flex:1;max-height:650px;overflow-y:auto">
                     <el-card :body-style="{padding:'10px'}">
                         <el-carousel trigger="click" height="360px" v-if="newExam!==null" :autoplay="false" indicator-position="none" :initial-index="nowIndex" :key="carouselKey">
                             <el-carousel-item v-for="(item,index) in newExam.cmsphoto" :key="index">
@@ -416,6 +416,12 @@ export default {
             })
         },
         mountedGetData() {
+            this.newExam = null
+            this.dynamicTags = []
+            this.playerOptions.sources[0].src = ''
+            this.playerOptions.poster = ''
+            this.videoIntro = ''
+            this.imageUrl = ''
             this.checkedNum('video')
             let localData = localStorage.getItem('tags_video')
             if (localData && JSON.parse(localData).length <= 3) {

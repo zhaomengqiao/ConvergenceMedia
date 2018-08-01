@@ -16,15 +16,15 @@ const service = axios.create({
     baseURL: process.env.BASE_API, // api的base_url
     timeout: timeoutTime, // 请求超时时间
     headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
     }
 })
 
 // request拦截器
 service.interceptors.request.use(config => {
-    config.headers={
-      'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'
-    }
+    // config.headers={
+    //   'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'
+    // }
     // Do something before request is sent
     //config.headers['Content-Type'] = 'application/x-www-form-urlencoded'
     // if (store.getters.token) {
@@ -41,6 +41,17 @@ service.interceptors.request.use(config => {
 service.interceptors.response.use(
     response => {
         const res = response.data;
+        // 直播 游戏盒子接口
+        if(!res.code) {
+            if(res.stat != 200) {
+                Message.error({
+                    message: res.msg
+                })
+                return
+            }else{
+                return res
+            }
+        }
         // 跳转至登录页
         if (res.code === '00044') {
             MessageBox.confirm('登录超时，可以取消继续留在该页面，或者重新登录', '确定登出', {

@@ -294,6 +294,7 @@ export default {
                     src: ''
                 }]
             },
+            saveUrl: '',
             form: {
                 appfrom: '',
                 newstype: '',
@@ -626,7 +627,7 @@ export default {
             this.listLoading = true
             searchVideoDetail(para).then((res) => {
                 if (res.code == '00001' && res.data) {
-                    this.form.searchUrl = res.data.url;
+                    this.saveUrl = res.data.url;
                     this.maintype = res.data.urlmaintype
                     this.playerOptions.sources[0].src = JSON.parse(res.data.videominiajs)[0].src;
                     this.playerOptions.poster = eval(res.data.minijs)[0].src
@@ -912,7 +913,7 @@ export default {
                 }
                 if (valid) {
                     let params = {
-                        content: this.form.searchUrl,
+                        content: this.saveUrl,
                         endTime: this.form.endTime == '' ? '' : parseTime(this.form.endTime, '{y}-{m}-{d} {h}:{i}:{s}'),
                         idx: this.form.idx,
                         isoneself: this.form.isoneself,

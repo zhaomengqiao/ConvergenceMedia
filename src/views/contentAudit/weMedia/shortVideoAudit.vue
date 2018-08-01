@@ -214,6 +214,7 @@ export default {
         },
         getVideoDetail() {
             if (this.dataList.length != 0) {
+                clearInterval(this.videoInterva)
                 this.newExam.contenttitle = this.dataList[0].title
                 this.newExam.keywords = this.dataList[0].lable01.split(',')
                 this.newExam.videoCover = JSON.parse(this.dataList[0].imgjs)[0].src
@@ -227,8 +228,9 @@ export default {
                 }
                 this.newExam.videoCover = JSON.parse(this.dataList[0].imgjs)[0].src
                 this.newExam.rowkey = this.dataList[0].rowkey
-                clearInterval(this.videoInterva)
+
             } else {
+                clearInterval(this.videoInterva)
                 this.newExam.contenttitle = ''
                 this.newExam.keywords = []
                 this.newExam.videoCover = ''
@@ -236,12 +238,18 @@ export default {
                 this.playerOptions.poster = ''
                 this.newExam.videoCover = ''
                 this.newExam.rowkey = ''
-                clearInterval(this.videoInterva)
                 this.getInterva()
             }
         },
         // 通过/拒绝获取视频
         getData() {
+            this.newExam.contenttitle = ''
+            this.newExam.keywords = []
+            this.newExam.videoCover = ''
+            this.playerOptions.sources[0].src = ''
+            this.playerOptions.poster = ''
+            this.newExam.videoCover = ''
+            this.newExam.rowkey = ''
             if (this.dataList.length === 0) {
                 this.getAuditList()
             } else {
@@ -253,16 +261,16 @@ export default {
         getInterva() {
             if (this.dataList.length === 0) {
                 var _this = this
-                if (this.dataList.length === 0) {
-                    this.videoInterva = setInterval(() => {
-                        if(_this.dataList.length === 0){
-                            _this.getAuditList()
-                        }
-                    }, 30000)
-                }
+                this.videoInterva = setInterval(() => {
+                    if(_this.dataList.length === 0){
+                        _this.getAuditList()
+                    }
+                }, 30000)
             }
         },
         pass() {
+            // 暂停视频
+            this.player.pause()
             if(!this.newExam.rowkey){
                 return
             }
@@ -293,6 +301,8 @@ export default {
             })
         },
         refuse() {
+            // 暂停视频
+            this.player.pause()
             if(!this.newExam.rowkey){
                 return
             }
@@ -312,7 +322,7 @@ export default {
                         localStorage.setItem('short_video', JSON.stringify(this.dataList))
                         this.$notify({
                             title: '成功',
-                            message: '通过成功',
+                            message: '拒绝成功',
                             type: 'success',
                             duration: 1 * 1000
                         });
@@ -346,7 +356,7 @@ export default {
                     _that.pass()
                 } else if (ev.shiftKey == 1 && ev.keyCode == 220) {
                     // shift + \
-                    _that.showPassVisible()
+                    _that.refuse()
                 }
             }
         },

@@ -476,6 +476,13 @@ export default {
             }
             livedetail(params).then(res => {
                 if (res.code == '00001') {
+                    if(res.data.stat!=0) {
+                        this.$message({
+                            message: res.data.msg,
+                            type: 'warning'
+                        });
+                        return
+                    }
                     this.showform.anchorName = res.data.roomInfo.nickname;
                     this.showform.anchorID = res.data.roomInfo.accid;
                     if (res.data.roomInfo.livestatus == 0) {

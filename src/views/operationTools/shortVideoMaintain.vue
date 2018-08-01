@@ -159,7 +159,7 @@ export default {
             if(this.form.select === 'username'){
                 this.getUserList('search')
             }else if(this.form.select === 'rowkey'){
-
+                this.getShortVideoByRowkey()
             }
         },
         getUserList(type) {
@@ -186,6 +186,17 @@ export default {
                     }
                 }
                 this.listLoading = false
+            })
+        },
+        // 通过rowkey查视频
+        getShortVideoByRowkey() {
+            let params = {
+                rowkey: this.form.text
+            }
+            getShortVideoByRowkey(params).then(res => {
+                if(res.code === '00001') {
+                    this.videoTableData = [res.data]
+                }
             })
         },
         getVideoByUserid(row,type) {

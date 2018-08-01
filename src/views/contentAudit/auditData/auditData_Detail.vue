@@ -120,6 +120,8 @@
                             <span class="aclick" @click="showDialog(scope.row.url)">{{ scope.row.newsTitle }} </span>
                         </template>
                     </el-table-column>
+                    <!-- <el-table-column :prop="item.prop" :label="item.label" width="170"  v-if="item.prop=='rowkey'" :show-overflow-tooltip="true" v-for="(item,index) in tableConfigCheck" :key="index">
+                    </el-table-column> -->
                     <el-table-column prop="newsSource" label="新闻来源" width="120" :show-overflow-tooltip="true">
                     </el-table-column>
                     <el-table-column prop="newsType" label="新闻类型" width="120" :show-overflow-tooltip="true">
@@ -264,7 +266,11 @@ export default {
                 {
                     prop: "auditUser",
                     label: "审核人"
-                }
+                },
+                // {
+                //     prop: "rowkey",
+                //     label: "ROWKEY"
+                // }
             ]
         }
     },

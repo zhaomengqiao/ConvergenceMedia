@@ -331,6 +331,7 @@ export default {
                 }
             ],
             checkedCities: [],
+            saveUrl: '',
             form: {
                 timeQuantum: '',
                 searchUrl: '',
@@ -889,7 +890,7 @@ export default {
             hotNewsSearchTop(para).then((res) => {
                 if (res.code == '00001' && res.data) {
                     this.newsInfo = res.data;
-                    this.form.searchUrl = res.data.url;
+                    this.saveUrl = res.data.url;
                     this.maintype = res.data.urlmaintype
                     this.newsInfo.content = contentToHtml(this.newsInfo);
                     if (res.data.pushtypeid) {
@@ -994,8 +995,17 @@ export default {
                     providPrefix = 'checkall,';
                 }
                 if (valid) {
+                    let contentUrl = ''
+                    if(!this.newsInfo){
+                        this.$message({
+                            message: '该新闻暂无内容，无法置顶',
+                            type: 'warning'
+                        });
+                        return
+                    }
+                    contentUrl = this.saveUrl
                     let para = {
-                        content: this.form.searchUrl,
+                        content: contentUrl,
                         endTime: this.form.endTime==''?'':parseTime(this.form.endTime, '{y}-{m}-{d} {h}:{i}:{s}'),
                         idx: this.form.idx,
                         isoneself: this.form.isoneself,

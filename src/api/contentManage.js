@@ -878,12 +878,147 @@ export function collectNews(data) {
     })
 }
 
-// 游戏盒子
-let gameBoxUrl = 'http://106.75.73.67:8070/gameBox'
-// let gameBoxUrl = 'https://api.mv.dftoutiao.com/gameBox'
-export function getGameList(data) {
+// 赛事维护
+// 获取赛事分类
+export function getRacingType(data) {
     return request({
-        url: `${gameBoxUrl}/game/getGamesByHot/pageNum/${data.pageNum}/pageSize/${data.pageSize}`,
+        url: `/afterlogin/competition/type`,
         method: 'get'
+    })
+}
+// 查询赛事
+export function getRacingList(data) {
+    return request({
+        url: `/afterlogin/competition/query`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+// 新增赛事
+export function addRacing(data) {
+    return request({
+        url: `/afterlogin/competition/add`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 赛程新增
+export function addAgenda(data) {
+    return request({
+        url: `/afterlogin/competitionagenda/add`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+// 赛程编辑
+export function editAgenda(data) {
+    return request({
+        url: `/afterlogin/competitionagenda/modify`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 查询队伍
+export function getCompetitiveTeams(data) {
+    return request({
+        url: `/afterlogin/competitionteam/query`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 查询赛程
+export function getAgendaList(data) {
+    return request({
+        url: `/afterlogin/competitionagenda/query`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 修改比分
+export function changeRacingScore(data) {
+    return request({
+        url: `/afterlogin/competitionagenda/modify`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 修改状态
+export function changeRacingStatus(data) {
+    return request({
+        url: `/afterlogin/competitionagenda/modify`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 通过ID查赛程
+export function getAgendaById(data) {
+    return request({
+        url: `/afterlogin/competitionagenda/queryone?id=${data.id}`,
+        method: 'get'
+    })
+}
+
+// 队伍添加
+export function teamAdd(data) {
+    return request({
+        url: `/afterlogin/competitionteam/add`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 查询队伍
+export function getTeamList(data) {
+    return request({
+        url: `/afterlogin/competitionteam/query`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 队伍修改
+export function teamEdit(data) {
+    return request({
+        url: `/afterlogin/competitionteam/modify`,
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+// 通过id查球队
+export function getTeamByid(data) {
+    return request({
+        url: `/afterlogin/competitionteam/queryone?id=${data.id}`,
+        method: 'get'
+    })
+}
+
+// 东方头条新增一键保存
+export function directSave(data) {
+    let param = {
+        json: JSON.stringify(data)
+    }
+    return request({
+        url: `/api/addtoutiaonews/saveall`,
+        method: 'post',
+        data: qs.stringify(param)
+    })
+}
+
+// 东方头条编辑一键保存
+export function editdirectSave(data) {
+    let param = {
+        json: JSON.stringify(data)
+    }
+    return request({
+        url: `/api/edittoutiaonews/saveall`,
+        method: 'post',
+        data: qs.stringify(param)
     })
 }

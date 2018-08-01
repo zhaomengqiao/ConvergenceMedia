@@ -809,6 +809,63 @@ export const asyncRouterMap = [
                         }
                     }
                 ]
+            },
+            {
+                path: '/contentManage/racingInfor',
+                component:  _import('contentManger/index'),
+                name: 'racingInfor',
+                redirect: 'noredirect',
+                meta: {
+                    title: 'racingInfor',
+                    icon: '',
+                    authUrl: 'racing/info'
+                },
+                children: [
+                    {
+                        path: 'competitionMaintain',
+                        component: _import('contentManger/racingInfor/competitionMaintain'),
+                        name: 'competitionMaintain',
+                        meta: {
+                            title: 'competitionMaintain',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'racing/competition/maintain'
+                        }
+                    },
+                    {
+                        path: 'agendaMaintain',
+                        component: _import('contentManger/racingInfor/agendaMaintain'),
+                        name: 'agendaMaintain',
+                        meta: {
+                            title: 'agendaMaintain',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'racing/agenda/maintain'
+                        }
+                    },
+                    {
+                        path: 'agendaAdd',
+                        component: _import('contentManger/racingInfor/agendaAdd'),
+                        name: 'agendaAdd',
+                        meta: {
+                            title: 'agendaAdd',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'racing/agenda/add'
+                        }
+                    },
+                    {
+                        path: 'teamMaintain',
+                        component: _import('contentManger/racingInfor/teamMaintain'),
+                        name: 'teamMaintain',
+                        meta: {
+                            title: 'teamMaintain',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'racing/team/maintain'
+                        }
+                    }
+                ]
             }
         ]
     },
@@ -1192,6 +1249,28 @@ export const asyncRouterMap = [
                             icon: '',
                             noCache: false,
                             authUrl: 'activeConfig/answer'
+                        }
+                    },
+                    {
+                        path: 'gameBox',
+                        component: _import('operationTools/gameBox'),
+                        name: 'gameBox',
+                        meta: {
+                            title: 'gameBox',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'activeConfig/gameBox'
+                        }
+                    },
+                    {
+                        path: 'sportsSpecialColumn',
+                        component: _import('operationTools/sportsSpecialColumn'),
+                        name: 'sportsSpecialColumn',
+                        meta: {
+                            title: 'sportsSpecialColumn',
+                            icon: '',
+                            noCache: false,
+                            authUrl: 'activeConfig/sportsSpecialColumn'
                         }
                     }
                 ]

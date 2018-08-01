@@ -167,6 +167,7 @@
                                 <div class="label-title">更新封面</div>
                                 <div class="imgUpload_Box" v-if="newExam!==null">
                                     <el-upload
+                                        v-loading="coverLoading"
                                         class="small-single__uploader"
                                         style="margin:10px 0"
                                         :action="imgUploadUrl"
@@ -197,7 +198,7 @@
                         </div>
                     </el-card>
                 </el-col>
-                <el-col style="flex:1">
+                <el-col style="flex:1;max-height:650px;overflow-y:auto">
                     <el-card :body-style="{padding:'10px'}">
                         <!-- <el-carousel trigger="click" height="360px" v-if="newExam!==null" :autoplay="false" indicator-position="none" :initial-index="nowIndex" :key="carouselKey">
                             <el-carousel-item v-for="(item,index) in newExam.cmsphoto" :key="index">
@@ -326,7 +327,8 @@ import {
     getVideoType,
     getVideoInfo,
     videoPassed,
-    videoNoPassed
+    videoNoPassed,
+    disposeCovers
 } from '@/api/audit'
 
 export default {
@@ -352,6 +354,8 @@ export default {
             }
         }
         return {
+            disposeImgs: [],
+            coverLoading: false,
             imgBig_url: '',
             imgBig_visible: false,
             passDialog: false,
@@ -438,6 +442,7 @@ export default {
             ],
             imgLevel: '',
             selfInterva: '',
+            coverInterval: '',
             // 拒审理由
             noPassVisible: false,
             noPassReason: '',
@@ -470,7 +475,13 @@ export default {
             })
         },
         mountedGetData() {
+            this.disposeImgs = []
             this.newExam = null
+            this.dynamicTags = []
+            this.playerOptions.sources[0].src = ''
+            this.playerOptions.poster = ''
+            this.videoIntro = ''
+            this.imageUrl = ''
             this.checkedNum('video')
             let localData = localStorage.getItem('wemedia_video')
             if (localData && (JSON.parse(localData).length > 0 && JSON.parse(localData).length <= 3)) {
@@ -653,12 +664,25 @@ export default {
             this.passDialog = true
         },
         pass() {
+            // 暂停视频
+            this.player.pause()
+            if(this.coverLoading){
+                this.$message({
+                    type: 'warning',
+                    message: '图片正在极速处理，请耐心等待'
+                })
+                return
+            }
             // 封面和原始一样就传空
             let coverpic
             if(this.oldImageUrl === this.imageUrl){
                 coverpic = ''
             }else{
-                coverpic = this.imageUrl
+                if(this.disposeImgs.length != 0){
+                    coverpic = this.disposeImgs.join(',')
+                }else{
+                    coverpic = this.imageUrl
+                }
             }
             let params = {
                 type: this.auditType,
@@ -690,6 +714,8 @@ export default {
             this.noPassVisible = true
         },
         refuse() {
+            // 暂停视频
+            this.player.pause()
             this.$refs['refuseForm'].validate((valid) => {
                 if (valid) {
                     let params = {
@@ -769,12 +795,31 @@ export default {
                 });
                 return false
             }
-            this.imageUrl = pic
-            this.$notify({
-                  title: '成功',
-                  message: '设置封面成功',
-                  type: 'success'
-            })
+            var _this = this
+            if(_this.imageUrl){
+                let params = {
+                    rowkey: _this.newExam.rowkey,
+                    coverpic: pic
+                }
+                _this.coverLoading = true
+                _this.coverInterval = setTimeout(() => {
+                    _this.imageUrl = _this.oldImageUrl
+                    _this.coverLoading = false
+                },15000)
+                disposeCovers(params).then(res => {
+                    if(res.code === '00001'){
+                         _this.imageUrl = res.data[0]  + '?time=' + new Date().getTime()
+                         _this.disposeImgs = res.data
+                        _this.coverLoading = false
+                        this.$notify({
+                              title: '成功',
+                              message: '设置封面成功',
+                              type: 'success'
+                        })
+                        clearInterval(_this.coverInterval)
+                    }
+                })
+            }
         },
         // 切换轮播当前显示图
         changeBigImg(item, index) {
@@ -789,19 +834,47 @@ export default {
             let img = new Image()
             img.src = res.url
             let rw, rh, rate
-            img.onload = () => {
-                rw = img.width
-                rh = img.height
-                rate = rw / rh
-                if (rw < width || rate > scaleMax || rate < scaleMin) {
-                    _this.$message({
-                        type: 'warning',
-                        message: '上传图片尺寸不能宽不能小于550，标准比例为16:9'
-                    })
-                } else {
-                    this.imageUrl = res.url
-                }
+            function loadImgFun() {
+                let loadImg = new Promise((resolve, reject) => {
+                    img.onload = () => {
+                        rw = img.width
+                        rh = img.height
+                        rate = rw / rh
+                        if (rw < width || rate > scaleMax || rate < scaleMin) {
+                            _this.$message({
+                                type: 'warning',
+                                message: '上传图片尺寸不能宽不能小于550，标准比例为16:9'
+                            })
+                        } else {
+                            _this.imageUrl = res.url
+                        }
+                        resolve()
+                    }
+                })
+                return loadImg
             }
+            loadImgFun()
+            loadImgFun().then(() => {
+                if(_this.imageUrl){
+                    let params = {
+                        rowkey: _this.newExam.rowkey,
+                        coverpic: _this.imageUrl
+                    }
+                    _this.coverLoading = true
+                    _this.coverInterval = setTimeout(() => {
+                        _this.imageUrl = _this.oldImageUrl
+                        _this.coverLoading = false
+                    },15000)
+                    disposeCovers(params).then(res => {
+                        if(res.code === '00001'){
+                             _this.imageUrl = res.data[0]  + '?time=' + new Date().getTime()
+                             _this.disposeImgs = res.data
+                            _this.coverLoading = false
+                            clearInterval(_this.coverInterval)
+                        }
+                    })
+                }
+            })
         },
         // 快捷键
         loadKey() {
@@ -832,6 +905,7 @@ export default {
         // 回收数据
         recycleData() {
             clearInterval(this.selfInterva)
+            clearInterval(this.coverInterval)
             localStorage.removeItem("wemedia_video")
             this.dataList = []
             let params = {
@@ -1073,7 +1147,6 @@ export default {
     width: 160px;
     height: 90px;
     text-align: center;
-    line-height: 90px;
     font-size: 20px;
     cursor: pointer;
     &:hover .imgUpload_Box_tools {
@@ -1086,6 +1159,7 @@ export default {
     left: 0;
     width: 100%;
     height: 100%;
+    line-height: 90px;
     background-color: rgba(0,0,0,0.6);
     color: #fff;
     visibility: hidden;

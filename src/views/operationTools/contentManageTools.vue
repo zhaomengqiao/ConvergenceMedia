@@ -371,10 +371,12 @@
                         </el-row>
                         <el-row v-if="nowType=='视频'">
                             <el-upload
+                                v-loading="coverLoading"
                                 class="small-single__uploader"
                                 style="margin:10px 0"
                                 :action="imgUploadUrl"
                                 :show-file-list="false"
+                                :http-request="uploadVideoCover"
                                 :on-success="handleAvatarSuccess">
                                 <img v-if="imageUrl" :src="imageUrl" class="small-single__img" id="coverpic">
                                 <i v-else class="el-icon-plus avatar-uploader-icon"></i>
@@ -501,7 +503,7 @@ import {
     searchAuditStatus,
     videoDelQuality,
     videoAddQuality,
-    getfileUpload,
+    // getfileUpload,
     videoCover,
     changeVideoCustomTag,
     changeVideoTimeliness,
@@ -525,7 +527,8 @@ import {
     trampleContent,
     edittitle,
     editsource,
-    allowAd
+    allowAd,
+    changeVideoCover
 } from '@/api/operationTools';
 export default {
     name: 'contentManageTool',
@@ -539,12 +542,14 @@ export default {
     },
     data(){
         return {
+            coverLoading: false,
             videoCoverLoading: false,
             dialogImageUrl: '',
             dialogVisible: false,
             imgUploadUrl: '',
             oldimageUrl: '',
             imageUrl: '',
+            imageUrlArr: [],
             urlfrom: '',
             source: '',
             editRowShow: true,
@@ -714,7 +719,7 @@ export default {
         }
     },
     mounted(){
-        this.imgUploadUrl = getfileUpload
+        // this.imgUploadUrl = getfileUpload
         this.getOperPlatform();
         this.getHqualityClass();
         this.scrollLoadMore();
@@ -733,9 +738,22 @@ export default {
                 })
                 return false
             }
+            let newurl = ''
+            if(this.imageUrlArr.length != 0){
+                newurl = this.imageUrlArr.join(',')
+            }else{
+                newurl = this.imageUrl
+            }
+            if(this.oldimageUrl == newurl) {
+                this.$message({
+                    type: 'warning',
+                    message: '该封面没做替换无需修改'
+                })
+                return false
+            }
             var param = {
                 rowkey: this.formData.rowkey,
-                newurl: this.imageUrl
+                newurl: newurl
             }
             this.videoCoverLoading = true;
             videoCover(param).then(res => {
@@ -1046,9 +1064,13 @@ export default {
                         }
                         // 视频封面
                         if(this.nowType == "视频"){
-                            this.imageUrl = JSON.parse(res.data.miniajs)[0].src  + '?time=' + new Date().getTime();
-                            this.oldimageUrl = JSON.parse(res.data.miniajs)[0].src  + '?time=' + new Date().getTime();
-                            this.dialogImageUrl = JSON.parse(res.data.miniajs)[0].src  + '?time=' + new Date().getTime();
+                            try {
+                                this.imageUrl = JSON.parse(res.data.miniajs)[0].src  + '?time=' + new Date().getTime();
+                                this.oldimageUrl = JSON.parse(res.data.miniajs)[0].src
+                                this.dialogImageUrl = JSON.parse(res.data.miniajs)[0].src  + '?time=' + new Date().getTime();
+                            } catch (e) {
+                                console.log(e)
+                            }
                         }
                         // 禁止/允许评论
                         if(res.data.nocomment == 0){
@@ -2083,6 +2105,50 @@ export default {
                     }
                 }
             })
+        },
+        // 上传视频封面
+        uploadVideoCover(res) {
+            let _this = this
+            let file = res.file
+            var reader = new FileReader()
+            reader.onload = function (e) {
+                var data = e.target.result
+                //加载图片获取图片真实宽度和高度
+                var image = new Image()
+                image.onload=function(){
+                    var rw = image.width
+                    var rh = image.height
+                    var rate = rw/rh
+                    if(rw<545 || rate>1.80 || rate<1.75){
+                        _this.imageUrl = '';
+                        _this.$message({
+                            type: 'warning',
+                            message: '上传图片尺寸不能宽不能小于550，标准比例为16:9'
+                        });
+                    }else{
+                        // 符合要求、图片做相关处理
+                        let params = new FormData()
+                        params.append("rowkey", _this.formData.rowkey)
+                        params.append("oldurl", _this.oldimageUrl)
+                        params.append("file", file)
+                        _this.coverLoading = true
+                        changeVideoCover(params).then(res => {
+                            if(res.code === '00001') {
+                                try {
+                                    _this.imageUrl = res.data[0]
+                                    _this.dialogImageUrl = res.data[0]
+                                    _this.imageUrlArr = res.data
+                                } catch (e) {
+                                    console.log(e)
+                                }
+                            }
+                            _this.coverLoading = false
+                        })
+                    }
+                }
+                image.src = data
+            };
+            reader.readAsDataURL(file)
         }
     }
 }

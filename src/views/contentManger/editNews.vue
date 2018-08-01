@@ -20,6 +20,8 @@
                        :loading="loading.dfhsave"
                        v-if="isDFH"
                        @click="newsDfhAdd('form')">保存</el-button>
+            <el-button type="primary"
+                       @click="directSave('form')">直接保存</el-button>
             <el-button type="primary" @click="addNewsDraft('form')" :loading="loading.saveDraft">存草稿</el-button>
             <el-button type="primary" @click="contentTransferred" :loading="loading.transferred">原文转义</el-button>
             <el-button @click="resetForm('form')">清空</el-button>
@@ -133,6 +135,14 @@
                                 <div class="inline-label">添加到万能WIFI：</div>
                                 <div class="inline-content">
                                     <el-checkbox v-model="isAllPowerfullWifi">是</el-checkbox>
+                                </div>
+                            </div>
+                        </el-row>
+                        <el-row class="mt-10">
+                            <div class="inline-div">
+                                <div class="inline-label">是否替换版权图片：</div>
+                                <div class="inline-content">
+                                    <el-checkbox v-model="isCopyRight">是</el-checkbox>
                                 </div>
                             </div>
                         </el-row>
@@ -622,7 +632,9 @@ import {
     delHotAriticle,
     getDFHtypes,
     dfhSaveContent,
-    collectNews
+    collectNews,
+    directSave,
+    editdirectSave
 } from '@/api/contentManage'
 import {
     getfileUpload
@@ -664,6 +676,7 @@ export default {
         return {
             copyRightKey: '',
             isDFH: false,
+            isCopyRight: false,
             copyRightLoading: false,
             copyrightImgsListAll: [
 
@@ -1495,7 +1508,6 @@ export default {
                                     })
                                 }
                                 // 这里 onload执行后
-                                // 防止iframe因链接一样的缓存
                                 _this.contentPreview = ''
                                 _this.$refs[formName].validate((valid) => {
                                     if (valid) {
@@ -1722,7 +1734,8 @@ export default {
                                 labelname: this.formData.labelname.join(","),
                                 localsite: this.formData.localsite.join(","),
                                 keywords: this.dynamicTags.join(","),
-                                paraid: this.transferred.id?this.transferred.id:0
+                                paraid: this.transferred.id?this.transferred.id:0,
+                                pichandle: this.isCopyRight ? 1 : 0
                             },
                             type: newsType
                         }
@@ -1827,6 +1840,53 @@ export default {
                                 });
                             }
                         })
+                    })
+                }
+            })
+        },
+        directSave(formName) {
+            this.$refs[formName].validate((valid) => {
+                if (valid) {
+                    this.$confirm('确认提交吗?', '提示', {
+                        type: 'warning'
+                    }).then(() => {
+                        let params = {
+                            content: myReplace(this.formData.content, '_ueditor_page_break_tag_', '<hr class="pagebreak" noshade="noshade" size="1" style="user-select: none;"/>'),
+                            maintype: this.formData.maintype[0],
+                            title: this.formData.title,
+                            source: this.formData.source,
+                            purl: this.formData.purl,
+                            keywords: this.dynamicTags.join(","),
+                            gifimg: this.gifFileList.join(","),
+                            imgs: this.fileList,
+                            paraid: this.transferred.id?this.transferred.id:0
+                        }
+                        if (this.pageStatus === 'add') {
+                            directSave(params).then(res => {
+                                if(res.code === '00001'){
+                                    this.resetForm('form')
+                                    this.$notify({
+                                        title: '成功',
+                                        message: '提交至处理成功',
+                                        type: 'success'
+                                    });
+                                }
+                            })
+                        } else if (this.pageStatus === 'edit') {
+                            params.date = this.editTime == '' ? '' : parseTime(this.editTime, '{y}-{m}-{d} {h}:{i}:{s}')
+                            params.offlinedfh = this.formData.offlineSelected
+                            params.reason = this.formData.offlineReason
+                            editdirectSave(params).then(res => {
+                                if(res.code === '00001'){
+                                    this.resetForm('form')
+                                    this.$notify({
+                                        title: '成功',
+                                        message: '提交至处理成功',
+                                        type: 'success'
+                                    });
+                                }
+                            })
+                        }
                     })
                 }
             })

@@ -219,7 +219,7 @@
                         </div>
                     </el-card>
                 </el-col>
-                <el-col style="flex:1">
+                <el-col style="flex:1;max-height:650px;overflow-y:auto">
                     <el-card :body-style="{padding:'10px'}">
                         <!-- <el-carousel trigger="click" height="360px" v-if="newExam!==null" :autoplay="false" indicator-position="none" :initial-index="nowIndex" :key="carouselKey">
                             <el-carousel-item v-for="(item,index) in newExam.cmsphoto" :key="index">
@@ -598,6 +598,12 @@ export default {
             })
         },
         mountedGetData() {
+            this.newExam = null
+            this.dynamicTags = []
+            this.playerOptions.sources[0].src = ''
+            this.playerOptions.poster = ''
+            this.videoIntro = ''
+            this.imageUrl = ''
             this.checkedNum('video')
             let localData = localStorage.getItem('selfmedia_video')
             if (localData && (JSON.parse(localData).length > 0 && JSON.parse(localData).length <= 3)) {
@@ -781,7 +787,8 @@ export default {
             this.passDialog = true
         },
         pass() {
-
+            // 暂停视频
+            this.player.pause()
             // 封面和原始一样就传空
             // if(this.oldImageUrl === this.imageUrl){
             //     coverpic = ''
@@ -816,6 +823,8 @@ export default {
             this.noPassVisible = true
         },
         refuse() {
+            // 暂停视频
+            this.player.pause()
             this.$refs.dialogr.validate((valid) => {
                 if (valid) {
                     let params = {

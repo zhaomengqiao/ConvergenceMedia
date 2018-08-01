@@ -98,7 +98,7 @@
     margin-top: 10px;
 }
 .el-button+.el-button{
-    margin-left: 0px;
+    margin-left: 4px;
 }
 /*disable title*/
 .el-button.disable_title{
@@ -235,7 +235,7 @@
 }
 /**icon上传**/
 .icon-uploader .el-upload {
-    border: 1px dashed #666;
+    border: 1px dashed #ccc;
     border-radius: 6px;
     cursor: pointer;
     position: relative;
@@ -257,6 +257,31 @@
 .icon-upload{
     width: 36px;
     height: 36px;
+}
+/*banner*/
+.banner-uploader .el-upload {
+    border: 1px dashed #ccc;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    width: 140px;
+    height: 80px;
+}
+.banner-uploader .el-upload:hover {
+    border-color: #20a0ff;
+}
+.banner-uploader-icon {
+    font-size: 14px;
+    color: #8c939d;
+    width: 140px;
+    height: 80px;
+    line-height: 80px;
+    text-align: center;
+}
+.banner-upload{
+    width: 140px;
+    height: 80px;
 }
 /**新闻广告样式**/
 a>.adv_box{
