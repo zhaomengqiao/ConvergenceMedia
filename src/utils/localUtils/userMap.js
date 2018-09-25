@@ -1,4 +1,7 @@
 export default {
+    'sunyan': '孙燕',
+    'taoshangong': '陶善工',
+    'xukai': '许凯',
     'qinxiaoyi': '秦小奕',
     'wangyun': '王赟',
     'guwenhua': '顾文华',
