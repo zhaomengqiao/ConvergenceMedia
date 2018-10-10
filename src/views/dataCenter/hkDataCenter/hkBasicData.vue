@@ -1,8 +1,6 @@
 <template>
     <div>
         <el-form :inline="true" :model="form">
-            <el-button type="primary">全部</el-button>
-            <el-button  @click="">篩選</el-button>
             <el-form-item label="時間：">
                 <el-date-picker
                     v-model="dateRange"
@@ -14,59 +12,19 @@
                 </el-date-picker>
             </el-form-item>
             <el-form-item label="軟件名稱：">香港頭條</el-form-item>
-            <el-form-item label="系統：">
-                <el-select v-model="systemName" class="select-platform"
-                           filterable placeholder="匯總" @change="">
-                    <el-option
-                        label="匯總"
-                        value="a"
-                    >
-                    </el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item label="版本：">
-                <el-select v-model="versionName" class="select-platform"
-                           filterable placeholder="匯總" @change="">
-                    <el-option
-                        label="匯總"
-                        value=""
-                    >
-                    </el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item label="按鈕id：">
-                <el-select v-model="buttonId" class="select-platform"
-                           filterable placeholder="匯總" @change="">
-                    <el-option
-                        label="匯總"
-                        value=""
-                    >
-                    </el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item label="按鈕名稱：">
-                <el-select v-model="buttonName" class="select-platform"
-                           filterable placeholder="匯總" @change="">
-                    <el-option
-                        label="匯總"
-                        value=""
-                    >
-                    </el-option>
-                </el-select>
+            <el-form-item>
+                <el-button type="primary" @click="search">查詢</el-button>
             </el-form-item>
         </el-form>
-        <el-button type="primary">全部</el-button>
-        <el-button  @click="">已註冊</el-button>
-        <el-button  @click="">未註冊</el-button>
         <el-row>
             <el-col :span="24">
                 <div id="chartContainer" style=""></div>
             </el-col>
         </el-row>
-        <el-table :data="tableData" class="table-total-count" highlight-current-row tooltip-effect="dark" stripe border align="center" v-loading="listLoading" :default-sort = "{prop: 'dt', order: 'descending'}" style="width: 100%;" max-height="300">
+        <el-table :data="tableData" class="roomList" highlight-current-row tooltip-effect="dark" stripe border align="center" v-loading="listLoading" :default-sort = "{prop: 'dt', order: 'descending'}" style="width: 100%;" max-height="300">
             <el-table-column
                 prop="dt"
-                label="日期"
+                label="時間"
                 width="100"
                 align="center"
                 sortable>
@@ -75,131 +33,230 @@
                 prop="apptype"
                 label="軟件名稱"
                 width="100"
-                align="center"
-                sortable>
+                align="center">
             </el-table-column>
-            <el-table-column
-                prop="version"
-                label="版本"
-                width="100"
-                align="center"
-                sortable>
-            </el-table-column>
-            <el-table-column
-                prop="system_name"
-                label="系統"
-                width="100"
-                align="center"
-                sortable>
-            </el-table-column>
-            <el-table-column
-                prop="buttonid"
-                label="按鈕id"
-                width="100"
-                align="center"
-                sortable>
-            </el-table-column>
-            <el-table-column
-                prop="button_name"
-                label="按鈕名稱"
-                width="100"
-                align="center"
-                sortable>
-            </el-table-column>
-            <el-table-column label="全部" align="center">
+            <el-table-column label="基礎" align="center">
                 <el-table-column
-                    prop="all_click"
-                    label="click"
-                    width="100"
+                    prop="openuv"
+                    label="APP打開UV數(IMEI)"
+                    width="200"
                     align="center"
                     sortable>
                 </el-table-column>
                 <el-table-column
-                    prop="all_uv"
-                    label="UV"
-                    width="100"
+                    prop="pv"
+                    label="總瀏覽量PV"
+                    width="150"
                     align="center"
                     sortable
                 >
                 </el-table-column>
                 <el-table-column
-                    prop="all_uv_percent"
-                    label="UV占日活"
-                    width="100"
+                    prop="uv"
+                    label="總訪客UV"
+                    width="120"
                     align="center"
                     sortable
                 >
                 </el-table-column>
                 <el-table-column
-                    prop="all_click_uv"
-                    label="click/UV"
-                    width="100"
+                    prop="p_u_rate"
+                    label="P/U"
+                    width="120"
+                    align="center"
+                    sortable
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="timeavg"
+                    label="人均時長"
+                    width="120"
+                    align="center"
+                    sortable
+                    :formatter="formatterTime"
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="onlineavg"
+                    label="人均在線時長(APP)"
+                    width="200"
+                    align="center"
+                    sortable
+                    :formatter="formatterTimeonline"
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="newuid_cnt"
+                    label="新增用戶數"
+                    width="150"
+                    align="center"
+                    sortable
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="total_newuid_cnt"
+                    label="累計新增用戶數"
+                    width="180"
                     align="center"
                     sortable
                 >
                 </el-table-column>
             </el-table-column>
-            <el-table-column label="未註冊" align="center">
+            <el-table-column label="註冊" align="center">
                 <el-table-column
-                    prop="no_click"
-                    label="click"
-                    width="100"
-                    align="center"
-                    sortable>
-                </el-table-column>
-                <el-table-column
-                    prop="no_uv"
-                    label="UV"
-                    width="100"
+                    prop="register_phone"
+                    label="手機註冊用戶數"
+                    width="200"
                     align="center"
                     sortable
                 >
                 </el-table-column>
                 <el-table-column
-                    prop="no_uv_percent"
-                    label="UV占日活"
-                    width="100"
+                    prop="register_other"
+                    label="第三方註冊用戶數"
+                    width="200"
                     align="center"
                     sortable
                 >
                 </el-table-column>
                 <el-table-column
-                    prop="no_click_uv"
-                    label="click/UV"
-                    width="100"
+                    prop="total_register_cnt"
+                    label="累計註冊用戶數"
+                    width="200"
+                    align="center"
+                    sortable
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="register_rate"
+                    label="當日註冊率"
+                    width="140"
+                    align="center"
+                    sortable
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="total_register_rate"
+                    label="累計註冊率"
+                    width="140"
+                    align="center"
+                    sortable
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="active_register_cnt"
+                    label="活躍註冊用戶"
+                    width="150"
+                    align="center"
+                    sortable
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="register_active_rate"
+                    label="註冊活躍占比"
+                    width="150"
                     align="center"
                     sortable
                 >
                 </el-table-column>
             </el-table-column>
-            <el-table-column label="已註冊" align="center">
+            <el-table-column label="新聞" align="center">
                 <el-table-column
-                    prop="yes_click"
-                    label="click"
-                    width="100"
-                    align="center"
-                    sortable>
-                </el-table-column>
-                <el-table-column
-                    prop="yes_uv"
-                    label="UV"
+                    prop="pv_news"
+                    label="pv"
                     width="100"
                     align="center"
                     sortable
                 >
                 </el-table-column>
                 <el-table-column
-                    prop="yes_uv_percent"
-                    label="UV占日活"
+                    prop="pvrate_news"
+                    label="pvrate"
+                    width="120"
+                    align="center"
+                    sortable
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="uv_news"
+                    label="uv"
                     width="100"
                     align="center"
                     sortable
                 >
                 </el-table-column>
                 <el-table-column
-                    prop="yes_click_uv"
-                    label="click/UV"
+                    prop="uvrate_news"
+                    label="uvrate"
+                    width="120"
+                    align="center"
+                    sortable
+                >
+                </el-table-column>
+            </el-table-column>
+            <el-table-column label="圖集" align="center">
+                <el-table-column
+                    prop="pv_pic"
+                    label="pv"
                     width="100"
+                    align="center"
+                    sortable
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="pvrate_pic"
+                    label="pvrate"
+                    width="120"
+                    align="center"
+                    sortable
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="uv_pic"
+                    label="uv"
+                    width="100"
+                    align="center"
+                    sortable
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="uvrate_pic"
+                    label="uvrate"
+                    width="120"
+                    align="center"
+                    sortable
+                >
+                </el-table-column>
+            </el-table-column>
+            <el-table-column label="視頻" align="center">
+                <el-table-column
+                    prop="video_pv"
+                    label="pv"
+                    width="100"
+                    align="center"
+                    sortable
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="pvrate_video"
+                    label="pvrate"
+                    width="120"
+                    align="center"
+                    sortable
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="video_uv"
+                    label="uv"
+                    width="100"
+                    align="center"
+                    sortable
+                >
+                </el-table-column>
+                <el-table-column
+                    prop="uvrate_video"
+                    label="uvrate"
+                    width="120"
                     align="center"
                     sortable
                 >
@@ -229,13 +286,9 @@
     export default {
         data() {
             return {
-                systemName: '',
-                versionName: '',
-                buttonId: '',
-                buttonName: '',
                 chart: null,
-                series: [{}, {}, {}, {}],
-                seriesName: ["click", "UV", "UV占日活", "click/UV"],
+                series: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
+                seriesName: ["APP打開UV數(IMEI)", "總瀏覽量PV", "總訪客UV", "P/U", "新增用戶數", "累計新增用戶數", "手機註冊用戶數", "第三方註冊用戶數", "累計註冊用戶數", "當日註冊率", "累計註冊率", "活躍註冊用戶", "註冊活躍占比", "新聞pv", "新聞pvrate", "新聞uv", "新聞uvrate", "圖片pv", "圖片pvrate", "圖片uv", "圖片uvrate","視頻pv", "視頻pvrate", "視頻uv", "視頻uvrate"],
                 labelWidth:"120px",
                 listLoading:false,
                 dateRange:'',
@@ -248,11 +301,32 @@
                 },
                 tableData:[],
                 chartData:{
-                    click: [],
+                    dt: [],
+                    openuv: [],
+                    pv: [],
                     uv: [],
-                    uv_percent: [],
-                    click_uv: [],
-                    buttonid: []
+                    p_u_rate: [],
+                    newuid_cnt: [],
+                    total_newuid_cnt: [],
+                    register_phone: [],
+                    register_other: [],
+                    total_register_cnt: [],
+                    register_rate: [],
+                    total_register_rate: [],
+                    active_register_cnt: [],
+                    register_active_rate: [],
+                    pv_news: [],
+                    pvrate_news: [],
+                    uv_news: [],
+                    uvrate_news: [],
+                    pv_pic: [],
+                    pvrate_pic: [],
+                    uv_pic: [],
+                    uvrate_pic: [],
+                    video_pv: [],
+                    pvrate_video: [],
+                    video_uv: [],
+                    uvrate_video: []
                 },
                 pickerOptions: {
                     shortcuts: [{
@@ -286,10 +360,6 @@
         methods: {
             drawGraph(id) {
                 // 绘图方法
-                if(this.chart) {
-                    this.chart.clear();
-                    this.chart.dispose();
-                }
                 this.chart = echarts.init(document.getElementById(id));
                 this.chart.showLoading();
                 let that = this;
@@ -303,50 +373,43 @@
                 chartSeries = this.series.map(function(item, index) {
                     return {
                         name: that.seriesName[index],
-                        type: 'bar',
-                        barWidth: '60%',
-                        data: that.chartData[chartArr[index]]
+                        type: 'line',
+                        data: that.chartData[chartArr[index+1]]
                     }
                 })
-                // console.log(chartArr);
-                // console.log(chartSeries);
-                let option = {
-                    color: ['#3398DB'],
-                    tooltip : {
-                        trigger: 'axis',
-                        axisPointer : {            // 坐标轴指示器，坐标轴触发有效
-                            type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
-                        }
+
+                this.chart.setOption({
+                    title: {
+
+                    },
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: '{a} <br/>{b} : {c}'
                     },
                     legend: {
-                        center: 'center',
-                        data: this.seriesName,
+                        left: 'left',
+                        data: that.seriesName,
                         selectedMode: 'single'
                     },
+                    xAxis: {
+                        type: 'category',
+                        name: 'x',
+                        splitLine: {show: false},
+                        data: that.chartData.dt
+                    },
                     grid: {
+                        top: '25%',
                         left: '3%',
                         right: '4%',
-                        bottom: '3%',
+                        bottom: '4%',
                         containLabel: true
                     },
-                    xAxis : [
-                        {
-                            type : 'category',
-                            data : this.chartData.buttonid,
-                            axisTick: {
-                                alignWithLabel: true
-                            }
-                        }
-                    ],
-                    yAxis : [
-                        {
-                            type : 'value'
-                        }
-                    ],
-                    series : chartSeries
-                };
-
-                this.chart.setOption(option);
+                    yAxis: {
+                        type: 'log',
+                        name: 'y'
+                    },
+                    series: chartSeries
+                })
                 this.chart.hideLoading();
 
                 // 表格resize
@@ -404,11 +467,11 @@
                 window.jsonpdata = function(data) {
                     if (data.code === 200) {
                         data.datalist.forEach(function(item, index) {
-                            // item.apptype = parseInt(item.apptype);
-                            // item.uv = parseInt(item.uv);
-                            // item.pv = parseInt(item.pv);
-                            // item.timeavg = that.toSecond(item.timeavg);
-                            // item.onlineavg = that.toSecond(item.onlineavg);
+                            item.openuv = parseInt(item.openuv);
+                            item.uv = parseInt(item.uv);
+                            item.pv = parseInt(item.pv);
+                            item.timeavg = that.toSecond(item.timeavg);
+                            item.onlineavg = that.toSecond(item.onlineavg);
                         })
                         that.tableData = data.datalist;
                         that.total = data.pagecount

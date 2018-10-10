@@ -1,19 +1,19 @@
 <template>
     <div>
         <el-form :inline="true" :model="form">
-            <el-form-item label="时间：">
+            <el-form-item label="時間：">
                 <el-date-picker
                   v-model="dateRange"
                   @change="dateRangeChange"
                   type="daterange"
                   align="right"
-                  placeholder="选择日期范围"
+                  placeholder="選擇日期範圍"
                   :picker-options="pickerOptions">
                 </el-date-picker>
             </el-form-item>
-            <el-form-item label="软件名称：">扬子头条</el-form-item>
+            <el-form-item label="軟件名稱：">香港頭條</el-form-item>
             <el-form-item>
-                <el-button type="primary" @click="search">查询</el-button>
+                <el-button type="primary" @click="search">查詢</el-button>
             </el-form-item>
         </el-form>
         <el-row>
@@ -24,28 +24,28 @@
         <el-table :data="tableData" class="roomList" highlight-current-row tooltip-effect="dark" stripe border align="center" v-loading="listLoading" :default-sort = "{prop: 'dt', order: 'descending'}" style="width: 100%;" max-height="300">
             <el-table-column
               prop="dt"
-              label="时间"
+              label="時間"
               width="100"
               align="center"
               sortable>
             </el-table-column>
             <el-table-column
               prop="apptype"
-              label="软件名称"
+              label="軟件名稱"
               width="100"
               align="center">
             </el-table-column>
-            <el-table-column label="基础" align="center">
+            <el-table-column label="基礎" align="center">
               <el-table-column
                 prop="openuv"
-                label="APP打开UV数(IMEI)"
+                label="APP打開UV數(IMEI)"
                 width="200"
                 align="center"
                 sortable>
               </el-table-column>
               <el-table-column
                 prop="pv"
-                label="总浏览量PV"
+                label="總瀏覽量PV"
                 width="150"
                 align="center"
                 sortable
@@ -53,7 +53,7 @@
               </el-table-column>
               <el-table-column
                 prop="uv"
-                label="总访客UV"
+                label="總訪客UV"
                 width="120"
                 align="center"
                 sortable
@@ -69,7 +69,7 @@
               </el-table-column>
               <el-table-column
                 prop="timeavg"
-                label="人均时长"
+                label="人均時長"
                 width="120"
                 align="center"
                 sortable
@@ -78,7 +78,7 @@
               </el-table-column>
               <el-table-column
                 prop="onlineavg"
-                label="人均在线时长(APP)"
+                label="人均在線時長(APP)"
                 width="200"
                 align="center"
                 sortable
@@ -87,7 +87,7 @@
               </el-table-column>
               <el-table-column
                 prop="newuid_cnt"
-                label="新增用户数"
+                label="新增用戶數"
                 width="150"
                 align="center"
                 sortable
@@ -95,17 +95,17 @@
               </el-table-column>
               <el-table-column
                 prop="total_newuid_cnt"
-                label="累计新增用户数"
+                label="累計新增用戶數"
                 width="180"
                 align="center"
                 sortable
                 >
               </el-table-column>
             </el-table-column>
-            <el-table-column label="注册" align="center">
+            <el-table-column label="註冊" align="center">
               <el-table-column
                 prop="register_phone"
-                label="手机注册用户数"
+                label="手機註冊用戶數"
                 width="200"
                 align="center"
                 sortable
@@ -113,7 +113,7 @@
               </el-table-column>
               <el-table-column
                 prop="register_other"
-                label="第三方注册用户数"
+                label="第三方註冊用戶數"
                 width="200"
                 align="center"
                 sortable
@@ -121,7 +121,7 @@
               </el-table-column>
               <el-table-column
                 prop="total_register_cnt"
-                label="累计注册用户数"
+                label="累計註冊用戶數"
                 width="200"
                 align="center"
                 sortable
@@ -129,7 +129,7 @@
               </el-table-column>
               <el-table-column
                 prop="register_rate"
-                label="当日注册率"
+                label="當日註冊率"
                 width="140"
                 align="center"
                 sortable
@@ -137,7 +137,7 @@
               </el-table-column>
               <el-table-column
                 prop="total_register_rate"
-                label="累计注册率"
+                label="累計註冊率"
                 width="140"
                 align="center"
                 sortable
@@ -145,7 +145,7 @@
               </el-table-column>
               <el-table-column
                 prop="active_register_cnt"
-                label="活跃注册用户"
+                label="活躍註冊用戶"
                 width="150"
                 align="center"
                 sortable
@@ -153,14 +153,14 @@
               </el-table-column>
               <el-table-column
                 prop="register_active_rate"
-                label="注册活跃占比"
+                label="註冊活躍占比"
                 width="150"
                 align="center"
                 sortable
                 >
               </el-table-column>
             </el-table-column>
-            <el-table-column label="新闻" align="center">
+            <el-table-column label="新聞" align="center">
               <el-table-column
                 prop="pv_news"
                 label="pv"
@@ -194,7 +194,7 @@
                 >
               </el-table-column>
             </el-table-column>
-            <el-table-column label="图集" align="center">
+            <el-table-column label="圖集" align="center">
               <el-table-column
                 prop="pv_pic"
                 label="pv"
@@ -228,7 +228,7 @@
                 >
               </el-table-column>
             </el-table-column>
-            <el-table-column label="视频" align="center">
+            <el-table-column label="視頻" align="center">
               <el-table-column
                 prop="video_pv"
                 label="pv"
@@ -288,7 +288,7 @@
           return {
             chart: null,
             series: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
-            seriesName: ["APP打开UV数(IMEI)", "总浏览量PV", "总访客UV", "P/U", "新增用户数", "累计新增用户数", "手机注册用户数", "第三方注册用户数", "累计注册用户数", "当日注册率", "累计注册率", "活跃注册用户", "注册活跃占比", "新闻pv", "新闻pvrate", "新闻uv", "新闻uvrate", "图片pv", "图片pvrate", "图片uv", "图片uvrate","视频pv", "视频pvrate", "视频uv", "视频uvrate"],
+            seriesName: ["APP打開UV數(IMEI)", "總瀏覽量PV", "總訪客UV", "P/U", "新增用戶數", "累計新增用戶數", "手機註冊用戶數", "第三方註冊用戶數", "累計註冊用戶數", "當日註冊率", "累計註冊率", "活躍註冊用戶", "註冊活躍占比", "新聞pv", "新聞pvrate", "新聞uv", "新聞uvrate", "圖片pv", "圖片pvrate", "圖片uv", "圖片uvrate","視頻pv", "視頻pvrate", "視頻uv", "視頻uvrate"],
             labelWidth:"120px",
             listLoading:false,
             dateRange:'',
@@ -330,7 +330,7 @@
             },
             pickerOptions: {
               shortcuts: [{
-                text: '最近一周',
+                text: '最近壹周',
                 onClick(picker) {
                   const end = new Date();
                   const start = new Date();
@@ -338,7 +338,7 @@
                   picker.$emit('pick', [start, end]);
                 }
               }, {
-                text: '最近一个月',
+                text: '最近壹個月',
                 onClick(picker) {
                   const end = new Date();
                   const start = new Date();
@@ -346,7 +346,7 @@
                   picker.$emit('pick', [start, end]);
                 }
               }, {
-                text: '最近三个月',
+                text: '最近三個月',
                 onClick(picker) {
                   const end = new Date();
                   const start = new Date();
